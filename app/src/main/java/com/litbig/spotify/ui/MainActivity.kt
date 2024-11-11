@@ -10,25 +10,21 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import com.litbig.spotify.ui.list.FooterExpanded
-import com.litbig.spotify.ui.list.ListCell
+import com.litbig.spotify.ui.grid.GridScreen
 import com.litbig.spotify.ui.list.ListScreen
-import com.litbig.spotify.ui.list.ListTitle
+import com.litbig.spotify.ui.shared.FooterExpanded
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.util.FileExtensions.getMusicMetadata
 import com.litbig.spotify.util.FileExtensions.scanForMusicFiles
-import com.litbig.spotify.util.MusicMetadata
 import com.litbig.spotify.util.UsbReceiver
 import timber.log.Timber
 import java.io.File
@@ -84,8 +80,31 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                ListScreen(
+//                ListScreen(
+//                    musicFiles = musicFiles
+//                )
+                GridScreen(
                     musicFiles = musicFiles
+                )
+
+                Scaffold(
+                    content = { paddingValues ->
+                        GridScreen(
+                            modifier = Modifier.padding(paddingValues),
+                            musicFiles = musicFiles
+                        )
+                    },
+                    bottomBar = {
+                        FooterExpanded(
+                            modifier = Modifier
+//                                .align(Alignment.BottomStart)
+                            ,
+                            musicMetadata = musicFiles[0].getMusicMetadata(),
+                            playingTime = 10000,
+                            isFavorite = false,
+                            onClick = { }
+                        )
+                    }
                 )
             }
         }

@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Preview(
     name = "1024x600 night",
-    device = "spec:width=1024dp,height=600dp",
+    device = "spec:width=1024dp,height=600dp,dpi=160",
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 //    showBackground = true
 )

@@ -46,6 +46,8 @@ dependencies {
 
     implementation(libs.jakewharton.timber)
 
+    implementation(libs.androidx.palette.ktx)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

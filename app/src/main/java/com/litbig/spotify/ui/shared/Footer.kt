@@ -1,8 +1,7 @@
-package com.litbig.spotify.ui.list
+package com.litbig.spotify.ui.shared
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,15 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
+import com.litbig.spotify.util.MusicMetadata
+import timber.log.Timber
 
 @Composable
 fun FooterCollapsed(
@@ -35,45 +34,45 @@ fun FooterCollapsed(
 @Composable
 fun FooterExpanded(
     modifier: Modifier = Modifier,
-    albumArt: ImageBitmap? = null,
-    title: String,
-    artist: String,
+    musicMetadata: MusicMetadata,
+    playingTime: Long,
     isFavorite: Boolean,
-    totalTime: String,
     onClick: () -> Unit
 ) {
+    Timber.i("musicMetadata: $musicMetadata")
+
     Column(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        Box(
-            modifier = Modifier
-                .clickable { onClick() }
-        ) {
-            Box(
-                modifier = Modifier.size(310.dp)
-            ) {
-                albumArt?.let {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        bitmap = it,
-                        contentDescription = "Album Art",
-                    )
-                } ?: Image(
-                    modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Album Art",
-                )
-            }
-            Image(
-                modifier = Modifier
-                    .size(30.dp)
-                    .offset(x = (-10).dp, y = 10.dp)
-                    .align(Alignment.TopEnd),
-                painter = painterResource(id = R.drawable.forward),
-                contentDescription = "Collapse Button",
-            )
-        }
+//        Box(
+//            modifier = Modifier
+//                .clickable { onClick() }
+//        ) {
+//            Box(
+//                modifier = Modifier.size(310.dp)
+//            ) {
+//                musicMetadata.albumArt?.let {
+//                    Image(
+//                        modifier = Modifier.fillMaxSize(),
+//                        bitmap = it,
+//                        contentDescription = "Album Art",
+//                    )
+//                } ?: Image(
+//                    modifier = Modifier.fillMaxSize(),
+//                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+//                    contentDescription = "Album Art",
+//                )
+//            }
+//            Image(
+//                modifier = Modifier
+//                    .size(30.dp)
+//                    .offset(x = (-10).dp, y = 10.dp)
+//                    .align(Alignment.TopEnd),
+//                painter = painterResource(id = R.drawable.forward),
+//                contentDescription = "Collapse Button",
+//            )
+//        }
 
         Row(
             modifier = Modifier
@@ -88,7 +87,7 @@ fun FooterExpanded(
                 modifier = Modifier
                     .size(72.dp)
             ) {
-                albumArt?.let {
+                musicMetadata.albumArt?.let {
                     Image(
                         modifier = Modifier.fillMaxSize(),
                         bitmap = it,
@@ -110,14 +109,14 @@ fun FooterExpanded(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = title,
+                    text = musicMetadata.title,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = artist,
+                    text = musicMetadata.artist,
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -140,7 +139,10 @@ fun FooterExpanded(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            ControlBar()
+            ControlBar(
+                playingTime = playingTime,
+                totalTime = musicMetadata.duration,
+            )
         }
     }
 }
@@ -148,6 +150,8 @@ fun FooterExpanded(
 @Composable
 fun ControlBar(
     modifier: Modifier = Modifier,
+    playingTime: Long,
+    totalTime: Long,
 ) {
     Column(
         modifier = modifier,
@@ -210,7 +214,7 @@ fun ControlBar(
         ) {
 
             Text(
-                text = "2:39",
+                text = playingTime.toHumanReadableDuration(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -220,13 +224,13 @@ fun ControlBar(
             RoundedMusicProgressBar(
                 modifier = Modifier
                     .width(250.dp),
-                progress = .5f
+                progress = playingTime.toFloat() / totalTime.toFloat(),
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "4:22",
+                text = totalTime.toHumanReadableDuration(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -262,10 +266,29 @@ fun RoundedMusicProgressBar(
 fun PreviewFooterExpanded() {
     SpotifyTheme {
         FooterExpanded(
-            title = "Ocean Eyes",
-            artist = "Billie Eilish",
+            musicMetadata = MusicMetadata(
+                absolutePath = "",
+                title = "Ocean Eyes",
+                artist = "Billie Eilish",
+                album = "Ocean Eyes",
+                genre = "Pop",
+                albumArt = null,
+                duration = 262000,
+                year = "2015",
+                albumArtist = "Billie Eilish",
+                composer = "Billie Eilish",
+                writer = "Billie Eilish",
+                cdTrackNumber = "1",
+                discNumber = "1",
+                date = "2015",
+                mimeType = "audio/mpeg",
+                compilation = "false",
+                hasAudio = true,
+                bitrate = "320000",
+                numTracks = "1",
+            ),
+            playingTime = 159000,
             isFavorite = true,
-            totalTime = "2:39",
             onClick = {}
         )
     }
@@ -275,6 +298,9 @@ fun PreviewFooterExpanded() {
 @Composable
 fun PreviewControlBar() {
     SpotifyTheme {
-        ControlBar()
+        ControlBar(
+            playingTime = 159000,
+            totalTime = 262000,
+        )
     }
 }

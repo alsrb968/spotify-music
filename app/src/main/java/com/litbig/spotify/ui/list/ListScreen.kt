@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.litbig.spotify.ui.shared.FooterExpanded
 import com.litbig.spotify.util.FileExtensions.getMusicMetadata
 import timber.log.Timber
 import java.io.File
@@ -37,9 +38,9 @@ fun ListScreen(
                     ListCell(
                         index = index + 1,
                         albumArt = file.albumArt,
-                        title = file.title ?: "Unknown",
-                        artist = file.artist ?: "Unknown",
-                        album = file.album ?: "Unknown",
+                        title = file.title,
+                        artist = file.artist,
+                        album = file.album,
                         totalTime = file.formattedDuration,
                         onClick = { }
                     )
@@ -61,17 +62,14 @@ fun ListScreen(
             }
         }
 
-        musicFiles[0].getMusicMetadata().let { file ->
-            FooterExpanded(
-                modifier = Modifier
-                    .align(Alignment.BottomStart),
-                albumArt = file.albumArt,
-                title = file.title ?: "Unknown",
-                artist = file.artist ?: "Unknown",
-                isFavorite = false,
-                totalTime = file.formattedDuration,
-                onClick = { }
-            )
-        }
+
     }
 }
+
+//@DevicePreviews
+//@Composable
+//fun ListScreenPreview() {
+//    ListScreen(
+//        musicFiles = emptyList()
+//    )
+//}

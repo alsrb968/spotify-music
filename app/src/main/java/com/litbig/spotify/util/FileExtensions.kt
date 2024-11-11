@@ -32,24 +32,24 @@ object FileExtensions {
 
         val metadata = MusicMetadata(
             absolutePath = absolutePath,
-            title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE),
-            artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST),
-            album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM),
-            genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE),
+            title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: nameWithoutExtension,
+            artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "",
+            album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "",
+            genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: "",
             albumArt = albumArt,
             duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L,
-            year = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR),
-            albumArtist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST),
-            composer = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER),
-            writer = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER),
-            cdTrackNumber = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER),
-            discNumber = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER),
-            date = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE),
-            mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE),
-            compilation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPILATION),
+            year = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR) ?: "",
+            albumArtist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) ?: "",
+            composer = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER) ?: "",
+            writer = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER) ?: "",
+            cdTrackNumber = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER) ?: "",
+            discNumber = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER) ?: "",
+            date = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE) ?: "",
+            mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "",
+            compilation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPILATION) ?: "",
             hasAudio = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)?.toBoolean() ?: false,
-            bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE),
-            numTracks = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS)
+            bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) ?: "",
+            numTracks = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) ?: ""
         )
 
         retriever.release()

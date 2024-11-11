@@ -32,13 +32,14 @@ fun GridCell(
     coreColor: Color = Color.Yellow,
     title: String,
     artist: String,
+    isPlayable: Boolean,
     onClick: () -> Unit
 ) {
     Column(
         modifier = modifier
             .size(width = 224.dp, height = 324.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f))
+            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -80,8 +81,8 @@ fun GridCell(
                 ) {
                     drawLine(
                         color = coreColor,
-                        start = androidx.compose.ui.geometry.Offset(0f, size.height - 95),
-                        end = androidx.compose.ui.geometry.Offset(0f, size.height - 45),
+                        start = androidx.compose.ui.geometry.Offset(0f, size.height - 40),
+                        end = androidx.compose.ui.geometry.Offset(0f, size.height - 15),
                         strokeWidth = 9.dp.toPx()
                     )
                     drawLine(
@@ -92,25 +93,27 @@ fun GridCell(
                     )
                 }
 
-                Image(
-                    modifier = Modifier
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = ripple(bounded = false, radius = 24.dp)
-                        ) { /* TODO */ }
-                        .size(62.dp)
+                if (isPlayable) {
+                    Image(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple(bounded = false, radius = 24.dp)
+                            ) { /* TODO */ }
+                            .size(62.dp)
 //                        .padding(4.dp)
-                        .align(Alignment.BottomEnd)
-                        .semantics { role = Role.Button }
+                            .align(Alignment.BottomEnd)
+                            .semantics { role = Role.Button }
 //                        .shadow(
 //                            elevation = 8.dp,
 //                            shape = CircleShape,
 //                            clip = false
 //                        )
-                    ,
-                    painter = painterResource(id = R.drawable.play_green_hover),
-                    contentDescription = "Play"
-                )
+                        ,
+                        painter = painterResource(id = R.drawable.play_green_hover),
+                        contentDescription = "Play"
+                    )
+                }
             }
         }
 
@@ -145,6 +148,7 @@ fun GridCellPreview() {
         GridCell(
             title = "Folk & Acoustic Mix 2021",
             artist = "Canyon City, Crooked Still, Gregory Alan, Isakov, The Paper Kites",
+            isPlayable = true,
             onClick = {}
         )
     }
