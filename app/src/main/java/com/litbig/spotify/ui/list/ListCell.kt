@@ -29,13 +29,13 @@ import kotlinx.coroutines.delay
 fun ListCell(
     modifier: Modifier = Modifier,
     index: Int,
-    isPlaying: Boolean,
+    isPlaying: Boolean = false,
     albumArt: ImageBitmap? = null,
     title: String,
     artist: String,
     album: String,
-    isFavorite: Boolean,
-    playingTime: String,
+    isFavorite: Boolean = false,
+    totalTime: String,
     onClick: () -> Unit
 ) {
     Row(
@@ -43,7 +43,7 @@ fun ListCell(
             .fillMaxWidth()
             .height(72.dp)
             .clip(RoundedCornerShape(5.dp))
-            .background(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.1f))
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.1f))
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -119,8 +119,7 @@ fun ListCell(
         Spacer(modifier = Modifier.width(211.dp))
 
         IconButton(
-            modifier = Modifier
-                .size(28.dp),
+            modifier = Modifier,
             onClick = { /*TODO*/ },
         ) {
             Icon(
@@ -134,7 +133,7 @@ fun ListCell(
 
         Text(
             modifier = Modifier,
-            text = playingTime,
+            text = totalTime,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1
@@ -146,7 +145,7 @@ fun ListCell(
 fun AnimatedEQDrawable(
     modifier: Modifier = Modifier
 ) {
-    var currentState by remember { mutableStateOf(R.drawable.property_1_bars_1) }
+    var currentState by remember { mutableIntStateOf(R.drawable.property_1_bars_1) }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -173,12 +172,12 @@ fun ListCellPreview() {
     SpotifyTheme {
         ListCell(
             index = 1,
-            isPlaying = true,
+            isPlaying = false,
             title = "A Moment Apart",
             artist = "ODESZA",
             album = "A Moment Apart",
             isFavorite = true,
-            playingTime = "3:54",
+            totalTime = "3:54",
             onClick = {}
         )
     }

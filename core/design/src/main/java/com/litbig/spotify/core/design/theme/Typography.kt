@@ -22,3 +22,11 @@ val ProductSans = FontFamily(
     Font(R.font.product_sans_regular, FontWeight.Normal),
     Font(R.font.product_sans_bold, FontWeight.Bold)
 )
+
+val CircularStd = FontFamily(
+    Font(R.font.circular_std_book, FontWeight.Light),
+    Font(R.font.circular_std_book, FontWeight.Normal),
+    Font(R.font.circular_std_bold, FontWeight.Bold)
+)
+
+val SpotifyFonts = CircularStd

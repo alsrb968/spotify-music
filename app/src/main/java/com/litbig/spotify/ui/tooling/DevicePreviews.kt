@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Preview(
     name = "1024x600 night",
     device = "spec:width=1024dp,height=600dp",
-    uiMode = Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//    showBackground = true
 )
 annotation class DevicePreviews
