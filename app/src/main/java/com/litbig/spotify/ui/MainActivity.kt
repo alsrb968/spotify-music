@@ -10,22 +10,22 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.litbig.spotify.ui.grid.GridScreen
 import com.litbig.spotify.ui.list.ListScreen
 import com.litbig.spotify.ui.shared.FooterExpanded
 import com.litbig.spotify.ui.theme.SpotifyTheme
+import com.litbig.spotify.util.FileExtensions.getMusicMapByAlbum
 import com.litbig.spotify.util.FileExtensions.getMusicMetadata
 import com.litbig.spotify.util.FileExtensions.scanForMusicFiles
 import com.litbig.spotify.util.UsbReceiver
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 
@@ -39,28 +39,37 @@ class MainActivity : ComponentActivity() {
         setContent {
             SpotifyTheme {
                 val musicFiles = remember { mutableStateListOf<File>() }
+                val isUsb1Detected = remember { mutableStateOf(false) }
+                val isUsb2Detected = remember { mutableStateOf(false) }
 
                 val usb1 = File("/storage/usbdisk1")
                 val usb2 = File("/storage/usbdisk2")
-                if (usb1.exists()) {
-                    Timber.i("USB1 exists")
+                if (usb1.exists() && !isUsb1Detected.value) {
                     musicFiles.addAll(usb1.scanForMusicFiles())
                     Timber.i("Music file count: ${musicFiles.size}")
-                } else {
-                    Timber.i("USB1 does not exist")
+                    isUsb1Detected.value = true
                 }
-                if (usb2.exists()) {
-                    Timber.i("USB2 exists")
+                if (usb2.exists() && !isUsb2Detected.value) {
                     musicFiles.addAll(usb2.scanForMusicFiles())
                     Timber.i("Music file count: ${musicFiles.size}")
-                } else {
-                    Timber.i("USB2 does not exist")
+                    isUsb2Detected.value = true
                 }
 
                 val usbReceiver = rememberUpdatedState(newValue = UsbReceiver(
                     onUsbMounted = { path ->
                         Timber.i("USB mounted: $path")
-                        musicFiles.addAll(File(path).scanForMusicFiles())
+                        when (path) {
+                            usb1.absolutePath -> {
+                                if (isUsb1Detected.value) return@UsbReceiver
+                                musicFiles.addAll(usb1.scanForMusicFiles())
+                                isUsb1Detected.value = true
+                            }
+                            usb2.absolutePath -> {
+                                if (isUsb2Detected.value) return@UsbReceiver
+                                musicFiles.addAll(usb2.scanForMusicFiles())
+                                isUsb2Detected.value = true
+                            }
+                        }
                     },
                     onUsbEjected = { path ->
                         Timber.i("USB ejected: $path")
@@ -80,32 +89,31 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-//                ListScreen(
-//                    musicFiles = musicFiles
-//                )
-                GridScreen(
-                    musicFiles = musicFiles
-                )
+//                val albumMap by musicFiles.getMusicMapByAlbum().collectAsState(initial = emptyMap())
 
-                Scaffold(
-                    content = { paddingValues ->
-                        GridScreen(
-                            modifier = Modifier.padding(paddingValues),
-                            musicFiles = musicFiles
-                        )
-                    },
-                    bottomBar = {
-                        FooterExpanded(
-                            modifier = Modifier
-//                                .align(Alignment.BottomStart)
-                            ,
-                            musicMetadata = musicFiles[0].getMusicMetadata(),
-                            playingTime = 10000,
-                            isFavorite = false,
-                            onClick = { }
-                        )
-                    }
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+
+
+
+                    ListScreen(
+                        musicFiles = musicFiles
+                    )
+//                    GridScreen(
+//                        musicFiles = musicFiles
+//                    )
+
+                    FooterExpanded(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart),
+                        musicMetadata = musicFiles[0].getMusicMetadata(),
+                        playingTime = 10000,
+                        isFavorite = false,
+                        onClick = { }
+                    )
+                }
             }
         }
     }

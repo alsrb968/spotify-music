@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -32,6 +33,7 @@ fun GridCell(
     coreColor: Color = Color.Yellow,
     title: String,
     artist: String,
+    album: String,
     isPlayable: Boolean,
     onClick: () -> Unit
 ) {
@@ -63,35 +65,23 @@ fun GridCell(
                     contentDescription = "Grid Thumbnail"
                 )
 
+                LineOverlay(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    color = coreColor
+                )
+
                 Text(
                     modifier = Modifier
-                        .width(160.dp)
+                        .width(180.dp)
                         .padding(16.dp)
                         .align(Alignment.BottomStart),
-                    text = title,
+                    text = album,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    drawLine(
-                        color = coreColor,
-                        start = androidx.compose.ui.geometry.Offset(0f, size.height - 40),
-                        end = androidx.compose.ui.geometry.Offset(0f, size.height - 15),
-                        strokeWidth = 9.dp.toPx()
-                    )
-                    drawLine(
-                        color = coreColor,
-                        start = androidx.compose.ui.geometry.Offset(0f, size.height),
-                        end = androidx.compose.ui.geometry.Offset(size.width, size.height),
-                        strokeWidth = 8.dp.toPx()
-                    )
-                }
 
                 if (isPlayable) {
                     Image(
@@ -141,6 +131,79 @@ fun GridCell(
     }
 }
 
+@Composable
+fun LineOverlay(
+    modifier: Modifier = Modifier,
+    color: Color
+) {
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        drawLine(
+            color = color,
+            start = androidx.compose.ui.geometry.Offset(0f, size.height - 40),
+            end = androidx.compose.ui.geometry.Offset(0f, size.height - 15),
+            strokeWidth = 9.dp.toPx()
+        )
+        drawLine(
+            color = color,
+            start = androidx.compose.ui.geometry.Offset(0f, size.height),
+            end = androidx.compose.ui.geometry.Offset(size.width, size.height),
+            strokeWidth = 8.dp.toPx()
+        )
+    }
+}
+
+@Composable
+fun WaveOverlay(
+    modifier: Modifier = Modifier,
+    color: Color
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+//        val topPath = Path().apply {
+//            moveTo(0f, size.height * 0.35f)
+//            cubicTo(
+//                size.width * 0.05f, size.height * 0.3f,
+//                size.width * 0.1f, size.height * 0.01f,
+//                size.width * 0.25f, size.height * 0.05f
+//            )
+//            cubicTo(
+//                size.width * 0.3f, size.height * 0.05f,
+//                size.width * 0.4f, size.height * 0.2f,
+//                size.width * 0.6f, size.height * 0f
+//            )
+//            lineTo(0f, 0f)
+//            close()
+//        }
+
+        val bottomPath = Path().apply {
+            moveTo(0f, size.height * 0.75f)
+            quadraticBezierTo(
+                size.width * 0.25f, size.height * 0.5f,
+                size.width * 0.5f, size.height * 0.7f
+            )
+            quadraticBezierTo(
+                size.width * 0.75f, size.height * 0.85f,
+                size.width, size.height * 0.8f
+            )
+            lineTo(size.width, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+
+//        drawPath(
+//            path = topPath,
+//            color = color
+//        )
+
+        drawPath(
+            path = bottomPath,
+            color = color
+        )
+    }
+}
+
 @DevicePreviews
 @Composable
 fun GridCellPreview() {
@@ -148,6 +211,7 @@ fun GridCellPreview() {
         GridCell(
             title = "Folk & Acoustic Mix 2021",
             artist = "Canyon City, Crooked Still, Gregory Alan, Isakov, The Paper Kites",
+            album = "Folk & Acoustic",
             isPlayable = true,
             onClick = {}
         )

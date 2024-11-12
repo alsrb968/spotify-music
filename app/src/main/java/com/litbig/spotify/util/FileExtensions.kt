@@ -3,7 +3,12 @@ package com.litbig.spotify.util
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import androidx.compose.ui.graphics.asImageBitmap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 object FileExtensions {
     @JvmStatic
@@ -12,7 +17,7 @@ object FileExtensions {
         val supportedExtensions = arrayOf("mp3")
 
         listFiles()?.forEach { file ->
-            if (file.isDirectory) {
+            if (file.isDirectory && !file.name.startsWith("_") && !file.name.startsWith(".")) {
                 musicFiles.addAll(file.scanForMusicFiles())
             } else if (supportedExtensions.any { file.name.endsWith(it, ignoreCase = true) }) {
                 musicFiles.add(file)
@@ -56,4 +61,29 @@ object FileExtensions {
 
         return metadata
     }
+
+    @JvmStatic
+    fun List<File>.getMusicMapByAlbum(): Flow<Map<String, List<File>>> = flow {
+        val albumMap = ConcurrentHashMap<String, MutableList<File>>()
+
+        for (file in this@getMusicMapByAlbum) {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(file.absolutePath)
+                val album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "Unknown"
+
+                synchronized(albumMap) {
+                    albumMap.computeIfAbsent(album) { mutableListOf() }.add(file)
+                }
+
+                // 방출할 복사본 생성
+                val snapshot = albumMap.mapValues { it.value.toList() }.toMap()
+                emit(snapshot)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                retriever.release()
+            }
+        }
+    }.flowOn(Dispatchers.IO)
 }

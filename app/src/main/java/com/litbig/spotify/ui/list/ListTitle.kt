@@ -23,7 +23,7 @@ fun ListTitle(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier
