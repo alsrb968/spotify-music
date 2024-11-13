@@ -36,6 +36,10 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
 
+    implementation(libs.androidx.paging.common)
+    implementation(libs.javax.inject)
+    implementation(libs.jakewharton.timber)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

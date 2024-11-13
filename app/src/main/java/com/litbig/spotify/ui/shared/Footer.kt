@@ -14,14 +14,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
+import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toDuration
+import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toLong
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
-import com.litbig.spotify.util.MusicMetadata
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import timber.log.Timber
 
 @Composable
@@ -90,7 +94,7 @@ fun FooterExpanded(
                 musicMetadata.albumArt?.let {
                     Image(
                         modifier = Modifier.fillMaxSize(),
-                        bitmap = it,
+                        bitmap = it.asImageBitmap(),
                         contentDescription = "Album Art",
                     )
                 } ?: Image(
@@ -141,7 +145,7 @@ fun FooterExpanded(
 
             ControlBar(
                 playingTime = playingTime,
-                totalTime = musicMetadata.duration,
+                totalTime = musicMetadata.duration.toLong(),
             )
         }
     }
@@ -266,27 +270,7 @@ fun RoundedMusicProgressBar(
 fun PreviewFooterExpanded() {
     SpotifyTheme {
         FooterExpanded(
-            musicMetadata = MusicMetadata(
-                absolutePath = "",
-                title = "Ocean Eyes",
-                artist = "Billie Eilish",
-                album = "Ocean Eyes",
-                genre = "Pop",
-                albumArt = null,
-                duration = 262000,
-                year = "2015",
-                albumArtist = "Billie Eilish",
-                composer = "Billie Eilish",
-                writer = "Billie Eilish",
-                cdTrackNumber = "1",
-                discNumber = "1",
-                date = "2015",
-                mimeType = "audio/mpeg",
-                compilation = "false",
-                hasAudio = true,
-                bitrate = "320000",
-                numTracks = "1",
-            ),
+            musicMetadata = PreviewMusicMetadata,
             playingTime = 159000,
             isFavorite = true,
             onClick = {}

@@ -1,16 +1,16 @@
-package com.litbig.spotify.util
+package com.litbig.spotify.core.data.model.local
 
-import androidx.compose.ui.graphics.ImageBitmap
-import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-data class MusicMetadata(
-    val absolutePath: String,
+@Entity(tableName = "music_metadata")
+data class MusicMetadataEntity(
+    @PrimaryKey val absolutePath: String,
     val title: String,
     val artist: String,
     val album: String,
     val genre: String,
-    val albumArt: ImageBitmap?,
-    val duration: Long, // in milliseconds
+    val duration: Long,
     val year: String,
     val albumArtist: String,
     val composer: String,
@@ -23,7 +23,4 @@ data class MusicMetadata(
     val hasAudio: Boolean,
     val bitrate: String,
     val numTracks: String,
-) {
-    val formattedDuration: String
-        get() = duration.toHumanReadableDuration()
-}
+)

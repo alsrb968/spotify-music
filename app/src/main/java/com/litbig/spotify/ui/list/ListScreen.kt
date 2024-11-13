@@ -1,31 +1,43 @@
 package com.litbig.spotify.ui.list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.grid.getRandomPastelColor
 import com.litbig.spotify.ui.grid.gradientBackground
-import com.litbig.spotify.ui.shared.FooterExpanded
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.util.FileExtensions.getMusicMetadata
-import timber.log.Timber
-import java.io.File
+import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
+import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
+import kotlinx.coroutines.flow.Flow
+
+@Composable
+fun ListScreen(
+    onBackPress: () -> Unit,
+    viewModel: ListViewModel = hiltViewModel()
+) {
+    ListScreen(
+        musicMetadataPagingItems = viewModel.musicMetadataPagingFlow
+    )
+}
 
 @Composable
 fun ListScreen(
     modifier: Modifier = Modifier,
-    musicFiles: List<File>
+    musicMetadataPagingItems: Flow<PagingData<MusicMetadata>>
 ) {
+    val metadataPagingItems = musicMetadataPagingItems.collectAsLazyPagingItems()
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -38,10 +50,6 @@ fun ListScreen(
         Column(
             modifier = Modifier
         ) {
-            var displayedMusicFiles by remember { mutableStateOf(musicFiles.take(20)) }
-            Timber.i("Displayed music files: ${displayedMusicFiles.size}")
-            val metadataList = displayedMusicFiles.map { it.getMusicMetadata() }
-
             val listState = rememberLazyListState()
 
             LazyColumn(state = listState) {
@@ -55,43 +63,28 @@ fun ListScreen(
                     ) {
                         ListHeader(
                             modifier = Modifier,
-                            metadataList = metadataList
+                            metadataList = metadataPagingItems.itemSnapshotList.items
                         )
                     }
                 }
                 item {
                     ListTitle()
                 }
-                items(metadataList.size) { index ->
-                    val file = metadataList[index]
+                items(metadataPagingItems.itemCount) { index ->
+                    val file = metadataPagingItems[index] ?: return@items
                     ListCell(
                         index = index + 1,
-                        albumArt = file.albumArt,
+                        isPlaying = index == 0,
+                        albumArt = file.albumArt?.asImageBitmap(),
                         title = file.title,
                         artist = file.artist,
                         album = file.album,
-                        totalTime = file.formattedDuration,
+                        totalTime = file.duration.toHumanReadableDuration(),
                         onClick = { }
                     )
                 }
             }
-
-            LaunchedEffect(listState) {
-                snapshotFlow { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.size }
-                    .collect { visibleItemCount ->
-                        if (visibleItemCount >= displayedMusicFiles.size && displayedMusicFiles.size < musicFiles.size) {
-                            val nextIndex = displayedMusicFiles.size
-                            val newFiles = musicFiles.subList(
-                                nextIndex,
-                                (nextIndex + 20).coerceAtMost(musicFiles.size)
-                            )
-                            displayedMusicFiles = displayedMusicFiles + newFiles
-                        }
-                    }
-            }
         }
-
-
     }
 }
 
@@ -100,7 +93,7 @@ fun ListScreen(
 fun ListScreenPreview() {
     SpotifyTheme {
         ListScreen(
-            musicFiles = emptyList()
+            musicMetadataPagingItems = PreviewMusicMetadataPagingData
         )
     }
 }

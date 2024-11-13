@@ -1,8 +1,10 @@
 package com.litbig.spotify
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
+@HiltAndroidApp
 class SpotifyApplication : Application() {
     override fun onCreate() {
         super.onCreate()

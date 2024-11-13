@@ -9,15 +9,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.util.MusicMetadata
+import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
 
 @Composable
 fun ListHeader(
@@ -35,7 +34,7 @@ fun ListHeader(
             metadataList.firstOrNull()?.albumArt?.let {
                 Image(
                     modifier = Modifier.fillMaxSize(),
-                    bitmap = it,
+                    bitmap = it.asImageBitmap(),
                     contentDescription = "Album Art",
                 )
             } ?: Image(
@@ -122,29 +121,7 @@ fun ListHeader(
 fun ListHeaderPreview() {
     SpotifyTheme {
         ListHeader(
-            metadataList = listOf(
-                MusicMetadata(
-                    absolutePath = "",
-                    title = "Ocean Eyes",
-                    artist = "Billie Eilish",
-                    album = "Ocean Eyes",
-                    genre = "Pop",
-                    albumArt = null,
-                    duration = 262000,
-                    year = "2015",
-                    albumArtist = "Billie Eilish",
-                    composer = "Billie Eilish",
-                    writer = "Billie Eilish",
-                    cdTrackNumber = "1",
-                    discNumber = "1",
-                    date = "2015",
-                    mimeType = "audio/mpeg",
-                    compilation = "false",
-                    hasAudio = true,
-                    bitrate = "320000",
-                    numTracks = "1",
-                )
-            )
+            metadataList = PreviewMusicMetadataList
         )
     }
 }

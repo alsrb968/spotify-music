@@ -15,19 +15,35 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.palette.graphics.Palette
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.util.FileExtensions.getMusicMetadata
+import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
+import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
-import java.io.File
 import kotlin.random.Random
 
 @Composable
 fun GridScreen(
-    modifier: Modifier = Modifier,
-    musicFiles: List<File>
+    navigateToList: () -> Unit,
+    viewModel: GridViewModel = hiltViewModel()
 ) {
+    GridScreen(
+        musicMetadataPagingItems = viewModel.musicMetadataPagingFlow
+    )
+}
+
+@Composable
+fun GridScreen(
+    modifier: Modifier = Modifier,
+    musicMetadataPagingItems: Flow<PagingData<MusicMetadata>>
+) {
+    val metadataPagingItems = musicMetadataPagingItems.collectAsLazyPagingItems()
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -61,12 +77,10 @@ fun GridScreen(
             Spacer(modifier = Modifier.height(26.dp))
 
             val listState = rememberLazyListState()
-            var displayedMusicFiles by remember { mutableStateOf(musicFiles.take(20)) }
-            Timber.i("Displayed music files: ${displayedMusicFiles.size}")
 
             LazyRow(state = listState) {
-                items(displayedMusicFiles.size) { index ->
-                    val file = displayedMusicFiles[index].getMusicMetadata()
+                items(metadataPagingItems.itemCount) { index ->
+                    val file = metadataPagingItems[index] ?: return@items
                     val dominantColor = getRandomPastelColor()
 
                     if (file.album.isNotEmpty()) {
@@ -74,7 +88,7 @@ fun GridScreen(
                     }
 
                     GridCell(
-                        albumArt = file.albumArt,
+                        albumArt = file.albumArt?.asImageBitmap(),
                         coreColor = dominantColor,
                         title = file.title,
                         artist = file.artist,
@@ -85,20 +99,6 @@ fun GridScreen(
 
                     Spacer(modifier = Modifier.width(30.dp))
                 }
-            }
-
-            LaunchedEffect(listState) {
-                snapshotFlow { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.size }
-                    .collect { visibleItemCount ->
-                        if (visibleItemCount >= displayedMusicFiles.size && displayedMusicFiles.size < musicFiles.size) {
-                            val nextIndex = displayedMusicFiles.size
-                            val newFiles = musicFiles.subList(
-                                nextIndex,
-                                (nextIndex + 20).coerceAtMost(musicFiles.size)
-                            )
-                            displayedMusicFiles = displayedMusicFiles + newFiles
-                        }
-                    }
             }
         }
     }
@@ -149,7 +149,7 @@ fun Modifier.gradientBackground(
 fun PreviewGridScreen() {
     SpotifyTheme {
         GridScreen(
-            musicFiles = emptyList()
+            musicMetadataPagingItems = PreviewMusicMetadataPagingData
         )
     }
 }
