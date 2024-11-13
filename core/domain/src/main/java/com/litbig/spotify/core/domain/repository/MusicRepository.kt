@@ -45,6 +45,7 @@ interface MusicRepository {
 
     suspend fun getAlbumArt(file: File): Flow<Bitmap?>
     suspend fun getAlbumArtList(files: List<File>): Flow<List<Bitmap?>>
+    fun getMusicMetadataWithoutFlow(file: File): MusicMetadata?
     suspend fun getMusicMetadata(file: File): Flow<MusicMetadata?>
     suspend fun getMusicMetadataList(files: List<File>): Flow<List<MusicMetadata?>>
 }

@@ -41,88 +41,71 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var getMetadataUseCase: GetMetadataUseCase
 
+    private val usb2 = File("/storage/usbdisk2")
+    private val musicFiles = mutableStateListOf<File>()
+    private var isUsb2Detected = false
+    private val usbReceiver = UsbReceiver(
+        onUsbMounted = { path ->
+            Timber.i("USB mounted: $path")
+            when (path) {
+                usb2.absolutePath -> {
+                    if (isUsb2Detected) return@UsbReceiver
+                    musicFiles.addAll(usb2.scanForMusicFiles())
+                    isUsb2Detected = true
+                }
+            }
+        },
+        onUsbEjected = { path ->
+            Timber.i("USB ejected: $path")
+            musicFiles.removeAll { it.absolutePath.startsWith(path) }
+        }
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Timber.i("onCreate")
         checkAndRequestStoragePermission()
 
+        if (usb2.exists() && !isUsb2Detected) {
+            musicFiles.addAll(usb2.scanForMusicFiles())
+            Timber.i("Music file count: ${musicFiles.size}")
+            isUsb2Detected = true
+        }
+
+        registerReceiver(usbReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_MEDIA_MOUNTED)
+            addAction(Intent.ACTION_MEDIA_EJECT)
+            addDataScheme("file")
+        })
+
+        lifecycleScope.launch {
+            syncMetadataUseCase(musicFiles)
+        }
+
         setContent {
             SpotifyTheme {
-                val musicFiles = remember { mutableStateListOf<File>() }
-                val isUsb2Detected = remember { mutableStateOf(false) }
-
-                val usb2 = File("/storage/usbdisk2")
-                if (usb2.exists() && !isUsb2Detected.value) {
-                    musicFiles.addAll(usb2.scanForMusicFiles())
-                    Timber.i("Music file count: ${musicFiles.size}")
-                    isUsb2Detected.value = true
-                }
-                val usbReceiver = rememberUpdatedState(newValue = UsbReceiver(
-                    onUsbMounted = { path ->
-                        Timber.i("USB mounted: $path")
-                        when (path) {
-                            usb2.absolutePath -> {
-                                if (isUsb2Detected.value) return@UsbReceiver
-                                musicFiles.addAll(usb2.scanForMusicFiles())
-                                isUsb2Detected.value = true
-                            }
-                        }
-                    },
-                    onUsbEjected = { path ->
-                        Timber.i("USB ejected: $path")
-                        musicFiles.removeAll { it.absolutePath.startsWith(path) }
-                    }
-                ))
-
-                DisposableEffect(Unit) {
-                    registerReceiver(usbReceiver.value, IntentFilter().apply {
-                        addAction(Intent.ACTION_MEDIA_MOUNTED)
-                        addAction(Intent.ACTION_MEDIA_EJECT)
-                        addDataScheme("file")
-                    })
-
-                    onDispose {
-                        unregisterReceiver(usbReceiver.value)
-                    }
-                }
-
-                LaunchedEffect(Unit) {
-                    lifecycleScope.launch {
-                        launch {
-                            syncMetadataUseCase(musicFiles.subList(0, 40))
-                        }
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    ListScreen(
-                        onBackPress = {}
-                    )
-//                    GridScreen(
-//                        musicFiles = musicFiles
+                SpotifyApp()
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                ) {
+//                    ListScreen(
+//                        onBackPress = {}
 //                    )
-
-                    LaunchedEffect(Unit) {
-                        lifecycleScope.launch {
-                            getMetadataUseCase().collectLatest { metadata ->
-                                Timber.i("Metadata: $metadata")
-                            }
-                        }
-                    }
-
-                    FooterExpanded(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart),
-                        musicMetadata = getMetadataUseCase().collectAsLazyPagingItems().itemSnapshotList.firstOrNull() ?: PreviewMusicMetadata,
-                        playingTime = 10000,
-                        isFavorite = false,
-                        onClick = { }
-                    )
-                }
+////                    GridScreen(
+////                        musicFiles = musicFiles
+////                    )
+//
+//                    FooterExpanded(
+//                        modifier = Modifier
+//                            .align(Alignment.BottomStart),
+//                        musicMetadata = PreviewMusicMetadata,
+//                        playingTime = 10000,
+//                        isFavorite = false,
+//                        onClick = { }
+//                    )
+//                }
             }
         }
     }
@@ -130,6 +113,12 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         hideSystemUI()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        unregisterReceiver(usbReceiver)
     }
 
     private fun hideSystemUI() {

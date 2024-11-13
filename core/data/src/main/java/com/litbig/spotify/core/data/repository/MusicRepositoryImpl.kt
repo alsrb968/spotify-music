@@ -132,6 +132,10 @@ class MusicRepositoryImpl @Inject constructor(
         return mediaDataSource.getAlbumArtList(files)
     }
 
+    override fun getMusicMetadataWithoutFlow(file: File): MusicMetadata? {
+        return mediaDataSource.getMusicMetadataWithoutFlow(file)
+    }
+
     override suspend fun getMusicMetadata(file: File): Flow<MusicMetadata?> {
         return mediaDataSource.getMusicMetadata(file)
     }

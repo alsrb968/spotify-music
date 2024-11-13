@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun ListScreen(
-    onBackPress: () -> Unit,
+    navigateBack: () -> Unit,
     viewModel: ListViewModel = hiltViewModel()
 ) {
     ListScreen(

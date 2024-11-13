@@ -16,12 +16,14 @@ import javax.inject.Inject
 interface MediaRetrieverDataSource {
     suspend fun getAlbumArt(file: File): Flow<Bitmap?>
     suspend fun getAlbumArtList(files: List<File>): Flow<List<Bitmap?>>
+    fun getMusicMetadataWithoutFlow(file: File): MusicMetadata?
     suspend fun getMusicMetadata(file: File): Flow<MusicMetadata?>
     suspend fun getMusicMetadataList(files: List<File>): Flow<List<MusicMetadata?>>
 }
 
 class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSource {
     override suspend fun getAlbumArt(file: File): Flow<Bitmap?> {
+        Timber.i("getAlbumArt: ${file.absolutePath}")
         return flow {
             val retriever = MediaMetadataRetriever()
             try {
@@ -62,6 +64,61 @@ class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSou
                 emit(bitmapList.toList())
             }
         }.flowOn(Dispatchers.IO) // I/O 작업을 비동기적으로 처리
+
+    override fun getMusicMetadataWithoutFlow(file: File): MusicMetadata? {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(file.absolutePath)
+            val duration =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?.toLongOrNull() ?: 0L
+            val metadata = MusicMetadata(
+                absolutePath = file.absolutePath,
+                title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+                    ?: file.nameWithoutExtension,
+                artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+                    ?: "",
+                album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+                    ?: "",
+                genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
+                    ?: "",
+                albumArt = retriever.embeddedPicture?.let {
+                    BitmapFactory.decodeByteArray(it, 0, it.size)
+                },
+                duration = duration.toDuration(),
+                year = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)
+                    ?: "",
+                albumArtist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)
+                    ?: "",
+                composer = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER)
+                    ?: "",
+                writer = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER)
+                    ?: "",
+                cdTrackNumber = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER)
+                    ?: "",
+                discNumber = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER)
+                    ?: "",
+                date = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
+                    ?: "",
+                mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)
+                    ?: "",
+                compilation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPILATION)
+                    ?: "",
+                hasAudio = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)
+                    ?.toBoolean() ?: false,
+                bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
+                    ?: "",
+                numTracks = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS)
+                    ?: "",
+            )
+            metadata
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        } finally {
+            retriever.release()
+        }
+    }
 
     override suspend fun getMusicMetadata(file: File): Flow<MusicMetadata?> {
         Timber.i("getMusicMetadata: ${file.absolutePath}")

@@ -2,7 +2,6 @@ package com.litbig.spotify.core.domain.usecase
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
@@ -18,7 +17,7 @@ class SyncMetadataUseCase @Inject constructor(
                 if (musicRepository.isExistMetadata(file.absolutePath)) {
                     return@forEach
                 }
-                val metadata = musicRepository.getMusicMetadata(file).first()
+                val metadata = musicRepository.getMusicMetadataWithoutFlow(file)
                 metadata?.let {
                     musicRepository.insertMetadata(it)
                     Timber.i("SyncMetadataUseCase: Metadata inserted: ${file.absolutePath}")
