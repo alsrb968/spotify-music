@@ -1,5 +1,6 @@
 package com.litbig.spotify.ui.list
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,21 +21,24 @@ import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 @Composable
 fun ListScreen(
-    navigateBack: () -> Unit,
-    viewModel: ListViewModel = hiltViewModel()
+    viewModel: ListViewModel = hiltViewModel(),
+    navigateBack: () -> Unit
 ) {
     ListScreen(
-        musicMetadataPagingItems = viewModel.musicMetadataPagingFlow
+        musicMetadataPagingItems = viewModel.musicMetadataByAlbumPagingFlow,
+        navigateBack = navigateBack
     )
 }
 
 @Composable
 fun ListScreen(
     modifier: Modifier = Modifier,
-    musicMetadataPagingItems: Flow<PagingData<MusicMetadata>>
+    musicMetadataPagingItems: Flow<PagingData<MusicMetadata>>,
+    navigateBack: () -> Unit
 ) {
     val metadataPagingItems = musicMetadataPagingItems.collectAsLazyPagingItems()
 
@@ -57,7 +61,8 @@ fun ListScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(360.dp),
+                            .height(360.dp)
+                            .clickable { navigateBack() },
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -93,7 +98,8 @@ fun ListScreen(
 fun ListScreenPreview() {
     SpotifyTheme {
         ListScreen(
-            musicMetadataPagingItems = PreviewMusicMetadataPagingData
+            musicMetadataPagingItems = PreviewMusicMetadataPagingData,
+            navigateBack = {}
         )
     }
 }

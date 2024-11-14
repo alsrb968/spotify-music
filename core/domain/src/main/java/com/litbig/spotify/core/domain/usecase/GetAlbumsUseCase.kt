@@ -16,6 +16,7 @@ class GetAlbumsUseCase @Inject constructor(
         return repository.getPagedAlbums(pageSize).map { pagingData ->
             pagingData.map { albumName ->
                 val firstMetadata = repository.getMetadataByAlbum(albumName).first()
+                val musicCount = repository.getMetadataCountByAlbum(albumName)
 
                 val (artist, albumArt) = firstMetadata.artist to firstMetadata.albumArt
 
@@ -23,6 +24,7 @@ class GetAlbumsUseCase @Inject constructor(
                     name = albumName,
                     artist = artist,
                     albumArt = albumArt,
+                    musicCount = musicCount
                 )
             }
         }

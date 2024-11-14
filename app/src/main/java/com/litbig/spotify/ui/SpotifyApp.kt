@@ -16,7 +16,9 @@ fun SpotifyApp(
     ) {
         composable(Screen.Grid.route) { backStackEntry ->
             GridScreen(
-                navigateToList = { appState.navigateToList(backStackEntry) }
+                navigateToList = { album ->
+                    appState.navigateToList(album.name, backStackEntry)
+                }
             )
         }
         composable(Screen.List.route) {

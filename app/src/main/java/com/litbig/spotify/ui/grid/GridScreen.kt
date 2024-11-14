@@ -28,10 +28,11 @@ import kotlin.random.Random
 
 @Composable
 fun GridScreen(
-    navigateToList: () -> Unit,
-    viewModel: GridViewModel = hiltViewModel()
+    viewModel: GridViewModel = hiltViewModel(),
+    navigateToList: (Album) -> Unit
 ) {
     GridScreen(
+        navigateToList = navigateToList,
         musicAlbumsPagingFlow = viewModel.musicAlbumsPagingFlow
     )
 }
@@ -39,7 +40,8 @@ fun GridScreen(
 @Composable
 fun GridScreen(
     modifier: Modifier = Modifier,
-    musicAlbumsPagingFlow: Flow<PagingData<Album>>
+    musicAlbumsPagingFlow: Flow<PagingData<Album>>,
+    navigateToList: (Album) -> Unit
 ) {
     val albumsPagingItems = musicAlbumsPagingFlow.collectAsLazyPagingItems()
 
@@ -89,7 +91,7 @@ fun GridScreen(
                         artist = album?.artist ?: "",
                         album = album?.name ?: "",
                         isPlayable = false,
-                        onClick = {}
+                        onClick = { album?.let { navigateToList(it) } }
                     )
 
                     Spacer(modifier = Modifier.width(30.dp))
@@ -144,6 +146,7 @@ fun Modifier.gradientBackground(
 fun PreviewGridScreen() {
     SpotifyTheme {
         GridScreen(
+            navigateToList = {},
             musicAlbumsPagingFlow = PreviewAlbumPagingData
         )
     }

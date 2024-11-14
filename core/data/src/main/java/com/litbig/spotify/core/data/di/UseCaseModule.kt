@@ -2,6 +2,7 @@ package com.litbig.spotify.core.data.di
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import com.litbig.spotify.core.domain.usecase.GetAlbumsUseCase
+import com.litbig.spotify.core.domain.usecase.GetMetadataByAlbumUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
 import com.litbig.spotify.core.domain.usecase.SyncMetadataUseCase
 import dagger.Module
@@ -26,6 +27,14 @@ object UseCaseModule {
     fun provideGetMetadataUseCase(
         musicRepository: MusicRepository
     ): GetMetadataUseCase = GetMetadataUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideGetMetadataByAlbumUseCase(
+        musicRepository: MusicRepository
+    ): GetMetadataByAlbumUseCase = GetMetadataByAlbumUseCase(
         musicRepository
     )
 
