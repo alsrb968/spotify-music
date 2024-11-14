@@ -18,7 +18,7 @@ class GetAlbumsUseCase @Inject constructor(
                 val firstMetadata = repository.getMetadataByAlbum(albumName).first()
                 val musicCount = repository.getMetadataCountByAlbum(albumName)
 
-                val (artist, albumArt) = firstMetadata.artist to firstMetadata.albumArt
+                val (artist, albumArt) = firstMetadata.artistName to firstMetadata.albumArt
 
                 Album(
                     name = albumName,

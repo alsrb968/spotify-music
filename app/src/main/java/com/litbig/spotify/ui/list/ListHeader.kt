@@ -2,6 +2,7 @@ package com.litbig.spotify.ui.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -11,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
 import com.litbig.spotify.core.domain.model.MusicMetadata
@@ -25,8 +25,9 @@ fun ListHeader(
     modifier: Modifier = Modifier,
     metadataList: List<MusicMetadata>,
 ) {
-    val title = metadataList.firstOrNull()?.album ?: ""
-    val artist = metadataList.firstOrNull()?.artist ?: ""
+    val first = metadataList.firstOrNull()
+    val title = first?.album ?: ""
+    val artist = first?.artistName ?: ""
     val artists = metadataList.map { it.artist }.distinct().joinToString(separator = ", ")
     val count = metadataList.size
     val durations = metadataList.fold(Duration.ZERO) { acc, metadata -> acc + metadata.duration }
@@ -72,11 +73,12 @@ fun ListHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
+                    modifier = Modifier
+                        .basicMarquee(),
                     text = title,
                     style = MaterialTheme.typography.displayLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
 
@@ -85,7 +87,8 @@ fun ListHeader(
             Text(
                 text = artists,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
             )
 
             Spacer(modifier = Modifier.height(12.dp))

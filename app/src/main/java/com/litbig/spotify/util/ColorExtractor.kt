@@ -1,6 +1,5 @@
 package com.litbig.spotify.util
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -19,9 +18,9 @@ object ColorExtractor {
         imageBitmap?.asAndroidBitmap()?.let { bm ->
             Palette.from(bm).generate { palette ->
                 palette?.let {
-                    // 흰색이나 검은색을 제외한 스와치 필터링
+                    // 검은색을 제외한 스와치 필터링
                     val filteredSwatches = it.swatches.filter { swatch ->
-                        !isWhiteOrBlackColor(swatch.rgb)
+                        !isBlackColor(swatch.rgb)
                     }
 
                     // 필터링된 스와치 중 가장 인구가 많은 색상 선택
@@ -38,18 +37,15 @@ object ColorExtractor {
         return dominantColor
     }
 
-    // RGB 값을 기반으로 흰색이나 검은색인지 확인하는 함수
-    private fun isWhiteOrBlackColor(rgb: Int): Boolean {
+    private fun isBlackColor(rgb: Int): Boolean {
         val red = (rgb shr 16) and 0xFF
         val green = (rgb shr 8) and 0xFF
         val blue = rgb and 0xFF
 
-        // 흰색으로 간주되는 범위 (거의 밝은 색)
-        val isWhite = red > 240 && green > 240 && blue > 240
         // 검은색으로 간주되는 범위 (거의 어두운 색)
-        val isBlack = red < 15 && green < 15 && blue < 15
+        val isBlack = red < 30 && green < 30 && blue < 30
 
-        return isWhite || isBlack
+        return isBlack
     }
 
     @JvmStatic

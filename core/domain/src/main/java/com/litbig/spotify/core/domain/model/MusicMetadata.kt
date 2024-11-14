@@ -23,4 +23,6 @@ data class MusicMetadata(
     val hasAudio: Boolean,
     val bitrate: String,
     val numTracks: String,
-)
+) {
+    val artistName = albumArtist.ifEmpty { artist }
+}
