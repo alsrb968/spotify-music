@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette
+import timber.log.Timber
 import kotlin.random.Random
 
 object ColorExtractor {
@@ -37,15 +38,16 @@ object ColorExtractor {
         return dominantColor
     }
 
-    private fun isBlackColor(rgb: Int): Boolean {
+    private fun isBlackColor(rgb: Int, threshold: Int = 50): Boolean {
         val red = (rgb shr 16) and 0xFF
         val green = (rgb shr 8) and 0xFF
         val blue = rgb and 0xFF
 
-        // 검은색으로 간주되는 범위 (거의 어두운 색)
-        val isBlack = red < 30 && green < 30 && blue < 30
+        // 밝기 계산 (가중치를 사용하여 사람이 보는 밝기에 더 가깝게 측정)
+        val luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
 
-        return isBlack
+        // 밝기가 threshold 이하일 경우 검은색 계열로 판단
+        return luminance < threshold
     }
 
     @JvmStatic
