@@ -14,11 +14,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.litbig.spotify.core.domain.model.MusicMetadata
-import com.litbig.spotify.ui.grid.getRandomPastelColor
 import com.litbig.spotify.ui.grid.gradientBackground
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
+import com.litbig.spotify.util.ColorExtractor.extractDominantColor
+import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
@@ -41,13 +42,14 @@ fun ListScreen(
     navigateBack: () -> Unit
 ) {
     val metadataPagingItems = musicMetadataPagingItems.collectAsLazyPagingItems()
+    val albumArtFirst = metadataPagingItems.itemSnapshotList.items.firstOrNull()?.albumArt
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .gradientBackground(
                 ratio = 0.5f,
-                startColor = getRandomPastelColor(),
+                startColor = extractDominantColor(albumArtFirst?.asImageBitmap()),
                 endColor = Color.Transparent
             )
     ) {

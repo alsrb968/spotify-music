@@ -11,18 +11,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
 import com.litbig.spotify.core.domain.model.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
+import kotlin.time.Duration
 
 @Composable
 fun ListHeader(
     modifier: Modifier = Modifier,
     metadataList: List<MusicMetadata>,
 ) {
+    val title = metadataList.firstOrNull()?.album ?: ""
+    val artist = metadataList.firstOrNull()?.artist ?: ""
+    val artists = metadataList.map { it.artist }.distinct().joinToString(separator = ", ")
+    val count = metadataList.size
+    val durations = metadataList.fold(Duration.ZERO) { acc, metadata -> acc + metadata.duration }
+    val hours = durations.inWholeHours
+    val minutes = durations.inWholeMinutes % 60
+
     Row(
         modifier = modifier
             .size(width = 988.dp, height = 300.dp),
@@ -62,16 +72,18 @@ fun ListHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Chill Mix",
+                    text = title,
                     style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Julia Wolf, ayokay, Khalid and more",
+                text = artists,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -88,7 +100,7 @@ fun ListHeader(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "davedirect3",
+                    text = artist,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -107,7 +119,7 @@ fun ListHeader(
                     )
                 }
                 Text(
-                    text = "34 songs, 2hr 01 min",
+                    text = "%d songs, %dhr %02d min".format(count, hours, minutes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

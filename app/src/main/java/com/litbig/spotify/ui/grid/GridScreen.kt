@@ -23,6 +23,7 @@ import com.litbig.spotify.core.domain.model.Album
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewAlbumPagingData
+import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
 import kotlinx.coroutines.flow.Flow
 import kotlin.random.Random
 
@@ -99,28 +100,6 @@ fun GridScreen(
             }
         }
     }
-}
-
-@Composable
-fun extractDominantColor(imageBitmap: ImageBitmap): Color {
-    var dominantColor by remember { mutableStateOf(Color.Transparent) }
-    val bitmap = imageBitmap.asAndroidBitmap()
-
-    Palette.from(bitmap).generate { palette ->
-        palette?.let {
-            dominantColor = Color(it.getDominantColor(Color.Transparent.toArgb()))
-        }
-    }
-
-    return dominantColor
-}
-
-fun getRandomPastelColor(): Color {
-    val hue = Random.nextFloat() * 360 // 0 to 360 for hue
-    val saturation = 0.80f // Lower saturation for pastel tone
-    val lightness = 0.6f // Higher lightness for a bright pastel color
-
-    return Color.hsl(hue, saturation, lightness)
 }
 
 fun Modifier.gradientBackground(
