@@ -1,8 +1,6 @@
 package com.litbig.spotify.core.data.datasource.local
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import com.litbig.spotify.core.data.db.MusicMetadataDao
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
 import kotlinx.coroutines.flow.Flow
@@ -11,30 +9,32 @@ import javax.inject.Inject
 interface RoomMusicDataSource {
     suspend fun insertMetadata(metadata: MusicMetadataEntity)
     suspend fun insertMetadataList(metadataList: List<MusicMetadataEntity>)
-    fun getPagedAlbums(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getPagedArtists(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getPagedGenres(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getPagedYears(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getPagedMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadataEntity>>
-    fun getPagedMetadataByAlbum(
-        album: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadataEntity>>
 
-    fun getPagedMetadataByArtist(
-        artist: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadataEntity>>
+    fun getAlbums(): Flow<List<String>>
+    fun getPagedAlbums(): PagingSource<Int, String>
 
-    fun getPagedMetadataByGenre(
-        genre: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadataEntity>>
+    fun getArtists(): Flow<List<String>>
+    fun getPagedArtists(): PagingSource<Int, String>
 
-    fun getPagedMetadataByYear(
-        year: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadataEntity>>
+    fun getGenres(): Flow<List<String>>
+    fun getPagedGenres(): PagingSource<Int, String>
+
+    fun getYears(): Flow<List<String>>
+    fun getPagedYears(): PagingSource<Int, String>
+
+    fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity>
+
+    fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity>
+    fun getPagedMetadataByAlbum(album: String): PagingSource<Int, MusicMetadataEntity>
+
+    fun getMetadataByArtist(artist: String): Flow<MusicMetadataEntity>
+    fun getPagedMetadataByArtist(artist: String): PagingSource<Int, MusicMetadataEntity>
+
+    fun getMetadataByGenre(genre: String): Flow<MusicMetadataEntity>
+    fun getPagedMetadataByGenre(genre: String): PagingSource<Int, MusicMetadataEntity>
+
+    fun getMetadataByYear(year: String): Flow<MusicMetadataEntity>
+    fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity>
 
     suspend fun isExistMetadata(absolutePath: String): Boolean
     suspend fun deleteAllMetadataList()
@@ -57,106 +57,72 @@ class RoomMusicDataSourceImpl @Inject constructor(
         metadataDao.insertMetadataList(metadataList)
     }
 
-    override fun getPagedAlbums(pageSize: Int): Flow<PagingData<String>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedAlbums() }
-        ).flow
+    override fun getAlbums(): Flow<List<String>> {
+        return metadataDao.getAlbums()
     }
 
-    override fun getPagedArtists(pageSize: Int): Flow<PagingData<String>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedArtists() }
-        ).flow
+    override fun getPagedAlbums(): PagingSource<Int, String> {
+        return metadataDao.getPagedAlbums()
     }
 
-    override fun getPagedGenres(pageSize: Int): Flow<PagingData<String>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedGenres() }
-        ).flow
+    override fun getArtists(): Flow<List<String>> {
+        return metadataDao.getArtists()
     }
 
-    override fun getPagedYears(pageSize: Int): Flow<PagingData<String>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedYears() }
-        ).flow
+    override fun getPagedArtists(): PagingSource<Int, String> {
+        return metadataDao.getPagedArtists()
     }
 
-    override fun getPagedMetadata(pageSize: Int): Flow<PagingData<MusicMetadataEntity>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedMetadata() }
-        ).flow
+    override fun getGenres(): Flow<List<String>> {
+        return metadataDao.getGenres()
     }
 
-    override fun getPagedMetadataByAlbum(
-        album: String,
-        pageSize: Int
-    ): Flow<PagingData<MusicMetadataEntity>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedMetadataByAlbum(album) }
-        ).flow
+    override fun getPagedGenres(): PagingSource<Int, String> {
+        return metadataDao.getPagedGenres()
     }
 
-    override fun getPagedMetadataByArtist(
-        artist: String,
-        pageSize: Int
-    ): Flow<PagingData<MusicMetadataEntity>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedMetadataByArtist(artist) }
-        ).flow
+    override fun getYears(): Flow<List<String>> {
+        return metadataDao.getYears()
     }
 
-    override fun getPagedMetadataByGenre(
-        genre: String,
-        pageSize: Int
-    ): Flow<PagingData<MusicMetadataEntity>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedMetadataByGenre(genre) }
-        ).flow
+    override fun getPagedYears(): PagingSource<Int, String> {
+        return metadataDao.getPagedYears()
     }
 
-    override fun getPagedMetadataByYear(
-        year: String,
-        pageSize: Int
-    ): Flow<PagingData<MusicMetadataEntity>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { metadataDao.getPagedMetadataByYear(year) }
-        ).flow
+    override fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity> {
+        return metadataDao.getPagedMetadata()
+    }
+
+    override fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity> {
+        return metadataDao.getMetadataByAlbum(album)
+    }
+
+    override fun getPagedMetadataByAlbum(album: String): PagingSource<Int, MusicMetadataEntity> {
+        return metadataDao.getPagedMetadataByAlbum(album)
+    }
+
+    override fun getMetadataByArtist(artist: String): Flow<MusicMetadataEntity> {
+        return metadataDao.getMetadataByArtist(artist)
+    }
+
+    override fun getPagedMetadataByArtist(artist: String): PagingSource<Int, MusicMetadataEntity> {
+        return metadataDao.getPagedMetadataByArtist(artist)
+    }
+
+    override fun getMetadataByGenre(genre: String): Flow<MusicMetadataEntity> {
+        return metadataDao.getMetadataByGenre(genre)
+    }
+
+    override fun getPagedMetadataByGenre(genre: String): PagingSource<Int, MusicMetadataEntity> {
+        return metadataDao.getPagedMetadataByGenre(genre)
+    }
+
+    override fun getMetadataByYear(year: String): Flow<MusicMetadataEntity> {
+        return metadataDao.getMetadataByYear(year)
+    }
+
+    override fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity> {
+        return metadataDao.getPagedMetadataByYear(year)
     }
 
     override suspend fun isExistMetadata(absolutePath: String): Boolean {

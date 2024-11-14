@@ -17,7 +17,7 @@ class SyncMetadataUseCase @Inject constructor(
                 if (musicRepository.isExistMetadata(file.absolutePath)) {
                     return@forEach
                 }
-                val metadata = musicRepository.getMusicMetadataWithoutFlow(file)
+                val metadata = musicRepository.getMusicMetadata(file)
                 metadata?.let {
                     musicRepository.insertMetadata(it)
                     Timber.i("SyncMetadataUseCase: Metadata inserted: ${file.absolutePath}")

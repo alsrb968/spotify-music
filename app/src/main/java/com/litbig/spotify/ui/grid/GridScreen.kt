@@ -19,12 +19,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.palette.graphics.Palette
-import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.core.domain.model.Album
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
+import com.litbig.spotify.ui.tooling.PreviewAlbumPagingData
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 import kotlin.random.Random
 
 @Composable
@@ -33,16 +32,16 @@ fun GridScreen(
     viewModel: GridViewModel = hiltViewModel()
 ) {
     GridScreen(
-        musicMetadataPagingItems = viewModel.musicMetadataPagingFlow
+        musicAlbumsPagingFlow = viewModel.musicAlbumsPagingFlow
     )
 }
 
 @Composable
 fun GridScreen(
     modifier: Modifier = Modifier,
-    musicMetadataPagingItems: Flow<PagingData<MusicMetadata>>
+    musicAlbumsPagingFlow: Flow<PagingData<Album>>
 ) {
-    val metadataPagingItems = musicMetadataPagingItems.collectAsLazyPagingItems()
+    val albumsPagingItems = musicAlbumsPagingFlow.collectAsLazyPagingItems()
 
     Box(
         modifier = modifier
@@ -79,20 +78,16 @@ fun GridScreen(
             val listState = rememberLazyListState()
 
             LazyRow(state = listState) {
-                items(metadataPagingItems.itemCount) { index ->
-                    val file = metadataPagingItems[index] ?: return@items
+                items(albumsPagingItems.itemCount) { index ->
+                    val album = albumsPagingItems[index]
                     val dominantColor = getRandomPastelColor()
 
-                    if (file.album.isNotEmpty()) {
-                        Timber.d("Album: ${file.album}")
-                    }
-
                     GridCell(
-                        albumArt = file.albumArt?.asImageBitmap(),
+                        albumArt = album?.albumArt?.asImageBitmap(),
                         coreColor = dominantColor,
-                        title = file.title,
-                        artist = file.artist,
-                        album = file.album,
+                        title = album?.name ?: "",
+                        artist = album?.artist ?: "",
+                        album = album?.name ?: "",
                         isPlayable = false,
                         onClick = {}
                     )
@@ -149,7 +144,7 @@ fun Modifier.gradientBackground(
 fun PreviewGridScreen() {
     SpotifyTheme {
         GridScreen(
-            musicMetadataPagingItems = PreviewMusicMetadataPagingData
+            musicAlbumsPagingFlow = PreviewAlbumPagingData
         )
     }
 }

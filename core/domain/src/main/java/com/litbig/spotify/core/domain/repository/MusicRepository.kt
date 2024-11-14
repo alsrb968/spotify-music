@@ -2,33 +2,47 @@ package com.litbig.spotify.core.domain.repository
 
 import android.graphics.Bitmap
 import androidx.paging.PagingData
-import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.core.domain.model.MusicMetadata
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface MusicRepository {
     suspend fun insertMetadata(metadata: MusicMetadata)
     suspend fun insertMetadataList(metadataList: List<MusicMetadata>)
-    fun getAlbums(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getArtists(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getGenres(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getYears(pageSize: Int = 20): Flow<PagingData<String>>
+
+    fun getAlbums(): Flow<List<String>>
+    fun getPagedAlbums(pageSize: Int = 20): Flow<PagingData<String>>
+
+    fun getArtists(): Flow<List<String>>
+    fun getPagedArtists(pageSize: Int = 20): Flow<PagingData<String>>
+
+    fun getGenres(): Flow<List<String>>
+    fun getPagedGenres(pageSize: Int = 20): Flow<PagingData<String>>
+
+    fun getYears(): Flow<List<String>>
+    fun getPagedYears(pageSize: Int = 20): Flow<PagingData<String>>
+
     fun getMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
+
+    fun getMetadataByAlbum(album: String): Flow<MusicMetadata>
     fun getMetadataByAlbum(
         album: String,
         pageSize: Int = 20
     ): Flow<PagingData<MusicMetadata>>
 
+    fun getMetadataByArtist(artist: String): Flow<MusicMetadata>
     fun getMetadataByArtist(
         artist: String,
         pageSize: Int = 20
     ): Flow<PagingData<MusicMetadata>>
 
+    fun getMetadataByGenre(genre: String): Flow<MusicMetadata>
     fun getMetadataByGenre(
         genre: String,
         pageSize: Int = 20
     ): Flow<PagingData<MusicMetadata>>
 
+    fun getMetadataByYear(year: String): Flow<MusicMetadata>
     fun getMetadataByYear(
         year: String,
         pageSize: Int = 20
@@ -43,9 +57,8 @@ interface MusicRepository {
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
 
-    suspend fun getAlbumArt(file: File): Flow<Bitmap?>
-    suspend fun getAlbumArtList(files: List<File>): Flow<List<Bitmap?>>
-    fun getMusicMetadataWithoutFlow(file: File): MusicMetadata?
-    suspend fun getMusicMetadata(file: File): Flow<MusicMetadata?>
-    suspend fun getMusicMetadataList(files: List<File>): Flow<List<MusicMetadata?>>
+    fun getAlbumArt(file: File): Bitmap?
+    suspend fun getAlbumArtFlow(file: File): Flow<Bitmap?>
+    fun getMusicMetadata(file: File): MusicMetadata?
+    suspend fun getMusicMetadataFlow(file: File): Flow<MusicMetadata?>
 }

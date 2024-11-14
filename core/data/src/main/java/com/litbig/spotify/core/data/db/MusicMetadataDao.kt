@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MusicMetadataDao {
@@ -16,13 +17,25 @@ interface MusicMetadataDao {
     suspend fun insertMetadataList(metadataList: List<MusicMetadataEntity>)
 
     @Query("SELECT DISTINCT album FROM music_metadata ORDER BY album")
+    fun getAlbums(): Flow<List<String>>
+
+    @Query("SELECT DISTINCT album FROM music_metadata ORDER BY album")
     fun getPagedAlbums(): PagingSource<Int, String>
+
+    @Query("SELECT DISTINCT artist FROM music_metadata ORDER BY artist")
+    fun getArtists(): Flow<List<String>>
 
     @Query("SELECT DISTINCT artist FROM music_metadata ORDER BY artist")
     fun getPagedArtists(): PagingSource<Int, String>
 
     @Query("SELECT DISTINCT genre FROM music_metadata ORDER BY genre")
+    fun getGenres(): Flow<List<String>>
+
+    @Query("SELECT DISTINCT genre FROM music_metadata ORDER BY genre")
     fun getPagedGenres(): PagingSource<Int, String>
+
+    @Query("SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only FROM music_metadata ORDER BY year_only")
+    fun getYears(): Flow<List<String>>
 
     @Query("SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only FROM music_metadata ORDER BY year_only")
     fun getPagedYears(): PagingSource<Int, String>
@@ -30,14 +43,26 @@ interface MusicMetadataDao {
     @Query("SELECT * FROM music_metadata")
     fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity>
 
+    @Query("SELECT * FROM music_metadata WHERE album = :album LIMIT 1")
+    fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity>
+
     @Query("SELECT * FROM music_metadata WHERE album = :album")
     fun getPagedMetadataByAlbum(album: String): PagingSource<Int, MusicMetadataEntity>
+
+    @Query("SELECT * FROM music_metadata WHERE artist = :artist LIMIT 1")
+    fun getMetadataByArtist(artist: String): Flow<MusicMetadataEntity>
 
     @Query("SELECT * FROM music_metadata WHERE artist = :artist")
     fun getPagedMetadataByArtist(artist: String): PagingSource<Int, MusicMetadataEntity>
 
+    @Query("SELECT * FROM music_metadata WHERE genre = :genre LIMIT 1")
+    fun getMetadataByGenre(genre: String): Flow<MusicMetadataEntity>
+
     @Query("SELECT * FROM music_metadata WHERE genre = :genre")
     fun getPagedMetadataByGenre(genre: String): PagingSource<Int, MusicMetadataEntity>
+
+    @Query("SELECT * FROM music_metadata WHERE year LIKE :year || '-%' LIMIT 1")
+    fun getMetadataByYear(year: String): Flow<MusicMetadataEntity>
 
     @Query("SELECT * FROM music_metadata WHERE year LIKE :year || '-%'")
     fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity>

@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.core.domain.model.MusicMetadata
 import com.litbig.spotify.ui.grid.getRandomPastelColor
 import com.litbig.spotify.ui.grid.gradientBackground
 import com.litbig.spotify.ui.theme.SpotifyTheme
