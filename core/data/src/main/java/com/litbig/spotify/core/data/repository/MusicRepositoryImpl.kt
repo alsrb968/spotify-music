@@ -5,11 +5,15 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.litbig.spotify.core.data.BuildConfig
 import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
+import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
 import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toMusicMetadata
 import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toMusicMetadataEntity
 import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toMusicMetadataEntityList
+import com.litbig.spotify.core.data.mapper.remote.SpotifyMapper.toArtistDetails
+import com.litbig.spotify.core.domain.model.ArtistDetails
 import com.litbig.spotify.core.domain.model.MusicMetadata
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +24,26 @@ import javax.inject.Inject
 class MusicRepositoryImpl @Inject constructor(
     private val roomDataSource: RoomMusicDataSource,
     private val mediaDataSource: MediaRetrieverDataSource,
+    private val spotifyDataSource: SpotifyDataSource,
 ) : MusicRepository {
+
+    private var cachedAccessToken: String? = null
+    private var tokenExpirationTime: Long = 0
+
+    private suspend fun getAccessToken(): String {
+        val currentTime = System.currentTimeMillis()
+        if (cachedAccessToken == null || currentTime >= tokenExpirationTime) {
+            val response = spotifyDataSource.getAccessToken(
+                clientId = BuildConfig.SPOTIFY_ID,
+                clientSecret = BuildConfig.SPOTIFY_SECRET,
+                grantType = "client_credentials"
+            )
+            cachedAccessToken = "Bearer ${response.accessToken}"
+            tokenExpirationTime = currentTime + response.expiresIn * 1000
+        }
+        return cachedAccessToken!!
+    }
+
     override suspend fun insertMetadata(metadata: MusicMetadata) {
         roomDataSource.insertMetadata(metadata.toMusicMetadataEntity())
     }
@@ -237,5 +260,14 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun getMusicMetadataFlow(file: File): Flow<MusicMetadata?> {
         return mediaDataSource.getMusicMetadataFlow(file)
+    }
+
+    override suspend fun getArtistDetails(artistId: String): Result<ArtistDetails> {
+        return try {
+            val response = spotifyDataSource.getArtistDetails(artistId, getAccessToken())
+            Result.success(response.toArtistDetails())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

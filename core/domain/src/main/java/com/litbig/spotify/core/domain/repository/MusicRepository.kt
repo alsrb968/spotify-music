@@ -2,6 +2,7 @@ package com.litbig.spotify.core.domain.repository
 
 import android.graphics.Bitmap
 import androidx.paging.PagingData
+import com.litbig.spotify.core.domain.model.ArtistDetails
 import com.litbig.spotify.core.domain.model.MusicMetadata
 import kotlinx.coroutines.flow.Flow
 import java.io.File
@@ -61,4 +62,6 @@ interface MusicRepository {
     suspend fun getAlbumArtFlow(file: File): Flow<Bitmap?>
     fun getMusicMetadata(file: File): MusicMetadata?
     suspend fun getMusicMetadataFlow(file: File): Flow<MusicMetadata?>
+
+    suspend fun getArtistDetails(artistId: String): Result<ArtistDetails>
 }

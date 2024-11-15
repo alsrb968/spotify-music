@@ -1,3 +1,11 @@
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -18,6 +26,10 @@ android {
     }
 
     buildTypes {
+        all {
+            buildConfigField("String", "SPOTIFY_ID", "\"${localProperties["spotify.id"]}\"")
+            buildConfigField("String", "SPOTIFY_SECRET", "\"${localProperties["spotify.secret"]}\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -32,6 +44,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -71,6 +86,12 @@ dependencies {
     //----- Paging
     implementation(libs.androidx.paging.runtime)
     testImplementation(libs.androidx.paging.common)
+
+    //----- Retrofit
+    implementation(libs.squareup.retrofit2.retrofit)
+    implementation(libs.squareup.retrofit2.converter.gson)
+    implementation(libs.squareup.okhttp3.logging.interceptor)
+    implementation(libs.google.gson)
 
     // ----- Test
     testImplementation(libs.junit)

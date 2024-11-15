@@ -52,7 +52,7 @@ dependencies {
     implementation(libs.androidx.palette.ktx)
 
     implementation(libs.androidx.core.ktx)
-//    implementation(libs.androidx.lifecycle.runtime.ktx)
+
     //----- Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.androidx.compose)
@@ -64,6 +64,9 @@ dependencies {
 
     //----- Paging
     implementation(libs.androidx.paging.compose)
+
+    //----- Coil
+    implementation(libs.io.coil.compose)
 
     // ----- Test
     testImplementation(libs.junit)

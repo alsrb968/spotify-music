@@ -1,15 +1,19 @@
 package com.litbig.spotify.core.data.di
 
 import android.content.Context
+import com.litbig.spotify.core.data.api.SpotifyApi
+import com.litbig.spotify.core.data.api.SpotifyAuthApi
+import com.litbig.spotify.core.data.api.SpotifyClient
 import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSourceImpl
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSourceImpl
+import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
+import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSourceImpl
 import com.litbig.spotify.core.data.db.MusicDatabase
 import com.litbig.spotify.core.data.db.MusicMetadataDao
 import com.litbig.spotify.core.data.repository.MusicRepositoryImpl
 import com.litbig.spotify.core.domain.repository.MusicRepository
-import com.litbig.spotify.core.domain.usecase.SyncMetadataUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +38,16 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideSpotifyAuthApi(): SpotifyAuthApi =
+        SpotifyClient.authRetrofit.create(SpotifyAuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSpotifyApi(): SpotifyApi =
+        SpotifyClient.retrofit.create(SpotifyApi::class.java)
+
+    @Provides
+    @Singleton
     fun provideRoomMusicDataSource(
         musicMetadataDao: MusicMetadataDao
     ): RoomMusicDataSource = RoomMusicDataSourceImpl(
@@ -46,11 +60,23 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideSpotifyDataSource(
+        spotifyAuthApi: SpotifyAuthApi,
+        spotifyApi: SpotifyApi
+    ): SpotifyDataSource = SpotifyDataSourceImpl(
+        spotifyAuthApi,
+        spotifyApi
+    )
+
+    @Provides
+    @Singleton
     fun provideMusicRepository(
         roomDataSource: RoomMusicDataSource,
-        mediaDataSource: MediaRetrieverDataSource
+        mediaDataSource: MediaRetrieverDataSource,
+        spotifyDataSource: SpotifyDataSource,
     ): MusicRepository = MusicRepositoryImpl(
         roomDataSource,
-        mediaDataSource
+        mediaDataSource,
+        spotifyDataSource,
     )
 }
