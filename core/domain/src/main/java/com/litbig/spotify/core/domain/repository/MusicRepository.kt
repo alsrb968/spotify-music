@@ -2,8 +2,7 @@ package com.litbig.spotify.core.domain.repository
 
 import android.graphics.Bitmap
 import androidx.paging.PagingData
-import com.litbig.spotify.core.domain.model.ArtistDetails
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.domain.model.*
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
@@ -63,5 +62,15 @@ interface MusicRepository {
     fun getMusicMetadata(file: File): MusicMetadata?
     suspend fun getMusicMetadataFlow(file: File): Flow<MusicMetadata?>
 
-    suspend fun getArtistDetails(artistId: String): Result<ArtistDetails>
+    suspend fun search(
+        query: String,
+        type: String,
+        market: String = "KR",
+        limit: Int = 10,
+        offset: Int = 0
+    ): Search
+
+    suspend fun getTrackDetails(trackId: String): TrackDetails
+    suspend fun getArtistDetails(artistId: String): ArtistDetails
+    suspend fun getAlbumDetails(albumId: String): AlbumDetails
 }

@@ -1,10 +1,7 @@
 package com.litbig.spotify.core.data.di
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
-import com.litbig.spotify.core.domain.usecase.GetAlbumsUseCase
-import com.litbig.spotify.core.domain.usecase.GetMetadataByAlbumUseCase
-import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
-import com.litbig.spotify.core.domain.usecase.SyncMetadataUseCase
+import com.litbig.spotify.core.domain.usecase.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,6 +40,14 @@ object UseCaseModule {
     fun provideGetAlbums(
         musicRepository: MusicRepository
     ): GetAlbumsUseCase = GetAlbumsUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideSearch(
+        musicRepository: MusicRepository
+    ): SearchUseCase = SearchUseCase(
         musicRepository
     )
 }

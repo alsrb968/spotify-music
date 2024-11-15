@@ -9,12 +9,14 @@ import com.litbig.spotify.core.data.BuildConfig
 import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
-import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toMusicMetadata
-import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toMusicMetadataEntity
-import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toMusicMetadataEntityList
-import com.litbig.spotify.core.data.mapper.remote.SpotifyMapper.toArtistDetails
-import com.litbig.spotify.core.domain.model.ArtistDetails
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.data.mapper.local.toMusicMetadata
+import com.litbig.spotify.core.data.mapper.local.toMusicMetadataEntity
+import com.litbig.spotify.core.data.mapper.local.toMusicMetadataEntityList
+import com.litbig.spotify.core.data.mapper.remote.toAlbumDetails
+import com.litbig.spotify.core.data.mapper.remote.toArtistDetails
+import com.litbig.spotify.core.data.mapper.remote.toSearch
+import com.litbig.spotify.core.data.mapper.remote.toTrackDetails
+import com.litbig.spotify.core.domain.model.*
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -41,7 +43,7 @@ class MusicRepositoryImpl @Inject constructor(
             cachedAccessToken = "Bearer ${response.accessToken}"
             tokenExpirationTime = currentTime + response.expiresIn * 1000
         }
-        return cachedAccessToken!!
+        return cachedAccessToken ?: throw IllegalStateException("Access token is null")
     }
 
     override suspend fun insertMetadata(metadata: MusicMetadata) {
@@ -262,12 +264,26 @@ class MusicRepositoryImpl @Inject constructor(
         return mediaDataSource.getMusicMetadataFlow(file)
     }
 
-    override suspend fun getArtistDetails(artistId: String): Result<ArtistDetails> {
-        return try {
-            val response = spotifyDataSource.getArtistDetails(artistId, getAccessToken())
-            Result.success(response.toArtistDetails())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun search(
+        query: String,
+        type: String,
+        market: String,
+        limit: Int,
+        offset: Int
+    ): Search {
+        return spotifyDataSource.search(query, type, market, limit, offset, getAccessToken())
+            .toSearch()
+    }
+
+    override suspend fun getTrackDetails(trackId: String): TrackDetails {
+        return spotifyDataSource.getTrackDetails(trackId, getAccessToken()).toTrackDetails()
+    }
+
+    override suspend fun getArtistDetails(artistId: String): ArtistDetails {
+        return spotifyDataSource.getArtistDetails(artistId, getAccessToken()).toArtistDetails()
+    }
+
+    override suspend fun getAlbumDetails(albumId: String): AlbumDetails {
+        return spotifyDataSource.getAlbumDetails(albumId, getAccessToken()).toAlbumDetails()
     }
 }

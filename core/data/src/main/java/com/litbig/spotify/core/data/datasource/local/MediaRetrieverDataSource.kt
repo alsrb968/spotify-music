@@ -3,7 +3,7 @@ package com.litbig.spotify.core.data.datasource.local
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toDuration
+import com.litbig.spotify.core.data.mapper.local.toDuration
 import com.litbig.spotify.core.domain.model.MusicMetadata
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
