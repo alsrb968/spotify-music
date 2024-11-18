@@ -28,6 +28,9 @@ interface MusicMetadataDao {
     @Query("SELECT DISTINCT artist FROM music_metadata ORDER BY artist")
     fun getPagedArtists(): PagingSource<Int, String>
 
+    @Query("SELECT artist FROM music_metadata WHERE album = :album LIMIT 1")
+    fun getArtistFromAlbum(album: String): String
+
     @Query("SELECT DISTINCT genre FROM music_metadata ORDER BY genre")
     fun getGenres(): Flow<List<String>>
 
@@ -81,6 +84,9 @@ interface MusicMetadataDao {
 
     @Query("SELECT COUNT(*) FROM music_metadata WHERE album = :album")
     suspend fun getMetadataCountByAlbum(album: String): Int
+
+    @Query("SELECT COUNT(DISTINCT album) FROM music_metadata WHERE artist = :artist")
+    suspend fun getMetadataCountByAlbumOfArtist(artist: String): Int
 
     @Query("SELECT COUNT(*) FROM music_metadata WHERE artist = :artist")
     suspend fun getMetadataCountByArtist(artist: String): Int

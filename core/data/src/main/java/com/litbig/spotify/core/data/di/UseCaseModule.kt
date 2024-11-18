@@ -45,6 +45,14 @@ object UseCaseModule {
 
     @Provides
     @Singleton
+    fun provideGetArtists(
+        musicRepository: MusicRepository
+    ): GetArtistsUseCase = GetArtistsUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
     fun provideSearch(
         musicRepository: MusicRepository
     ): SearchUseCase = SearchUseCase(

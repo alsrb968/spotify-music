@@ -16,7 +16,11 @@ import com.litbig.spotify.core.data.mapper.remote.toAlbumDetails
 import com.litbig.spotify.core.data.mapper.remote.toArtistDetails
 import com.litbig.spotify.core.data.mapper.remote.toSearch
 import com.litbig.spotify.core.data.mapper.remote.toTrackDetails
-import com.litbig.spotify.core.domain.model.*
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.core.domain.model.remote.AlbumDetails
+import com.litbig.spotify.core.domain.model.remote.ArtistDetails
+import com.litbig.spotify.core.domain.model.remote.Search
+import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -80,6 +84,10 @@ class MusicRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = { roomDataSource.getPagedArtists() }
         ).flow
+    }
+
+    override fun getArtistFromAlbum(album: String): String {
+        return roomDataSource.getArtistFromAlbum(album)
     }
 
     override fun getGenres(): Flow<List<String>> {
@@ -236,6 +244,10 @@ class MusicRepositoryImpl @Inject constructor(
         return roomDataSource.getMetadataCountByAlbum(album)
     }
 
+    override suspend fun getMetadataCountByAlbumOfArtist(artist: String): Int {
+        return roomDataSource.getMetadataCountByAlbumOfArtist(artist)
+    }
+
     override suspend fun getMetadataCountByArtist(artist: String): Int {
         return roomDataSource.getMetadataCountByArtist(artist)
     }
@@ -273,6 +285,38 @@ class MusicRepositoryImpl @Inject constructor(
     ): Search {
         return spotifyDataSource.search(query, type, market, limit, offset, getAccessToken())
             .toSearch()
+    }
+
+    override suspend fun searchTrack(trackName: String, artistName: String): TrackDetails? {
+        return spotifyDataSource.search(
+            query = trackName,
+            type = "track",
+            accessToken = getAccessToken()
+        ).let { search ->
+            search.tracks?.items?.firstOrNull { trackDetails ->
+                trackDetails.artists.any { it.name == artistName }
+            }?.toTrackDetails()
+        }
+    }
+
+    override suspend fun searchArtist(artistName: String): ArtistDetails? {
+        return spotifyDataSource.search(
+            query = artistName,
+            type = "artist",
+            accessToken = getAccessToken()
+        ).let { search ->
+            search.artists?.items?.firstOrNull()?.toArtistDetails()
+        }
+    }
+
+    override suspend fun searchAlbum(albumName: String, artistName: String): AlbumDetails? {
+        return spotifyDataSource.search(
+            query = albumName,
+            type = "album",
+            accessToken = getAccessToken()
+        ).let { search ->
+            search.albums?.items?.firstOrNull()?.toAlbumDetails()
+        }
     }
 
     override suspend fun getTrackDetails(trackId: String): TrackDetails {

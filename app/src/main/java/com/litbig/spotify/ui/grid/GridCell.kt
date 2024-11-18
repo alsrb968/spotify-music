@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,12 +17,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -29,6 +33,8 @@ import com.litbig.spotify.ui.tooling.DevicePreviews
 @Composable
 fun GridCell(
     modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(4.dp),
+    imageUrl: String? = null,
     albumArt: ImageBitmap? = null,
     coreColor: Color = Color.Yellow,
     title: String,
@@ -50,10 +56,19 @@ fun GridCell(
                 .padding(top = 20.dp)
                 .size(182.dp),
             elevation = CardDefaults.cardElevation(8.dp),
-            shape = RoundedCornerShape(4.dp),
+            shape = shape,
         ) {
             Box(modifier = Modifier) {
-                albumArt?.let {
+                imageUrl?.let {
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = it,
+                        contentDescription = "Grid Thumbnail",
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    )
+                } ?: albumArt?.let {
                     Image(
                         modifier = Modifier.fillMaxSize(),
                         bitmap = it,
@@ -65,23 +80,26 @@ fun GridCell(
                     contentDescription = "Grid Thumbnail"
                 )
 
-                LineOverlay(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    color = coreColor
-                )
 
-                Text(
-                    modifier = Modifier
-                        .width(180.dp)
-                        .padding(16.dp)
-                        .align(Alignment.BottomStart),
-                    text = album,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (shape != CircleShape) {
+                    LineOverlay(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        color = coreColor
+                    )
+
+                    Text(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .padding(16.dp)
+                            .align(Alignment.BottomStart),
+                        text = album,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 if (isPlayable) {
                     Image(

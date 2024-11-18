@@ -15,6 +15,7 @@ interface RoomMusicDataSource {
 
     fun getArtists(): Flow<List<String>>
     fun getPagedArtists(): PagingSource<Int, String>
+    fun getArtistFromAlbum(album: String): String
 
     fun getGenres(): Flow<List<String>>
     fun getPagedGenres(): PagingSource<Int, String>
@@ -41,6 +42,7 @@ interface RoomMusicDataSource {
     suspend fun deleteMetadata(absolutePath: String)
     suspend fun getMetadataCount(): Int
     suspend fun getMetadataCountByAlbum(album: String): Int
+    suspend fun getMetadataCountByAlbumOfArtist(artist: String): Int
     suspend fun getMetadataCountByArtist(artist: String): Int
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
@@ -71,6 +73,10 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override fun getPagedArtists(): PagingSource<Int, String> {
         return metadataDao.getPagedArtists()
+    }
+
+    override fun getArtistFromAlbum(album: String): String {
+        return metadataDao.getArtistFromAlbum(album)
     }
 
     override fun getGenres(): Flow<List<String>> {
@@ -143,6 +149,10 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override suspend fun getMetadataCountByAlbum(album: String): Int {
         return metadataDao.getMetadataCountByAlbum(album)
+    }
+
+    override suspend fun getMetadataCountByAlbumOfArtist(artist: String): Int {
+        return metadataDao.getMetadataCountByAlbumOfArtist(artist)
     }
 
     override suspend fun getMetadataCountByArtist(artist: String): Int {

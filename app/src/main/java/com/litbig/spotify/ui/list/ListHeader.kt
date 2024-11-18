@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList

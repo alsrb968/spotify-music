@@ -2,7 +2,11 @@ package com.litbig.spotify.core.domain.repository
 
 import android.graphics.Bitmap
 import androidx.paging.PagingData
-import com.litbig.spotify.core.domain.model.*
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.core.domain.model.remote.AlbumDetails
+import com.litbig.spotify.core.domain.model.remote.ArtistDetails
+import com.litbig.spotify.core.domain.model.remote.Search
+import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
@@ -15,6 +19,7 @@ interface MusicRepository {
 
     fun getArtists(): Flow<List<String>>
     fun getPagedArtists(pageSize: Int = 20): Flow<PagingData<String>>
+    fun getArtistFromAlbum(album: String): String
 
     fun getGenres(): Flow<List<String>>
     fun getPagedGenres(pageSize: Int = 20): Flow<PagingData<String>>
@@ -53,6 +58,7 @@ interface MusicRepository {
     suspend fun deleteMetadata(absolutePath: String)
     suspend fun getMetadataCount(): Int
     suspend fun getMetadataCountByAlbum(album: String): Int
+    suspend fun getMetadataCountByAlbumOfArtist(artist: String): Int
     suspend fun getMetadataCountByArtist(artist: String): Int
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
@@ -69,6 +75,10 @@ interface MusicRepository {
         limit: Int = 10,
         offset: Int = 0
     ): Search
+
+    suspend fun searchTrack(trackName: String, artistName: String): TrackDetails?
+    suspend fun searchArtist(artistName: String): ArtistDetails?
+    suspend fun searchAlbum(albumName: String, artistName: String): AlbumDetails?
 
     suspend fun getTrackDetails(trackId: String): TrackDetails
     suspend fun getArtistDetails(artistId: String): ArtistDetails

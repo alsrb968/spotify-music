@@ -19,11 +19,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
-import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toLong
+import com.litbig.spotify.core.data.mapper.local.toLong
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import timber.log.Timber
 

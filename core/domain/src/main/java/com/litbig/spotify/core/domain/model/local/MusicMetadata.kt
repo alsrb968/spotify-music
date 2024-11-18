@@ -1,4 +1,4 @@
-package com.litbig.spotify.core.domain.model
+package com.litbig.spotify.core.domain.model.local
 
 import android.graphics.Bitmap
 import kotlin.time.Duration

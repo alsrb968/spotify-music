@@ -1,9 +1,10 @@
 package com.litbig.spotify.ui.tooling
 
 import androidx.paging.PagingData
-import com.litbig.spotify.core.data.mapper.local.MusicMetadataMapper.toDuration
+import com.litbig.spotify.core.data.mapper.local.toDuration
 import com.litbig.spotify.core.domain.model.Album
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.domain.model.Artist
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -46,6 +47,13 @@ val PreviewAlbum = Album(
     musicCount = 3,
 )
 
+val PreviewArtist = Artist(
+    name = "Billie Eilish",
+    imageUrl = null,
+    albumCount = 3,
+    musicCount = 9,
+)
+
 val PreviewAlbumPagingData = flow<PagingData<Album>> {
     flowOf(
         PagingData.from(
@@ -53,6 +61,18 @@ val PreviewAlbumPagingData = flow<PagingData<Album>> {
                 PreviewAlbum,
                 PreviewAlbum,
                 PreviewAlbum,
+            )
+        )
+    )
+}
+
+val PreviewArtistPagingData = flow<PagingData<Artist>> {
+    flowOf(
+        PagingData.from(
+            listOf(
+                PreviewArtist,
+                PreviewArtist,
+                PreviewArtist,
             )
         )
     )

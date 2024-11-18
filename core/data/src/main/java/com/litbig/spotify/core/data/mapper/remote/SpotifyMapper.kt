@@ -1,7 +1,7 @@
 package com.litbig.spotify.core.data.mapper.remote
 
 import com.litbig.spotify.core.data.model.remote.*
-import com.litbig.spotify.core.domain.model.*
+import com.litbig.spotify.core.domain.model.remote.*
 
 fun SearchResponse.toSearch(): Search {
     return Search(

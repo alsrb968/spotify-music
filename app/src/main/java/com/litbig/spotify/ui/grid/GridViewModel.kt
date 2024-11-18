@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.litbig.spotify.core.domain.usecase.GetAlbumsUseCase
+import com.litbig.spotify.core.domain.usecase.GetArtistsUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -12,10 +13,14 @@ import javax.inject.Inject
 class GridViewModel @Inject constructor(
     getMetadataUseCase: GetMetadataUseCase,
     getAlbumsUseCase: GetAlbumsUseCase,
+    getArtistsUseCase: GetArtistsUseCase,
 ) : ViewModel() {
-    val musicMetadataPagingFlow = getMetadataUseCase(pageSize = 20)
+    val metadataPagingFlow = getMetadataUseCase(pageSize = 20)
         .cachedIn(viewModelScope)
 
-    val musicAlbumsPagingFlow = getAlbumsUseCase()
+    val albumsPagingFlow = getAlbumsUseCase()
+        .cachedIn(viewModelScope)
+
+    val artistPagingFlow = getArtistsUseCase()
         .cachedIn(viewModelScope)
 }

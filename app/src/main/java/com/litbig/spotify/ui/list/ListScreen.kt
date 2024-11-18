@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.grid.gradientBackground
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -21,7 +21,6 @@ import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
 import com.litbig.spotify.util.ColorExtractor.extractDominantColor
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 
 @Composable
 fun ListScreen(

@@ -2,7 +2,7 @@ package com.litbig.spotify.core.data.mapper.local
 
 import android.graphics.Bitmap
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
-import com.litbig.spotify.core.domain.model.MusicMetadata
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
