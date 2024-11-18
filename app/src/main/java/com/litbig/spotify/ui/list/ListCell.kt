@@ -2,6 +2,7 @@ package com.litbig.spotify.ui.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
+import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.delay
 
 @Composable
@@ -42,102 +45,118 @@ fun ListCell(
         modifier = modifier
             .fillMaxWidth()
             .height(72.dp)
-            .clip(RoundedCornerShape(5.dp))
-            .background(color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.1f))
-            .clickable { onClick() },
+
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.2f))
+            ,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .padding(start = 4.dp)
-                .size(60.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .clickable { onClick() },
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (isPlaying) {
-                AnimatedEQDrawable()
-            } else {
-                Text(
-                    text = index.toString(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Box(
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .size(60.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isPlaying) {
+                    AnimatedEQDrawable()
+                } else {
+                    Text(
+                        text = index.toString(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-        }
 
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-        ) {
-            albumArt?.let {
-                Image(
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+            ) {
+                albumArt?.let {
+                    Image(
+                        modifier = Modifier.fillMaxSize(),
+                        bitmap = it,
+                        contentDescription = "Grid Thumbnail"
+                    )
+                } ?: Image(
                     modifier = Modifier.fillMaxSize(),
-                    bitmap = it,
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
                     contentDescription = "Grid Thumbnail"
                 )
-            } ?: Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Grid Thumbnail"
-            )
-        }
+            }
 
-        Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
-        Column(
-            modifier = Modifier
-                .size(width = 227.dp, height = 50.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
+            Column(
+                modifier = Modifier
+                    .size(width = 227.dp, height = 50.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = if (isPlaying) Modifier
+                        .fillMaxWidth()
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 3000,
+                        )
+                    else Modifier,
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = artist,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.width(45.dp))
+
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = artist,
+                modifier = Modifier
+                    .width(207.dp),
+                text = album,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-        }
 
-        Spacer(modifier = Modifier.width(37.dp))
+            Spacer(modifier = Modifier.width(215.dp))
 
-        Text(
-            modifier = Modifier
-                .width(207.dp),
-            text = album,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+            IconButton(
+                modifier = Modifier,
+                onClick = { /*TODO*/ },
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
 
-        Spacer(modifier = Modifier.width(211.dp))
+            Spacer(modifier = Modifier.width(30.dp))
 
-        IconButton(
-            modifier = Modifier,
-            onClick = { /*TODO*/ },
-        ) {
-            Icon(
-                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Favorite",
-                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            Text(
+                modifier = Modifier,
+                text = totalTime,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
         }
-
-        Spacer(modifier = Modifier.width(30.dp))
-
-        Text(
-            modifier = Modifier,
-            text = totalTime,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1
-        )
     }
 }
 
@@ -170,14 +189,15 @@ fun AnimatedEQDrawable(
 @Composable
 fun ListCellPreview() {
     SpotifyTheme {
+        val item = PreviewMusicMetadata
         ListCell(
             index = 1,
             isPlaying = false,
-            title = "A Moment Apart",
-            artist = "ODESZA",
-            album = "A Moment Apart",
+            title = item.title,
+            artist = item.artist,
+            album = item.album,
             isFavorite = true,
-            totalTime = "3:54",
+            totalTime = item.duration.toHumanReadableDuration(),
             onClick = {}
         )
     }

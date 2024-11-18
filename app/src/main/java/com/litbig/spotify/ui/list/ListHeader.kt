@@ -1,6 +1,7 @@
 package com.litbig.spotify.ui.list
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
@@ -36,11 +37,11 @@ fun ListHeader(
 
     Row(
         modifier = modifier
-            .size(width = 988.dp, height = 300.dp),
+            .size(width = 988.dp, height = 230.dp),
     ) {
         Box(
             modifier = Modifier
-                .size(300.dp)
+                .size(230.dp)
         ) {
             metadataList.firstOrNull()?.albumArt?.let {
                 Image(
@@ -74,15 +75,18 @@ fun ListHeader(
             ) {
                 Text(
                     modifier = Modifier
-                        .basicMarquee(),
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            animationMode = MarqueeAnimationMode.Immediately,
+                            repeatDelayMillis = 1000,
+                            initialDelayMillis = 3000,
+                        ),
                     text = title,
                     style = MaterialTheme.typography.displayLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                 )
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = artists,

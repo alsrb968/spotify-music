@@ -2,8 +2,10 @@ package com.litbig.spotify.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import com.litbig.spotify.core.design.theme.*
 
@@ -83,6 +85,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpotifyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -100,9 +103,21 @@ fun SpotifyTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = SpotifyTypography,
-        content = content
+    val rippleConfiguration = RippleConfiguration(
+        color = colorScheme.onSurface,
+        rippleAlpha = RippleAlpha(
+            draggedAlpha = 0.2f,
+            hoveredAlpha = 0.12f,
+            focusedAlpha = 0.12f,
+            pressedAlpha = 0.32f
+        )
     )
+
+    CompositionLocalProvider(LocalRippleConfiguration provides rippleConfiguration) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = SpotifyTypography,
+            content = content
+        )
+    }
 }

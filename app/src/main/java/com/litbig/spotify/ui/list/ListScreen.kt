@@ -1,5 +1,6 @@
 package com.litbig.spotify.ui.list
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +28,7 @@ fun ListScreen(
     viewModel: ListViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
+    BackHandler { navigateBack() }
     ListScreen(
         metadataPagingFlow = viewModel.metadataPagingFlow,
         navigateBack = navigateBack
@@ -40,55 +42,56 @@ fun ListScreen(
     navigateBack: () -> Unit
 ) {
     val metadataPagingItems = metadataPagingFlow.collectAsLazyPagingItems()
-    val albumArtFirst = metadataPagingItems.itemSnapshotList.items.firstOrNull()?.albumArt?.asImageBitmap()
+    val albumArtFirst =
+        metadataPagingItems.itemSnapshotList.items.firstOrNull()?.albumArt?.asImageBitmap()
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .gradientBackground(
-                ratio = 0.5f,
-                startColor = albumArtFirst?.let { extractDominantColor(it) } ?: Color.Transparent,
-                endColor = Color.Transparent
-            )
-    ) {
-        Column(
-            modifier = Modifier
-        ) {
-            val listState = rememberLazyListState()
+    val listState = rememberLazyListState()
 
-            LazyColumn(state = listState) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(360.dp)
-                            .clickable { navigateBack() },
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ListHeader(
-                            modifier = Modifier,
-                            metadataList = metadataPagingItems.itemSnapshotList.items
-                        )
-                    }
-                }
-                item {
-                    ListTitle()
-                }
-                items(metadataPagingItems.itemCount) { index ->
-                    val file = metadataPagingItems[index] ?: return@items
-                    ListCell(
-                        index = index + 1,
-                        isPlaying = index == 0,
-                        albumArt = file.albumArt?.asImageBitmap(),
-                        title = file.title,
-                        artist = file.artist,
-                        album = file.album,
-                        totalTime = file.duration.toHumanReadableDuration(),
-                        onClick = { }
+    LazyColumn(state = listState) {
+
+        item {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .gradientBackground(
+                        ratio = 1f,
+                        startColor = albumArtFirst?.let { extractDominantColor(it) }
+                            ?: Color.Transparent,
+                        endColor = Color.Transparent
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(270.dp)
+                        .clickable { navigateBack() },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ListHeader(
+                        modifier = Modifier,
+                        metadataList = metadataPagingItems.itemSnapshotList.items
                     )
                 }
+
+                ListTitle()
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
+        }
+
+        items(metadataPagingItems.itemCount) { index ->
+            val file = metadataPagingItems[index] ?: return@items
+            ListCell(
+                index = index + 1,
+                isPlaying = index == 0,
+                albumArt = file.albumArt?.asImageBitmap(),
+                title = file.title,
+                artist = file.artist,
+                album = file.album,
+                totalTime = file.duration.toHumanReadableDuration(),
+                onClick = { }
+            )
         }
     }
 }
