@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.litbig.spotify.core.domain.usecase.GetMetadataByAlbumUseCase
+import com.litbig.spotify.core.domain.usecase.GetMetadataByArtistUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
 import com.litbig.spotify.ui.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,13 +16,23 @@ import javax.inject.Inject
 class ListViewModel @Inject constructor(
     getMetadataUseCase: GetMetadataUseCase,
     getMetadataByAlbumUseCase: GetMetadataByAlbumUseCase,
+    getMetadataByArtistUseCase: GetMetadataByArtistUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val albumName = Uri.decode(savedStateHandle.get<String>(Screen.ARG_ALBUM_NAME)!!)
+    private val arguments = Uri.decode(savedStateHandle.get<String>(Screen.ARG_CATEGORY)!!).split("/")
+    private val category = arguments[0]
+    val name = if (arguments.size > 1) {
+        arguments.subList(1, arguments.size).joinToString("/")
+    } else {
+        ""
+    }
 
-    val musicMetadataPagingFlow = getMetadataUseCase(pageSize = 20)
-        .cachedIn(viewModelScope)
-
-    val musicMetadataByAlbumPagingFlow = getMetadataByAlbumUseCase(albumName, pageSize = 20)
-        .cachedIn(viewModelScope)
+    val metadataPagingFlow = when (category) {
+        "album" -> getMetadataByAlbumUseCase(name, pageSize = 10)
+            .cachedIn(viewModelScope)
+        "artist" -> getMetadataByArtistUseCase(name, pageSize = 10)
+            .cachedIn(viewModelScope)
+        else -> getMetadataUseCase(pageSize = 10)
+            .cachedIn(viewModelScope)
+    }
 }

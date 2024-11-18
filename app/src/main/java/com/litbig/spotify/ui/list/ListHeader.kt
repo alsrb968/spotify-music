@@ -107,22 +107,8 @@ fun ListHeader(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Box(
-                    modifier = Modifier
-                        .width(20.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .align(Alignment.Center)
-                            .background(
-                                color = MaterialTheme.colorScheme.onBackground,
-                                shape = CircleShape
-                            ),
-                    )
-                }
                 Text(
-                    text = "%d songs, %dhr %02d min".format(count, hours, minutes),
+                    text = " • %d songs, %dhr %02d min".format(count, hours, minutes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -16,84 +16,245 @@ interface MusicMetadataDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMetadataList(metadataList: List<MusicMetadataEntity>)
 
-    @Query("SELECT DISTINCT album FROM music_metadata ORDER BY album")
+    @Query(
+        """
+        SELECT DISTINCT album 
+        FROM music_metadata 
+        ORDER BY album
+        """
+    )
     fun getAlbums(): Flow<List<String>>
 
-    @Query("SELECT DISTINCT album FROM music_metadata ORDER BY album")
+    @Query(
+        """
+        SELECT DISTINCT album 
+        FROM music_metadata 
+        ORDER BY album
+        """
+    )
     fun getPagedAlbums(): PagingSource<Int, String>
 
-    @Query("SELECT DISTINCT artist FROM music_metadata ORDER BY artist")
+    @Query(
+        """
+        SELECT DISTINCT artist 
+        FROM music_metadata 
+        ORDER BY artist
+        """
+    )
     fun getArtists(): Flow<List<String>>
 
-    @Query("SELECT DISTINCT artist FROM music_metadata ORDER BY artist")
+    @Query(
+        """
+        SELECT DISTINCT artist 
+        FROM music_metadata 
+        ORDER BY artist
+        """
+    )
     fun getPagedArtists(): PagingSource<Int, String>
 
-    @Query("SELECT artist FROM music_metadata WHERE album = :album LIMIT 1")
+    @Query(
+        """
+        SELECT artist 
+        FROM music_metadata 
+        WHERE album = :album LIMIT 1
+        """
+    )
     fun getArtistFromAlbum(album: String): String
 
-    @Query("SELECT DISTINCT genre FROM music_metadata ORDER BY genre")
+    @Query(
+        """
+        SELECT DISTINCT genre 
+        FROM music_metadata 
+        ORDER BY genre
+        """
+    )
     fun getGenres(): Flow<List<String>>
 
-    @Query("SELECT DISTINCT genre FROM music_metadata ORDER BY genre")
+    @Query(
+        """
+        SELECT DISTINCT genre 
+        FROM music_metadata 
+        ORDER BY genre
+        """
+    )
     fun getPagedGenres(): PagingSource<Int, String>
 
-    @Query("SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only FROM music_metadata ORDER BY year_only")
+    @Query(
+        """
+        SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only 
+        FROM music_metadata 
+        ORDER BY year_only
+        """
+    )
     fun getYears(): Flow<List<String>>
 
-    @Query("SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only FROM music_metadata ORDER BY year_only")
+    @Query(
+        """
+        SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only 
+        FROM music_metadata 
+        ORDER BY year_only
+        """
+    )
     fun getPagedYears(): PagingSource<Int, String>
 
-    @Query("SELECT * FROM music_metadata")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata
+        """
+    )
     fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE album = :album LIMIT 1")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE album = :album LIMIT 1
+        """
+    )
     fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE album = :album")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE album = :album
+        """
+    )
     fun getPagedMetadataByAlbum(album: String): PagingSource<Int, MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE artist = :artist LIMIT 1")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE LOWER(REPLACE(artist, ' ', '')) LIKE '%' || LOWER(REPLACE(:artist, ' ', '')) || '%' LIMIT 1
+        """
+    )
     fun getMetadataByArtist(artist: String): Flow<MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE artist = :artist")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE LOWER(REPLACE(artist, ' ', '')) LIKE '%' || LOWER(REPLACE(:artist, ' ', '')) || '%'
+        """
+    )
     fun getPagedMetadataByArtist(artist: String): PagingSource<Int, MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE genre = :genre LIMIT 1")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE genre = :genre LIMIT 1
+        """
+    )
     fun getMetadataByGenre(genre: String): Flow<MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE genre = :genre")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE genre = :genre
+        """
+    )
     fun getPagedMetadataByGenre(genre: String): PagingSource<Int, MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE year LIKE :year || '-%' LIMIT 1")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE year LIKE :year || '-%' LIMIT 1
+        """
+    )
     fun getMetadataByYear(year: String): Flow<MusicMetadataEntity>
 
-    @Query("SELECT * FROM music_metadata WHERE year LIKE :year || '-%'")
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
+        WHERE year LIKE :year || '-%'
+        """
+    )
     fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity>
 
-    @Query("SELECT EXISTS(SELECT * FROM music_metadata WHERE absolutePath = :absolutePath)")
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT * 
+            FROM music_metadata 
+            WHERE absolutePath = :absolutePath
+        )
+        """
+    )
     suspend fun isExistMetadata(absolutePath: String): Boolean
 
-    @Query("DELETE FROM music_metadata")
+    @Query(
+        """
+        DELETE 
+        FROM music_metadata
+        """
+    )
     suspend fun deleteAllMetadataList()
 
-    @Query("DELETE FROM music_metadata WHERE absolutePath = :absolutePath")
+    @Query(
+        """
+        DELETE 
+        FROM music_metadata 
+        WHERE absolutePath = :absolutePath
+        """
+    )
     suspend fun deleteMetadata(absolutePath: String)
 
-    @Query("SELECT COUNT(*) FROM music_metadata")
+    @Query(
+        """
+        SELECT COUNT(*) 
+        FROM music_metadata
+        """
+    )
     suspend fun getMetadataCount(): Int
 
-    @Query("SELECT COUNT(*) FROM music_metadata WHERE album = :album")
+    @Query(
+        """
+        SELECT COUNT(*) 
+        FROM music_metadata 
+        WHERE album = :album
+        """
+    )
     suspend fun getMetadataCountByAlbum(album: String): Int
 
-    @Query("SELECT COUNT(DISTINCT album) FROM music_metadata WHERE artist = :artist")
+    @Query(
+        """
+        SELECT COUNT(DISTINCT album) 
+        FROM music_metadata 
+        WHERE LOWER(REPLACE(artist, ' ', '')) LIKE '%' || LOWER(REPLACE(:artist, ' ', '')) || '%'
+        """
+    )
     suspend fun getMetadataCountByAlbumOfArtist(artist: String): Int
 
-    @Query("SELECT COUNT(*) FROM music_metadata WHERE artist = :artist")
+    @Query(
+        """
+        SELECT COUNT(*) 
+        FROM music_metadata 
+        WHERE LOWER(REPLACE(artist, ' ', '')) LIKE '%' || LOWER(REPLACE(:artist, ' ', '')) || '%'
+        """
+    )
     suspend fun getMetadataCountByArtist(artist: String): Int
 
-    @Query("SELECT COUNT(*) FROM music_metadata WHERE genre = :genre")
+    @Query(
+        """
+        SELECT COUNT(*) 
+        FROM music_metadata 
+        WHERE genre = :genre
+        """
+    )
     suspend fun getMetadataCountByGenre(genre: String): Int
 
-    @Query("SELECT COUNT(*) FROM music_metadata WHERE year LIKE :year || '-%'")
+    @Query(
+        """
+        SELECT COUNT(*) 
+        FROM music_metadata 
+        WHERE year LIKE :year || '-%'
+        """
+    )
     suspend fun getMetadataCountByYear(year: String): Int
 }

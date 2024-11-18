@@ -12,12 +12,12 @@ import androidx.navigation.compose.rememberNavController
 
 sealed class Screen(val route: String) {
     data object Grid : Screen("grid")
-    data object List : Screen("list/{$ARG_ALBUM_NAME}") {
-        fun createRoute(albumName: String) = "list/$albumName"
+    data object List : Screen("list/{$ARG_CATEGORY}") {
+        fun createRoute(category: String) = "list/$category"
     }
 
     companion object {
-        const val ARG_ALBUM_NAME = "albumName"
+        const val ARG_CATEGORY = "category"
     }
 }
 

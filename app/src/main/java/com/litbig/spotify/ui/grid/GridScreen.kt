@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun GridScreen(
     viewModel: GridViewModel = hiltViewModel(),
-    navigateToList: (Album) -> Unit
+    navigateToList: (String) -> Unit
 ) {
     GridScreen(
         navigateToList = navigateToList,
@@ -48,7 +48,7 @@ fun GridScreen(
     modifier: Modifier = Modifier,
     albumsPagingFlow: Flow<PagingData<Album>>,
     artistPagingFlow: Flow<PagingData<Artist>>,
-    navigateToList: (Album) -> Unit
+    navigateToList: (String) -> Unit
 ) {
     val albumsPagingItems = albumsPagingFlow.collectAsLazyPagingItems()
     val artistPagingItems = artistPagingFlow.collectAsLazyPagingItems()
@@ -101,7 +101,7 @@ fun GridScreen(
                             artist = album?.artist ?: "",
                             album = album?.name ?: "",
                             isPlayable = false,
-                            onClick = { album?.let { navigateToList(it) } }
+                            onClick = { album?.let { navigateToList("album/${it.name}") } }
                         )
 
                         Spacer(modifier = Modifier.width(30.dp))
@@ -146,7 +146,7 @@ fun GridScreen(
                             artist = "${artist?.albumCount} albums • ${artist?.musicCount} songs",
                             album = artist?.name ?: "",
                             isPlayable = false,
-                            onClick = {}
+                            onClick = { artist?.let { navigateToList("artist/${it.name}") } }
                         )
 
                         Spacer(modifier = Modifier.width(30.dp))

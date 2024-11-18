@@ -81,25 +81,25 @@ fun GridCell(
                 )
 
 
-                if (shape != CircleShape) {
-                    LineOverlay(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        color = coreColor
-                    )
-
-                    Text(
-                        modifier = Modifier
-                            .width(180.dp)
-                            .padding(16.dp)
-                            .align(Alignment.BottomStart),
-                        text = album,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+//                if (shape != CircleShape) {
+//                    LineOverlay(
+//                        modifier = Modifier
+//                            .fillMaxSize(),
+//                        color = coreColor
+//                    )
+//
+//                    Text(
+//                        modifier = Modifier
+//                            .width(180.dp)
+//                            .padding(16.dp)
+//                            .align(Alignment.BottomStart),
+//                        text = album,
+//                        style = MaterialTheme.typography.titleLarge,
+//                        color = MaterialTheme.colorScheme.onSurface,
+//                        maxLines = 2,
+//                        overflow = TextOverflow.Ellipsis
+//                    )
+//                }
 
                 if (isPlayable) {
                     Image(

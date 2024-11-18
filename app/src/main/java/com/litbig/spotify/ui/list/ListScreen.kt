@@ -28,7 +28,7 @@ fun ListScreen(
     navigateBack: () -> Unit
 ) {
     ListScreen(
-        musicMetadataPagingItems = viewModel.musicMetadataByAlbumPagingFlow,
+        metadataPagingFlow = viewModel.metadataPagingFlow,
         navigateBack = navigateBack
     )
 }
@@ -36,10 +36,10 @@ fun ListScreen(
 @Composable
 fun ListScreen(
     modifier: Modifier = Modifier,
-    musicMetadataPagingItems: Flow<PagingData<MusicMetadata>>,
+    metadataPagingFlow: Flow<PagingData<MusicMetadata>>,
     navigateBack: () -> Unit
 ) {
-    val metadataPagingItems = musicMetadataPagingItems.collectAsLazyPagingItems()
+    val metadataPagingItems = metadataPagingFlow.collectAsLazyPagingItems()
     val albumArtFirst = metadataPagingItems.itemSnapshotList.items.firstOrNull()?.albumArt?.asImageBitmap()
 
     Box(
@@ -98,7 +98,7 @@ fun ListScreen(
 fun ListScreenPreview() {
     SpotifyTheme {
         ListScreen(
-            musicMetadataPagingItems = PreviewMusicMetadataPagingData,
+            metadataPagingFlow = PreviewMusicMetadataPagingData,
             navigateBack = {}
         )
     }
