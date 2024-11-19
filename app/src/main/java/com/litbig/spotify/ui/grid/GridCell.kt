@@ -1,12 +1,14 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class, ExperimentalAnimationApi::class)
+
 package com.litbig.spotify.ui.grid
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
+import com.litbig.spotify.ui.LocalSharedTransitionScope
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 
@@ -59,26 +63,41 @@ fun GridCell(
             shape = shape,
         ) {
             Box(modifier = Modifier) {
-                imageUrl?.let {
-                    AsyncImage(
+                val sharedTransitionScope = LocalSharedTransitionScope.current
+                    ?: throw IllegalStateException("No Scope found")
+                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                    ?: throw IllegalStateException("No animatedVisibilityScope found")
+                with(sharedTransitionScope) {
+                    imageUrl?.let {
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState("image-$title"),
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+//                                    boundsTransform = imageBoundsTransform
+                                ),
+                            model = it,
+                            contentDescription = "Grid Thumbnail",
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                            error = painterResource(id = R.drawable.ic_launcher_foreground),
+                        )
+                    } ?: albumArt?.let {
+                        Image(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            bitmap = it,
+                            contentDescription = "Grid Thumbnail"
+                        )
+                    } ?: Image(
                         modifier = Modifier.fillMaxSize(),
-                        model = it,
-                        contentDescription = "Grid Thumbnail",
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                        error = painterResource(id = R.drawable.ic_launcher_foreground),
-                    )
-                } ?: albumArt?.let {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        bitmap = it,
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
                         contentDescription = "Grid Thumbnail"
                     )
-                } ?: Image(
-                    modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Grid Thumbnail"
-                )
+                }
 
 
 //                if (shape != CircleShape) {

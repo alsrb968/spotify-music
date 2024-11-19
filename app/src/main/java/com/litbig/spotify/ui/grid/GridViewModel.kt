@@ -15,12 +15,12 @@ class GridViewModel @Inject constructor(
     getAlbumsUseCase: GetAlbumsUseCase,
     getArtistsUseCase: GetArtistsUseCase,
 ) : ViewModel() {
-    val metadataPagingFlow = getMetadataUseCase(pageSize = 20)
+    val metadataPagingFlow = getMetadataUseCase(pageSize = 10)
         .cachedIn(viewModelScope)
 
-    val albumsPagingFlow = getAlbumsUseCase()
+    val albumsPagingFlow = getAlbumsUseCase(pageSize = 10)
         .cachedIn(viewModelScope)
 
-    val artistPagingFlow = getArtistsUseCase()
+    val artistPagingFlow = getArtistsUseCase(pageSize = 10)
         .cachedIn(viewModelScope)
 }

@@ -9,15 +9,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.litbig.spotify.core.domain.model.MusicInfo
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import timber.log.Timber
 
 sealed class Screen(val route: String) {
     data object Grid : Screen("grid")
-    data object List : Screen("list/{$ARG_CATEGORY}") {
-        fun createRoute(category: String) = "list/$category"
+    data object List : Screen("list/{$ARG_MUSIC_INFO}") {
+        fun createRoute(musicInfo: String) = "list/$musicInfo"
     }
 
     companion object {
-        const val ARG_CATEGORY = "category"
+        const val ARG_MUSIC_INFO = "music_info"
     }
 }
 
@@ -33,10 +37,11 @@ class SpotifyAppState(
     val navController: NavHostController,
     private val context: Context
 ) {
-    fun navigateToList(albumName: String, from: NavBackStackEntry) {
+    fun navigateToList(musicInfo: MusicInfo, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            val name = Uri.encode(albumName)
-            navController.navigate(Screen.List.createRoute(name))
+            val serializedMusicInfo = Uri.encode(Json.encodeToString(musicInfo))
+            Timber.w("serializedMusicInfo: $serializedMusicInfo")
+            navController.navigate(Screen.List.createRoute(serializedMusicInfo))
         }
     }
 

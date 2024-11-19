@@ -78,7 +78,7 @@ interface MusicRepository {
 
     suspend fun searchTrack(trackName: String, artistName: String): TrackDetails?
     suspend fun searchArtist(artistName: String): ArtistDetails?
-    suspend fun searchAlbum(albumName: String, artistName: String): AlbumDetails?
+    suspend fun searchAlbum(albumName: String): AlbumDetails?
 
     suspend fun getTrackDetails(trackId: String): TrackDetails
     suspend fun getArtistDetails(artistId: String): ArtistDetails

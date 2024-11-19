@@ -303,13 +303,14 @@ class MusicRepositoryImpl @Inject constructor(
         return spotifyDataSource.search(
             query = artistName,
             type = "artist",
+            limit = 1,
             accessToken = getAccessToken()
         ).let { search ->
             search.artists?.items?.firstOrNull()?.toArtistDetails()
         }
     }
 
-    override suspend fun searchAlbum(albumName: String, artistName: String): AlbumDetails? {
+    override suspend fun searchAlbum(albumName: String): AlbumDetails? {
         return spotifyDataSource.search(
             query = albumName,
             type = "album",

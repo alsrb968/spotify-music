@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -36,6 +37,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
 
+    implementation(libs.jetbrains.kotlinx.serialization)
     implementation(libs.androidx.paging.common)
     implementation(libs.javax.inject)
     implementation(libs.jakewharton.timber)

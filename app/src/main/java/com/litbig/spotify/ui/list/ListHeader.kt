@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class, ExperimentalAnimationApi::class)
+
 package com.litbig.spotify.ui.list
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
@@ -12,23 +15,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
+import com.litbig.spotify.ui.LocalSharedTransitionScope
+import com.litbig.spotify.ui.imageBoundsTransform
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewMusicInfo
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
 import kotlin.time.Duration
 
 @Composable
 fun ListHeader(
     modifier: Modifier = Modifier,
+    musicInfo: MusicInfo,
     metadataList: List<MusicMetadata>,
 ) {
-    val first = metadataList.firstOrNull()
-    val title = first?.album ?: ""
-    val artist = first?.artistName ?: ""
+    val title = musicInfo.title
+    val artist = musicInfo.content
     val artists = metadataList.map { it.artist }.distinct().joinToString(separator = ", ")
     val count = metadataList.size
     val durations = metadataList.fold(Duration.ZERO) { acc, metadata -> acc + metadata.duration }
@@ -43,17 +53,34 @@ fun ListHeader(
             modifier = Modifier
                 .size(230.dp)
         ) {
-            metadataList.firstOrNull()?.albumArt?.let {
-                Image(
+            val sharedTransitionScope = LocalSharedTransitionScope.current
+                ?: throw IllegalStateException("No Scope found")
+            val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                ?: throw IllegalStateException("No animatedVisibilityScope found")
+            with(sharedTransitionScope) {
+                musicInfo.imageUrl?.let {
+                    AsyncImage(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .sharedBounds(
+                                sharedContentState = rememberSharedContentState("image-$title"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+//                                boundsTransform = imageBoundsTransform
+                            ),
+                        model = it,
+                        contentDescription = "Album Art",
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    )
+                } ?: Image(
                     modifier = Modifier.fillMaxSize(),
-                    bitmap = it.asImageBitmap(),
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
                     contentDescription = "Album Art",
                 )
-            } ?: Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Album Art",
-            )
+            }
         }
 
         Spacer(modifier = Modifier.width(32.dp))
@@ -126,6 +153,7 @@ fun ListHeader(
 fun ListHeaderPreview() {
     SpotifyTheme {
         ListHeader(
+            musicInfo = PreviewMusicInfo,
             metadataList = PreviewMusicMetadataList
         )
     }

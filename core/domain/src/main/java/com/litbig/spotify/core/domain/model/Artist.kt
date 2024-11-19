@@ -5,4 +5,4 @@ data class Artist(
     val imageUrl: String?,
     val albumCount: Int,
     val musicCount: Int,
-)
+) : java.io.Serializable

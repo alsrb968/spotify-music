@@ -17,17 +17,19 @@ constraintlayoutCompose = "1.1.0"
 hilt = "2.51.1"
 hiltCompose = "1.2.0"
 composeBom = "2024.10.01"
+animationCompose = "1.7.5"
+foundationCompose = "1.7.5"
 navigation = "2.8.3"
 room = "2.6.1"
 paging = "3.3.2"
 xerialSqlite = "3.41.2.2"
 timber = "5.0.1"
 inject = "1"
-spotifyAuth = "1.2.5"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 gson = "2.10.1"
 coil = "2.7.0"
+serialization = "1.7.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,6 +50,8 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+androidx-animation-compose = { group = "androidx.compose.animation", name = "animation", version.ref = "animationCompose" }
+androidx-foundation-compose = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationCompose" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -68,7 +72,7 @@ xerial-sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "xer
 jakewharton-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "inject" }
 io-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-spotify-android-auth = { group = "com.spotify.android", name = "auth", version.ref = "spotifyAuth" }
+jetbrains-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -77,12 +81,15 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 [bundles]
 androidx-compose = [
     "androidx-navigation-compose",
+    "androidx-animation-compose",
+    "androidx-foundation-compose",
     "androidx-activity-compose",
     "androidx-lifecycle-viewmodel-compose",
     "androidx-constraintlayout-compose",

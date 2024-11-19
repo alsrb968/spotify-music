@@ -1,6 +1,5 @@
 package com.litbig.spotify.ui.list
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,10 +13,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.grid.gradientBackground
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewMusicInfo
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
 import com.litbig.spotify.util.ColorExtractor.extractDominantColor
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
@@ -28,8 +29,8 @@ fun ListScreen(
     viewModel: ListViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
-    BackHandler { navigateBack() }
     ListScreen(
+        musicInfo = viewModel.musicInfo,
         metadataPagingFlow = viewModel.metadataPagingFlow,
         navigateBack = navigateBack
     )
@@ -38,6 +39,7 @@ fun ListScreen(
 @Composable
 fun ListScreen(
     modifier: Modifier = Modifier,
+    musicInfo: MusicInfo,
     metadataPagingFlow: Flow<PagingData<MusicMetadata>>,
     navigateBack: () -> Unit
 ) {
@@ -70,6 +72,7 @@ fun ListScreen(
                 ) {
                     ListHeader(
                         modifier = Modifier,
+                        musicInfo = musicInfo,
                         metadataList = metadataPagingItems.itemSnapshotList.items
                     )
                 }
@@ -101,6 +104,7 @@ fun ListScreen(
 fun ListScreenPreview() {
     SpotifyTheme {
         ListScreen(
+            musicInfo = PreviewMusicInfo,
             metadataPagingFlow = PreviewMusicMetadataPagingData,
             navigateBack = {}
         )

@@ -1,5 +1,6 @@
 package com.litbig.spotify.ui.grid
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,17 +25,19 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.litbig.spotify.core.domain.model.Album
 import com.litbig.spotify.core.domain.model.Artist
+import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewAlbumPagingData
 import com.litbig.spotify.ui.tooling.PreviewArtistPagingData
 import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 @Composable
 fun GridScreen(
     viewModel: GridViewModel = hiltViewModel(),
-    navigateToList: (String) -> Unit
+    navigateToList: (MusicInfo) -> Unit
 ) {
     GridScreen(
         navigateToList = navigateToList,
@@ -48,29 +51,29 @@ fun GridScreen(
     modifier: Modifier = Modifier,
     albumsPagingFlow: Flow<PagingData<Album>>,
     artistPagingFlow: Flow<PagingData<Artist>>,
-    navigateToList: (String) -> Unit
+    navigateToList: (MusicInfo) -> Unit
 ) {
     val albumsPagingItems = albumsPagingFlow.collectAsLazyPagingItems()
     val artistPagingItems = artistPagingFlow.collectAsLazyPagingItems()
 
-    Box(
+    LazyColumn(
         modifier = modifier
-            .fillMaxSize()
-            .gradientBackground(
-                ratio = 0.5f,
-                startColor = getRandomPastelColor(),
-                endColor = MaterialTheme.colorScheme.surfaceDim
-            )
+            .fillMaxSize(),
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-        ) {
-            item {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .gradientBackground(
+                        ratio = 0.5f,
+                        startColor = getRandomPastelColor(),
+                        endColor = MaterialTheme.colorScheme.surfaceDim
+                    )
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Text(
                         text = "Your top albums",
@@ -87,34 +90,39 @@ fun GridScreen(
 
                 Spacer(modifier = Modifier.height(26.dp))
 
-                val listState = rememberLazyListState()
-
-                LazyRow(state = listState) {
+                LazyRow(state = rememberLazyListState()) {
                     items(albumsPagingItems.itemCount) { index ->
+                        Timber.d("index=$index")
                         val album = albumsPagingItems[index]
                         val dominantColor = getRandomPastelColor()
 
-                        GridCell(
-                            albumArt = album?.albumArt?.asImageBitmap(),
-                            coreColor = dominantColor,
+                        Spacer(modifier = Modifier.width(30.dp))
+
+                        val musicInfo = MusicInfo(
+                            imageUrl = album?.imageUrl,
                             title = album?.name ?: "",
-                            artist = album?.artist ?: "",
-                            album = album?.name ?: "",
-                            isPlayable = false,
-                            onClick = { album?.let { navigateToList("album/${it.name}") } }
+                            content = album?.let { "${it.artist} • ${it.musicCount} songs" } ?: "",
+                            category = "album"
                         )
 
-                        Spacer(modifier = Modifier.width(30.dp))
+                        GridCell(
+                            imageUrl = musicInfo.imageUrl,
+                            coreColor = dominantColor,
+                            title = musicInfo.title,
+                            artist = musicInfo.content,
+                            album = musicInfo.title,
+                            isPlayable = false,
+                            onClick = { album?.let { navigateToList(musicInfo) } }
+                        )
                     }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(26.dp)) }
+                Spacer(modifier = Modifier.height(26.dp))
 
-            item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Text(
                         text = "Your top artists",
@@ -131,30 +139,34 @@ fun GridScreen(
 
                 Spacer(modifier = Modifier.height(26.dp))
 
-                val listState = rememberLazyListState()
-
-                LazyRow(state = listState) {
+                LazyRow(state = rememberLazyListState()) {
                     items(artistPagingItems.itemCount) { index ->
+                        Timber.i("index=$index")
                         val artist = artistPagingItems[index]
                         val dominantColor = getRandomPastelColor()
 
-                        GridCell(
-                            shape = CircleShape,
+                        Spacer(modifier = Modifier.width(30.dp))
+
+                        val musicInfo = MusicInfo(
                             imageUrl = artist?.imageUrl,
-                            coreColor = dominantColor,
                             title = artist?.name ?: "",
-                            artist = "${artist?.albumCount} albums • ${artist?.musicCount} songs",
-                            album = artist?.name ?: "",
-                            isPlayable = false,
-                            onClick = { artist?.let { navigateToList("artist/${it.name}") } }
+                            content = artist?.let { "${it.albumCount} albums • ${it.musicCount} songs" } ?: "",
+                            category = "artist"
                         )
 
-                        Spacer(modifier = Modifier.width(30.dp))
+                        GridCell(
+                            shape = CircleShape,
+                            imageUrl = musicInfo.imageUrl,
+                            coreColor = dominantColor,
+                            title = musicInfo.title,
+                            artist = musicInfo.content,
+                            album = musicInfo.title,
+                            isPlayable = false,
+                            onClick = { artist?.let { navigateToList(musicInfo) } }
+                        )
                     }
                 }
             }
-
-
         }
     }
 }
