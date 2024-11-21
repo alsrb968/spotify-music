@@ -1,15 +1,60 @@
 package com.litbig.spotify.util
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette
-import timber.log.Timber
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import kotlin.random.Random
 
 object ColorExtractor {
+
+    suspend fun extractDominantColorFromUrl(context: Context, imageUrl: String?): Color {
+        if (imageUrl.isNullOrEmpty()) return Color.Transparent
+
+        // ImageLoader 생성
+        val imageLoader = ImageLoader(context)
+
+        val request = ImageRequest.Builder(context)
+            .data(imageUrl)
+            .allowHardware(false) // 하드웨어 비트맵 비활성화
+            .build()
+
+        val result = (imageLoader.execute(request) as? SuccessResult)?.drawable
+        val bitmap = (result as? BitmapDrawable)?.bitmap ?: return Color.Transparent
+
+        // 하드웨어 비트맵 변환
+        val safeBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+            bitmap.copy(Bitmap.Config.ARGB_8888, false)
+        } else {
+            bitmap
+        }
+
+        // Palette로 Dominant Color 추출
+        val palette = Palette.from(safeBitmap).generate()
+
+        // 검은색을 제외한 스와치 필터링
+        val filteredSwatches = palette.swatches.filter { swatch ->
+            !isBlackColor(swatch.rgb)
+        }
+
+        // 필터링된 스와치 중 가장 인구가 많은 색상 선택
+        val dominantColor = if (filteredSwatches.isNotEmpty()) {
+            val dominantSwatch = filteredSwatches.maxByOrNull { swatch -> swatch.population }
+            Color(dominantSwatch?.rgb ?: Color.Transparent.toArgb())
+        } else {
+            Color.Transparent // 조건을 만족하는 색상이 없으면 투명 반환
+        }
+
+        return dominantColor
+    }
 
     @JvmStatic
     @Composable
@@ -26,7 +71,8 @@ object ColorExtractor {
 
                     // 필터링된 스와치 중 가장 인구가 많은 색상 선택
                     dominantColor = if (filteredSwatches.isNotEmpty()) {
-                        val dominantSwatch = filteredSwatches.maxByOrNull { swatch -> swatch.population }
+                        val dominantSwatch =
+                            filteredSwatches.maxByOrNull { swatch -> swatch.population }
                         Color(dominantSwatch?.rgb ?: Color.Transparent.toArgb())
                     } else {
                         Color.Transparent // 조건을 만족하는 색상이 없으면 투명 반환
