@@ -14,28 +14,16 @@ class GetArtistsUseCase @Inject constructor(
     operator fun invoke(pageSize: Int = 20): Flow<PagingData<Artist>> {
         return repository.getPagedArtists(pageSize).map { pagingData ->
             pagingData.map { artistName ->
-                val result = repository.searchArtist(artistName)?.let {
-                    Result.success(it)
-                } ?: Result.failure(Exception("Artist not found"))
+                val imageUrl = repository.getArtistInfoByArtist(artistName)?.imageUrl
+                val albumCount = repository.getMetadataCountByAlbumOfArtist(artistName)
+                val musicCount = repository.getMetadataCountByArtist(artistName)
 
-                if (result.isSuccess) {
-                    val imageUrl = result.getOrNull()?.images?.firstOrNull()?.url
-                    val albumCount = repository.getMetadataCountByAlbumOfArtist(artistName)
-                    val musicCount = repository.getMetadataCountByArtist(artistName)
-                    Artist(
-                        name = artistName,
-                        imageUrl = imageUrl,
-                        albumCount = albumCount,
-                        musicCount = musicCount
-                    )
-                } else {
-                    Artist(
-                        name = artistName,
-                        imageUrl = null,
-                        albumCount = 0,
-                        musicCount = 0
-                    )
-                }
+                Artist(
+                    name = artistName,
+                    imageUrl = imageUrl,
+                    albumCount = albumCount,
+                    musicCount = musicCount
+                )
             }
         }
     }

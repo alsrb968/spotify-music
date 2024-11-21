@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class, ExperimentalAnimationApi::class)
+@file:OptIn(ExperimentalSharedTransitionApi::class)
 
 package com.litbig.spotify.ui.grid
 
@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -39,7 +38,6 @@ fun GridCell(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(4.dp),
     imageUrl: String? = null,
-    albumArt: ImageBitmap? = null,
     coreColor: Color = Color.Yellow,
     title: String,
     artist: String,
@@ -68,34 +66,21 @@ fun GridCell(
                 val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
                     ?: throw IllegalStateException("No animatedVisibilityScope found")
                 with(sharedTransitionScope) {
-                    imageUrl?.let {
-                        AsyncImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .sharedBounds(
-                                    sharedContentState = rememberSharedContentState("image-$title"),
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                    enter = fadeIn(),
-                                    exit = fadeOut(),
+                    AsyncImage(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .sharedBounds(
+                                sharedContentState = rememberSharedContentState("image-$title"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
 //                                    boundsTransform = imageBoundsTransform
-                                ),
-                            model = it,
-                            contentDescription = "Grid Thumbnail",
-                            contentScale = ContentScale.Crop,
-                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                            error = painterResource(id = R.drawable.ic_launcher_foreground),
-                        )
-                    } ?: albumArt?.let {
-                        Image(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            bitmap = it,
-                            contentDescription = "Grid Thumbnail"
-                        )
-                    } ?: Image(
-                        modifier = Modifier.fillMaxSize(),
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                        contentDescription = "Grid Thumbnail"
+                            ),
+                        model = imageUrl,
+                        contentDescription = "Grid Thumbnail",
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
                     )
                 }
 

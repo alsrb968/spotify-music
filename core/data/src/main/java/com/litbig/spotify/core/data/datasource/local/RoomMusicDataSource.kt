@@ -1,9 +1,14 @@
 package com.litbig.spotify.core.data.datasource.local
 
 import androidx.paging.PagingSource
+import com.litbig.spotify.core.data.db.AlbumArtDao
+import com.litbig.spotify.core.data.db.ArtistInfoDao
 import com.litbig.spotify.core.data.db.MusicMetadataDao
+import com.litbig.spotify.core.data.model.local.AlbumArtEntity
+import com.litbig.spotify.core.data.model.local.ArtistInfoEntity
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 import javax.inject.Inject
 
 interface RoomMusicDataSource {
@@ -46,10 +51,22 @@ interface RoomMusicDataSource {
     suspend fun getMetadataCountByArtist(artist: String): Int
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
+
+    suspend fun insertAlbumArt(albumArt: AlbumArtEntity)
+    suspend fun getAlbumArtByAlbum(album: String): AlbumArtEntity?
+    suspend fun getAlbumArtById(id: String): AlbumArtEntity?
+    suspend fun deleteAllAlbumArt()
+
+    suspend fun insertArtistInfo(artistInfo: ArtistInfoEntity)
+    suspend fun getArtistInfoByArtist(artist: String): ArtistInfoEntity?
+    suspend fun getArtistInfoById(id: String): ArtistInfoEntity?
+    suspend fun deleteAllArtistInfo()
 }
 
 class RoomMusicDataSourceImpl @Inject constructor(
-    private val metadataDao: MusicMetadataDao
+    private val metadataDao: MusicMetadataDao,
+    private val albumArtDao: AlbumArtDao,
+    private val artistInfoDao: ArtistInfoDao
 ) : RoomMusicDataSource {
     override suspend fun insertMetadata(metadata: MusicMetadataEntity) {
         metadataDao.insertMetadata(metadata)
@@ -165,5 +182,39 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override suspend fun getMetadataCountByYear(year: String): Int {
         return metadataDao.getMetadataCountByYear(year)
+    }
+
+    override suspend fun insertAlbumArt(albumArt: AlbumArtEntity) {
+        Timber.d("insertAlbumArt: $albumArt")
+        albumArtDao.insertAlbumArt(albumArt)
+    }
+
+    override suspend fun getAlbumArtByAlbum(album: String): AlbumArtEntity? {
+        Timber.d("getAlbumArtByAlbum: $album")
+        return albumArtDao.getAlbumArtByAlbum(album)
+    }
+
+    override suspend fun getAlbumArtById(id: String): AlbumArtEntity? {
+        return albumArtDao.getAlbumArtById(id)
+    }
+
+    override suspend fun deleteAllAlbumArt() {
+        albumArtDao.deleteAllAlbumArt()
+    }
+
+    override suspend fun insertArtistInfo(artistInfo: ArtistInfoEntity) {
+        artistInfoDao.insertArtistInfo(artistInfo)
+    }
+
+    override suspend fun getArtistInfoByArtist(artist: String): ArtistInfoEntity? {
+        return artistInfoDao.getArtistInfoByArtist(artist)
+    }
+
+    override suspend fun getArtistInfoById(id: String): ArtistInfoEntity? {
+        return artistInfoDao.getArtistInfoById(id)
+    }
+
+    override suspend fun deleteAllArtistInfo() {
+        artistInfoDao.deleteAllArtistInfo()
     }
 }

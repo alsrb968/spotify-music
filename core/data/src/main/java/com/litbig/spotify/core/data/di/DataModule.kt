@@ -10,6 +10,8 @@ import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSourceImpl
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSourceImpl
+import com.litbig.spotify.core.data.db.AlbumArtDao
+import com.litbig.spotify.core.data.db.ArtistInfoDao
 import com.litbig.spotify.core.data.db.MusicDatabase
 import com.litbig.spotify.core.data.db.MusicMetadataDao
 import com.litbig.spotify.core.data.repository.MusicRepositoryImpl
@@ -38,6 +40,18 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideAlbumArtDao(
+        database: MusicDatabase
+    ): AlbumArtDao = database.albumArtDao()
+
+    @Provides
+    @Singleton
+    fun provideArtistInfoDao(
+        database: MusicDatabase
+    ): ArtistInfoDao = database.artistInfoDao()
+
+    @Provides
+    @Singleton
     fun provideSpotifyAuthApi(): SpotifyAuthApi =
         SpotifyClient.authRetrofit.create(SpotifyAuthApi::class.java)
 
@@ -49,9 +63,13 @@ object DataModule {
     @Provides
     @Singleton
     fun provideRoomMusicDataSource(
-        musicMetadataDao: MusicMetadataDao
+        musicMetadataDao: MusicMetadataDao,
+        albumArtDao: AlbumArtDao,
+        artistInfoDao: ArtistInfoDao,
     ): RoomMusicDataSource = RoomMusicDataSourceImpl(
-        musicMetadataDao
+        musicMetadataDao,
+        albumArtDao,
+        artistInfoDao,
     )
 
     @Provides

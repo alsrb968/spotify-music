@@ -2,19 +2,18 @@
 
 package com.litbig.spotify.ui.list
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.Image
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.MarqueeAnimationMode
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -24,7 +23,6 @@ import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
 import com.litbig.spotify.ui.LocalSharedTransitionScope
-import com.litbig.spotify.ui.imageBoundsTransform
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
@@ -58,27 +56,21 @@ fun ListHeader(
             val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
                 ?: throw IllegalStateException("No animatedVisibilityScope found")
             with(sharedTransitionScope) {
-                musicInfo.imageUrl?.let {
-                    AsyncImage(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState("image-$title"),
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                enter = fadeIn(),
-                                exit = fadeOut(),
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState("image-$title"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
 //                                boundsTransform = imageBoundsTransform
-                            ),
-                        model = it,
-                        contentDescription = "Album Art",
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                        error = painterResource(id = R.drawable.ic_launcher_foreground),
-                    )
-                } ?: Image(
-                    modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        ),
+                    model = musicInfo.imageUrl,
                     contentDescription = "Album Art",
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
                 )
             }
         }

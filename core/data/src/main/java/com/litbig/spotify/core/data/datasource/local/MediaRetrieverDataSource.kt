@@ -14,7 +14,10 @@ import java.io.File
 import javax.inject.Inject
 
 interface MediaRetrieverDataSource {
+    @Deprecated("Do not use Bitmap")
     fun getAlbumArt(file: File): Bitmap?
+
+    @Deprecated("Do not use Bitmap")
     suspend fun getAlbumArtFlow(file: File): Flow<Bitmap?>
     fun getMusicMetadata(file: File): MusicMetadata?
     suspend fun getMusicMetadataFlow(file: File): Flow<MusicMetadata?>
@@ -72,9 +75,7 @@ class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSou
                     ?: "",
                 genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
                     ?: "",
-                albumArt = retriever.embeddedPicture?.let {
-                    BitmapFactory.decodeByteArray(it, 0, it.size)
-                },
+                albumArtUrl = null,
                 duration = duration.toDuration(),
                 year = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)
                     ?: "",
@@ -129,9 +130,7 @@ class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSou
                         ?: "",
                     genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
                         ?: "",
-                    albumArt = retriever.embeddedPicture?.let {
-                        BitmapFactory.decodeByteArray(it, 0, it.size)
-                    },
+                    albumArtUrl = null,
                     duration = duration.toDuration(),
                     year = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)
                         ?: "",

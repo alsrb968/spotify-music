@@ -1,18 +1,21 @@
 package com.litbig.spotify.core.data.mapper.local
 
-import android.graphics.Bitmap
+import com.litbig.spotify.core.data.model.local.AlbumArtEntity
+import com.litbig.spotify.core.data.model.local.ArtistInfoEntity
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
+import com.litbig.spotify.core.domain.model.local.AlbumArt
+import com.litbig.spotify.core.domain.model.local.ArtistInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-fun MusicMetadataEntity.toMusicMetadata(albumArt: Bitmap?): MusicMetadata {
+fun MusicMetadataEntity.toMusicMetadata(albumArtUrl: String?): MusicMetadata {
     return MusicMetadata(
         absolutePath = absolutePath,
         title = title,
         artist = artist,
         album = album,
-        albumArt = albumArt,
+        albumArtUrl = albumArtUrl,
         genre = genre,
         duration = duration.toDuration(),
         year = year,
@@ -30,9 +33,9 @@ fun MusicMetadataEntity.toMusicMetadata(albumArt: Bitmap?): MusicMetadata {
     )
 }
 
-fun List<MusicMetadataEntity>.toMusicMetadataList(albumArts: List<Bitmap?>): List<MusicMetadata> {
+fun List<MusicMetadataEntity>.toMusicMetadataList(albumArtUrls: List<String?>): List<MusicMetadata> {
     return mapIndexed { index, musicMetadataEntity ->
-        musicMetadataEntity.toMusicMetadata(albumArts[index])
+        musicMetadataEntity.toMusicMetadata(albumArtUrls[index])
     }
 }
 
@@ -69,4 +72,36 @@ fun Long.toDuration(): Duration {
 
 fun Duration.toLong(): Long {
     return this.inWholeMilliseconds
+}
+
+fun AlbumArtEntity.toAlbumArt(): AlbumArt {
+    return AlbumArt(
+        album = album,
+        imageUrl = imageUrl,
+        id = id
+    )
+}
+
+fun AlbumArt.toAlbumArtEntity(): AlbumArtEntity {
+    return AlbumArtEntity(
+        album = album,
+        imageUrl = imageUrl,
+        id = id
+    )
+}
+
+fun ArtistInfoEntity.toArtistInfo(): ArtistInfo {
+    return ArtistInfo(
+        artist = artist,
+        imageUrl = imageUrl,
+        id = id
+    )
+}
+
+fun ArtistInfo.toArtistInfoEntity(): ArtistInfoEntity {
+    return ArtistInfoEntity(
+        artist = artist,
+        imageUrl = imageUrl,
+        id = id
+    )
 }

@@ -17,10 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -33,7 +34,7 @@ fun ListCell(
     modifier: Modifier = Modifier,
     index: Int,
     isPlaying: Boolean = false,
-    albumArt: ImageBitmap? = null,
+    imageUrl: String? = null,
     title: String,
     artist: String,
     album: String,
@@ -79,16 +80,13 @@ fun ListCell(
                 modifier = Modifier
                     .size(52.dp)
             ) {
-                albumArt?.let {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        bitmap = it,
-                        contentDescription = "Grid Thumbnail"
-                    )
-                } ?: Image(
+                AsyncImage(
                     modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Grid Thumbnail"
+                    model = imageUrl,
+                    contentDescription = "List Thumbnail",
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
             }
 

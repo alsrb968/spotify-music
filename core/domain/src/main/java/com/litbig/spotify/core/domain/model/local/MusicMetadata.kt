@@ -1,6 +1,5 @@
 package com.litbig.spotify.core.domain.model.local
 
-import android.graphics.Bitmap
 import kotlin.time.Duration
 
 data class MusicMetadata(
@@ -8,7 +7,7 @@ data class MusicMetadata(
     val title: String,
     val artist: String,
     val album: String,
-    val albumArt: Bitmap?,
+    val albumArtUrl: String?,
     val genre: String,
     val duration: Duration,
     val year: String,

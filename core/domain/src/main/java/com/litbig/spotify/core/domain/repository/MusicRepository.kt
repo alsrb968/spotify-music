@@ -1,7 +1,8 @@
 package com.litbig.spotify.core.domain.repository
 
-import android.graphics.Bitmap
 import androidx.paging.PagingData
+import com.litbig.spotify.core.domain.model.local.AlbumArt
+import com.litbig.spotify.core.domain.model.local.ArtistInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.core.domain.model.remote.AlbumDetails
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
@@ -63,8 +64,16 @@ interface MusicRepository {
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
 
-    fun getAlbumArt(file: File): Bitmap?
-    suspend fun getAlbumArtFlow(file: File): Flow<Bitmap?>
+    suspend fun insertAlbumArt(albumArt: AlbumArt)
+    suspend fun getAlbumArtByAlbum(album: String): AlbumArt?
+    suspend fun getAlbumArtById(id: String): AlbumArt
+    suspend fun deleteAllAlbumArt()
+
+    suspend fun insertArtistInfo(artistInfo: ArtistInfo)
+    suspend fun getArtistInfoByArtist(artist: String): ArtistInfo?
+    suspend fun getArtistInfoById(id: String): ArtistInfo
+    suspend fun deleteAllArtistInfo()
+
     fun getMusicMetadata(file: File): MusicMetadata?
     suspend fun getMusicMetadataFlow(file: File): Flow<MusicMetadata?>
 

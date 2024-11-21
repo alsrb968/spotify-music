@@ -14,9 +14,8 @@ class GetAlbumsUseCase @Inject constructor(
     operator fun invoke(pageSize: Int = 20): Flow<PagingData<Album>> {
         return repository.getPagedAlbums(pageSize).map { pagingData ->
             pagingData.map { albumName ->
-                val albumDetails = repository.searchAlbum(albumName) ?: throw IllegalStateException("Album not found")
-                val artist = albumDetails.artists.firstOrNull()?.name ?: ""
-                val imageUrl = albumDetails.images.firstOrNull()?.url
+                val artist = repository.getArtistFromAlbum(albumName)
+                val imageUrl = repository.getAlbumArtByAlbum(albumName)?.imageUrl
                 val musicCount = repository.getMetadataCountByAlbum(albumName)
 
                 Album(

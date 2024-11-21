@@ -1,6 +1,5 @@
 package com.litbig.spotify.core.data.repository
 
-import android.graphics.Bitmap
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -9,13 +8,13 @@ import com.litbig.spotify.core.data.BuildConfig
 import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
-import com.litbig.spotify.core.data.mapper.local.toMusicMetadata
-import com.litbig.spotify.core.data.mapper.local.toMusicMetadataEntity
-import com.litbig.spotify.core.data.mapper.local.toMusicMetadataEntityList
+import com.litbig.spotify.core.data.mapper.local.*
 import com.litbig.spotify.core.data.mapper.remote.toAlbumDetails
 import com.litbig.spotify.core.data.mapper.remote.toArtistDetails
 import com.litbig.spotify.core.data.mapper.remote.toSearch
 import com.litbig.spotify.core.data.mapper.remote.toTrackDetails
+import com.litbig.spotify.core.domain.model.local.AlbumArt
+import com.litbig.spotify.core.domain.model.local.ArtistInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.core.domain.model.remote.AlbumDetails
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
@@ -24,6 +23,7 @@ import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 
@@ -127,16 +127,16 @@ class MusicRepositoryImpl @Inject constructor(
             pagingSourceFactory = { roomDataSource.getPagedMetadata() }
         ).flow.map { pagingData ->
             pagingData.map { entity ->
-                val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-                entity.toMusicMetadata(albumArt)
+                val albumArt = getAlbumArtByAlbum(entity.album)
+                entity.toMusicMetadata(albumArt?.imageUrl)
             }
         }
     }
 
     override fun getMetadataByAlbum(album: String): Flow<MusicMetadata> {
         return roomDataSource.getMetadataByAlbum(album).map { entity ->
-            val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-            entity.toMusicMetadata(albumArt)
+            val albumArt = getAlbumArtByAlbum(entity.album)
+            entity.toMusicMetadata(albumArt?.imageUrl)
         }
     }
 
@@ -149,16 +149,16 @@ class MusicRepositoryImpl @Inject constructor(
             pagingSourceFactory = { roomDataSource.getPagedMetadataByAlbum(album) }
         ).flow.map { pagingData ->
             pagingData.map { entity ->
-                val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-                entity.toMusicMetadata(albumArt)
+                val albumArt = getAlbumArtByAlbum(entity.album)
+                entity.toMusicMetadata(albumArt?.imageUrl)
             }
         }
     }
 
     override fun getMetadataByArtist(artist: String): Flow<MusicMetadata> {
         return roomDataSource.getMetadataByArtist(artist).map { entity ->
-            val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-            entity.toMusicMetadata(albumArt)
+            val albumArt = getAlbumArtByAlbum(entity.album)
+            entity.toMusicMetadata(albumArt?.imageUrl)
         }
     }
 
@@ -174,16 +174,16 @@ class MusicRepositoryImpl @Inject constructor(
             pagingSourceFactory = { roomDataSource.getPagedMetadataByArtist(artist) }
         ).flow.map { pagingData ->
             pagingData.map { entity ->
-                val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-                entity.toMusicMetadata(albumArt)
+                val albumArt = getAlbumArtByAlbum(entity.album)
+                entity.toMusicMetadata(albumArt?.imageUrl)
             }
         }
     }
 
     override fun getMetadataByGenre(genre: String): Flow<MusicMetadata> {
         return roomDataSource.getMetadataByGenre(genre).map { entity ->
-            val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-            entity.toMusicMetadata(albumArt)
+            val albumArt = getAlbumArtByAlbum(entity.album)
+            entity.toMusicMetadata(albumArt?.imageUrl)
         }
     }
 
@@ -196,16 +196,16 @@ class MusicRepositoryImpl @Inject constructor(
             pagingSourceFactory = { roomDataSource.getPagedMetadataByGenre(genre) }
         ).flow.map { pagingData ->
             pagingData.map { entity ->
-                val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-                entity.toMusicMetadata(albumArt)
+                val albumArt = getAlbumArtByAlbum(entity.album)
+                entity.toMusicMetadata(albumArt?.imageUrl)
             }
         }
     }
 
     override fun getMetadataByYear(year: String): Flow<MusicMetadata> {
         return roomDataSource.getMetadataByYear(year).map { entity ->
-            val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-            entity.toMusicMetadata(albumArt)
+            val albumArt = getAlbumArtByAlbum(entity.album)
+            entity.toMusicMetadata(albumArt?.imageUrl)
         }
     }
 
@@ -218,8 +218,8 @@ class MusicRepositoryImpl @Inject constructor(
             pagingSourceFactory = { roomDataSource.getPagedMetadataByYear(year) }
         ).flow.map { pagingData ->
             pagingData.map { entity ->
-                val albumArt = mediaDataSource.getAlbumArt(File(entity.absolutePath))
-                entity.toMusicMetadata(albumArt)
+                val albumArt = getAlbumArtByAlbum(entity.album)
+                entity.toMusicMetadata(albumArt?.imageUrl)
             }
         }
     }
@@ -260,12 +260,80 @@ class MusicRepositoryImpl @Inject constructor(
         return roomDataSource.getMetadataCountByYear(year)
     }
 
-    override fun getAlbumArt(file: File): Bitmap? {
-        return mediaDataSource.getAlbumArt(file)
+    override suspend fun insertAlbumArt(albumArt: AlbumArt) {
+        return roomDataSource.insertAlbumArt(albumArt.toAlbumArtEntity())
     }
 
-    override suspend fun getAlbumArtFlow(file: File): Flow<Bitmap?> {
-        return mediaDataSource.getAlbumArtFlow(file)
+    override suspend fun getAlbumArtByAlbum(album: String): AlbumArt? {
+        return roomDataSource.getAlbumArtByAlbum(album)?.toAlbumArt() ?: run {
+            searchAlbum(album)?.let {
+                val albumArt = AlbumArt(
+                    album = album,
+                    imageUrl = it.images.firstOrNull()?.url,
+                    id = it.id
+                )
+                insertAlbumArt(albumArt)
+
+                albumArt
+            }
+        }
+    }
+
+    override suspend fun getAlbumArtById(id: String): AlbumArt {
+        return roomDataSource.getAlbumArtById(id)?.toAlbumArt() ?: run {
+            getAlbumDetails(id).let {
+                val albumArt = AlbumArt(
+                    album = it.name,
+                    imageUrl = it.images.firstOrNull()?.url,
+                    id = it.id
+                )
+                insertAlbumArt(albumArt)
+
+                albumArt
+            }
+        }
+    }
+
+    override suspend fun deleteAllAlbumArt() {
+        return roomDataSource.deleteAllAlbumArt()
+    }
+
+    override suspend fun insertArtistInfo(artistInfo: ArtistInfo) {
+        return roomDataSource.insertArtistInfo(artistInfo.toArtistInfoEntity())
+    }
+
+    override suspend fun getArtistInfoByArtist(artist: String): ArtistInfo? {
+        return roomDataSource.getArtistInfoByArtist(artist)?.toArtistInfo() ?: run {
+            searchArtist(artist)?.let {
+                val artistInfo = ArtistInfo(
+                    artist = artist,
+                    imageUrl = it.images?.firstOrNull()?.url,
+                    id = it.id
+                )
+                insertArtistInfo(artistInfo)
+
+                artistInfo
+            }
+        }
+    }
+
+    override suspend fun getArtistInfoById(id: String): ArtistInfo {
+        return roomDataSource.getArtistInfoById(id)?.toArtistInfo() ?: run {
+            getArtistDetails(id).let {
+                val artistInfo = ArtistInfo(
+                    artist = it.name,
+                    imageUrl = it.images?.firstOrNull()?.url,
+                    id = it.id
+                )
+                insertArtistInfo(artistInfo)
+
+                artistInfo
+            }
+        }
+    }
+
+    override suspend fun deleteAllArtistInfo() {
+        return roomDataSource.deleteAllArtistInfo()
     }
 
     override fun getMusicMetadata(file: File): MusicMetadata? {
@@ -283,23 +351,24 @@ class MusicRepositoryImpl @Inject constructor(
         limit: Int,
         offset: Int
     ): Search {
+        Timber.w("search query=$query, type=$type")
         return spotifyDataSource.search(query, type, market, limit, offset, getAccessToken())
             .toSearch()
     }
 
     override suspend fun searchTrack(trackName: String, artistName: String): TrackDetails? {
         return spotifyDataSource.search(
-            query = trackName,
+            query = "$trackName artist:$artistName",
             type = "track",
             accessToken = getAccessToken()
         ).let { search ->
-            search.tracks?.items?.firstOrNull { trackDetails ->
-                trackDetails.artists.any { it.name == artistName }
-            }?.toTrackDetails()
+            Timber.w("searchTrack search=$search")
+            search.tracks?.items?.firstOrNull()?.toTrackDetails()
         }
     }
 
     override suspend fun searchArtist(artistName: String): ArtistDetails? {
+        Timber.w("searchArtist artistName=$artistName")
         return spotifyDataSource.search(
             query = artistName,
             type = "artist",
@@ -311,6 +380,7 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchAlbum(albumName: String): AlbumDetails? {
+        Timber.w("searchAlbum albumName=$albumName")
         return spotifyDataSource.search(
             query = albumName,
             type = "album",
@@ -321,14 +391,17 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTrackDetails(trackId: String): TrackDetails {
+        Timber.w("getTrackDetails trackId=$trackId")
         return spotifyDataSource.getTrackDetails(trackId, getAccessToken()).toTrackDetails()
     }
 
     override suspend fun getArtistDetails(artistId: String): ArtistDetails {
+        Timber.w("getArtistDetails artistId=$artistId")
         return spotifyDataSource.getArtistDetails(artistId, getAccessToken()).toArtistDetails()
     }
 
     override suspend fun getAlbumDetails(albumId: String): AlbumDetails {
+        Timber.w("getAlbumDetails albumId=$albumId")
         return spotifyDataSource.getAlbumDetails(albumId, getAccessToken()).toAlbumDetails()
     }
 }

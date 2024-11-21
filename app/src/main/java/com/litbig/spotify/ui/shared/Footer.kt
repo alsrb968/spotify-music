@@ -5,7 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -14,17 +15,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.data.mapper.local.toLong
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
-import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
+import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import timber.log.Timber
 
 @Composable
@@ -90,16 +92,13 @@ fun FooterExpanded(
                 modifier = Modifier
                     .size(72.dp)
             ) {
-                musicMetadata.albumArt?.let {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = "Album Art",
-                    )
-                } ?: Image(
+                AsyncImage(
                     modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    model = musicMetadata.albumArtUrl,
                     contentDescription = "Album Art",
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
                 )
             }
 
