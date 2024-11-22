@@ -1,68 +1,46 @@
 package com.litbig.spotify.ui
 
-import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.mutableStateListOf
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
-import com.litbig.spotify.core.domain.usecase.SyncMetadataUseCase
+import androidx.activity.viewModels
+import com.litbig.spotify.ui.splash.SplashViewModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
-import com.litbig.spotify.util.FileExtensions.scanForMusicFiles
-import com.litbig.spotify.util.UsbReceiver
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var syncMetadataUseCase: SyncMetadataUseCase
+    private val splashViewModel: SplashViewModel by viewModels()
 
-    @Inject
-    lateinit var getMetadataUseCase: GetMetadataUseCase
+    private val usbReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val path = intent?.data?.path ?: return
+            when (intent.action) {
+                Intent.ACTION_MEDIA_MOUNTED -> {
+                    when (path) {
+                        USB2 -> splashViewModel.setUsb2Detected(true)
+                    }
+                }
 
-    private val usb2 = File("/storage/usbdisk2")
-    private val musicFiles = mutableStateListOf<File>()
-    private var isUsb2Detected = false
-    private val usbReceiver = UsbReceiver(
-        onUsbMounted = { path ->
-            Timber.i("USB mounted: $path")
-            when (path) {
-                usb2.absolutePath -> {
-                    if (isUsb2Detected) return@UsbReceiver
-                    musicFiles.addAll(usb2.scanForMusicFiles())
-                    isUsb2Detected = true
+                Intent.ACTION_MEDIA_EJECT -> {
+                    when (path) {
+                        USB2 -> splashViewModel.setUsb2Detected(false)
+                    }
                 }
             }
-        },
-        onUsbEjected = { path ->
-            Timber.i("USB ejected: $path")
-            musicFiles.removeAll { it.absolutePath.startsWith(path) }
         }
-    )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Timber.i("onCreate")
-        checkAndRequestStoragePermission()
-
-        if (usb2.exists() && !isUsb2Detected) {
-            musicFiles.addAll(usb2.scanForMusicFiles())
-            Timber.i("Music file count: ${musicFiles.size}")
-            isUsb2Detected = true
-        }
 
         registerReceiver(usbReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_MEDIA_MOUNTED)
@@ -70,40 +48,16 @@ class MainActivity : ComponentActivity() {
             addDataScheme("file")
         })
 
-        lifecycleScope.launch {
-            syncMetadataUseCase(musicFiles)
-        }
-
         setContent {
             SpotifyTheme {
                 SpotifyApp()
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                ) {
-//                    ListScreen(
-//                        onBackPress = {}
-//                    )
-////                    GridScreen(
-////                        musicFiles = musicFiles
-////                    )
-//
-//                    FooterExpanded(
-//                        modifier = Modifier
-//                            .align(Alignment.BottomStart),
-//                        musicMetadata = PreviewMusicMetadata,
-//                        playingTime = 10000,
-//                        isFavorite = false,
-//                        onClick = { }
-//                    )
-//                }
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        hideSystemUI()
+//        hideSystemUI()
     }
 
     override fun onDestroy() {
@@ -122,33 +76,8 @@ class MainActivity : ComponentActivity() {
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     }
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // 권한이 허용된 경우 수행할 작업
-                onStoragePermissionGranted()
-            } else {
-                // 권한이 거부된 경우 사용자에게 알림
-                Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    private fun checkAndRequestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // 권한이 이미 허용된 경우
-            onStoragePermissionGranted()
-        } else {
-            // 권한이 허용되지 않은 경우 권한 요청
-            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-    }
-
-    private fun onStoragePermissionGranted() {
-        // 권한이 허용되었을 때 수행할 작업
-        Toast.makeText(this, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
+    companion object {
+        private const val USB1 = "/storage/usbdisk1"
+        private const val USB2 = "/storage/usbdisk2"
     }
 }

@@ -1,26 +1,30 @@
 package com.litbig.spotify.core.domain.usecase
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
 class SyncMetadataUseCase @Inject constructor(
     private val musicRepository: MusicRepository
 ) {
-    suspend operator fun invoke(files: List<File>) {
-        Timber.i("SyncMetadataUseCase: files.size: ${files.size}")
-        withContext(Dispatchers.IO) {
-            files.forEach { file ->
+    operator fun invoke(
+        scope: CoroutineScope,
+        files: List<File>,
+        onProgress: (Int, Int) -> Unit
+    ): Job {
+        return scope.launch(Dispatchers.IO) {
+            files.forEachIndexed { index, file ->
                 if (musicRepository.isExistMetadata(file.absolutePath)) {
-                    return@forEach
+                    return@forEachIndexed
                 }
                 val metadata = musicRepository.getMusicMetadata(file)
                 metadata?.let {
                     musicRepository.insertMetadata(it)
-                    Timber.i("SyncMetadataUseCase: Metadata inserted: ${file.absolutePath}")
+                    onProgress(index + 1, files.size)
                 }
             }
         }

@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
     data object Grid : Screen("grid")
     data object List : Screen("list/{$ARG_MUSIC_INFO}") {
         fun createRoute(musicInfo: String) = "list/$musicInfo"
@@ -37,10 +38,29 @@ class SpotifyAppState(
     val navController: NavHostController,
     private val context: Context
 ) {
+    fun navigateToSplash(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(Screen.Splash.route) {
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+            }
+        }
+    }
+
+    fun navigateToGrid(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(Screen.Grid.route) {
+                popUpTo(Screen.Splash.route) {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
     fun navigateToList(musicInfo: MusicInfo, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             val serializedMusicInfo = Uri.encode(Json.encodeToString(musicInfo))
-            Timber.w("serializedMusicInfo: $serializedMusicInfo")
             navController.navigate(Screen.List.createRoute(serializedMusicInfo))
         }
     }

@@ -52,7 +52,6 @@ fun ListScreen(
     // LaunchedEffect로 비동기 작업 수행
     LaunchedEffect(musicInfo.imageUrl) {
         dominantColor = extractDominantColorFromUrl(context, musicInfo.imageUrl)
-        Timber.d("dominantColor: $dominantColor")
     }
 
     val listState = rememberLazyListState()

@@ -21,7 +21,7 @@ class ListViewModel @Inject constructor(
     getMetadataByArtistUseCase: GetMetadataByArtistUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    val decoded = Uri.decode(savedStateHandle.get<String>(Screen.ARG_MUSIC_INFO))
+    private val decoded = Uri.decode(savedStateHandle.get<String>(Screen.ARG_MUSIC_INFO))
     val musicInfo = Json.decodeFromString<MusicInfo>(decoded)
 
     val metadataPagingFlow = when (musicInfo.category) {

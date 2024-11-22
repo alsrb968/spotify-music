@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.litbig.spotify.ui.grid.GridScreen
 import com.litbig.spotify.ui.list.ListScreen
+import com.litbig.spotify.ui.splash.SplashScreen
 
 @Composable
 fun SpotifyApp(
@@ -28,8 +29,16 @@ fun SpotifyApp(
         ) {
             NavHost(
                 navController = appState.navController,
-                startDestination = Screen.Grid.route
+                startDestination = Screen.Splash.route
             ) {
+                composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
+                    SplashScreen(
+                        navigateToGrid = {
+                            appState.navigateToGrid(backStackEntry)
+                        }
+                    )
+                }
+
                 composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
                     GridScreen(
                         navigateToList = { musicInfo ->

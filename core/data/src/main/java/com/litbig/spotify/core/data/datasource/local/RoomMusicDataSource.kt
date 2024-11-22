@@ -8,7 +8,6 @@ import com.litbig.spotify.core.data.model.local.AlbumArtEntity
 import com.litbig.spotify.core.data.model.local.ArtistInfoEntity
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 import javax.inject.Inject
 
 interface RoomMusicDataSource {
@@ -185,12 +184,10 @@ class RoomMusicDataSourceImpl @Inject constructor(
     }
 
     override suspend fun insertAlbumArt(albumArt: AlbumArtEntity) {
-        Timber.d("insertAlbumArt: $albumArt")
         albumArtDao.insertAlbumArt(albumArt)
     }
 
     override suspend fun getAlbumArtByAlbum(album: String): AlbumArtEntity? {
-        Timber.d("getAlbumArtByAlbum: $album")
         return albumArtDao.getAlbumArtByAlbum(album)
     }
 
