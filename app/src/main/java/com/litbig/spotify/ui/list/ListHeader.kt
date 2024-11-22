@@ -23,6 +23,7 @@ import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
 import com.litbig.spotify.ui.LocalSharedTransitionScope
+import com.litbig.spotify.ui.imageBoundsTransform
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
@@ -64,7 +65,7 @@ fun ListHeader(
                             animatedVisibilityScope = animatedVisibilityScope,
                             enter = fadeIn(),
                             exit = fadeOut(),
-//                                boundsTransform = imageBoundsTransform
+                            boundsTransform = imageBoundsTransform
                         ),
                     model = musicInfo.imageUrl,
                     contentDescription = "Album Art",

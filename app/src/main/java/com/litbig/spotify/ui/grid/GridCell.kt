@@ -2,7 +2,9 @@
 
 package com.litbig.spotify.ui.grid
 
-import androidx.compose.animation.*
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,6 +32,7 @@ import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
 import com.litbig.spotify.ui.LocalSharedTransitionScope
+import com.litbig.spotify.ui.imageBoundsTransform
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 
@@ -53,36 +56,36 @@ fun GridCell(
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Card(
-            modifier = Modifier
-                .padding(top = 20.dp)
-                .size(182.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            shape = shape,
-        ) {
-            Box(modifier = Modifier) {
-                val sharedTransitionScope = LocalSharedTransitionScope.current
-                    ?: throw IllegalStateException("No Scope found")
-                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-                    ?: throw IllegalStateException("No animatedVisibilityScope found")
-                with(sharedTransitionScope) {
+        val sharedTransitionScope = LocalSharedTransitionScope.current
+            ?: throw IllegalStateException("No Scope found")
+        val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+            ?: throw IllegalStateException("No animatedVisibilityScope found")
+        with(sharedTransitionScope) {
+            Card(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .size(182.dp)
+                    .sharedBounds(
+                        sharedContentState = rememberSharedContentState("image-$title"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        boundsTransform = imageBoundsTransform
+                    ),
+                elevation = CardDefaults.cardElevation(8.dp),
+                shape = shape,
+            ) {
+                Box(modifier = Modifier) {
+
                     AsyncImage(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState("image-$title"),
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                enter = fadeIn(),
-                                exit = fadeOut(),
-//                                    boundsTransform = imageBoundsTransform
-                            ),
+                            .fillMaxSize(),
                         model = imageUrl,
                         contentDescription = "Grid Thumbnail",
                         contentScale = ContentScale.Crop,
                         placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                         error = painterResource(id = R.drawable.ic_launcher_foreground),
                     )
-                }
 
 
 //                if (shape != CircleShape) {
@@ -105,26 +108,27 @@ fun GridCell(
 //                    )
 //                }
 
-                if (isPlayable) {
-                    Image(
-                        modifier = Modifier
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple(bounded = false, radius = 24.dp)
-                            ) { /* TODO */ }
-                            .size(62.dp)
+                    if (isPlayable) {
+                        Image(
+                            modifier = Modifier
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = ripple(bounded = false, radius = 24.dp)
+                                ) { /* TODO */ }
+                                .size(62.dp)
 //                        .padding(4.dp)
-                            .align(Alignment.BottomEnd)
-                            .semantics { role = Role.Button }
+                                .align(Alignment.BottomEnd)
+                                .semantics { role = Role.Button }
 //                        .shadow(
 //                            elevation = 8.dp,
 //                            shape = CircleShape,
 //                            clip = false
 //                        )
-                        ,
-                        painter = painterResource(id = R.drawable.play_green_hover),
-                        contentDescription = "Play"
-                    )
+                            ,
+                            painter = painterResource(id = R.drawable.play_green_hover),
+                            contentDescription = "Play"
+                        )
+                    }
                 }
             }
         }
