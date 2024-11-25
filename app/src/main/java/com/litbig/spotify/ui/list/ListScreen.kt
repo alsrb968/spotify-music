@@ -23,7 +23,6 @@ import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
 import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 
 @Composable
 fun ListScreen(
@@ -33,7 +32,9 @@ fun ListScreen(
     ListScreen(
         musicInfo = viewModel.musicInfo,
         metadataPagingFlow = viewModel.metadataPagingFlow,
-        navigateBack = navigateBack
+        navigateBack = navigateBack,
+        onList = { },
+        onFavorite = viewModel::toggleFavoriteTrack
     )
 }
 
@@ -42,7 +43,9 @@ fun ListScreen(
     modifier: Modifier = Modifier,
     musicInfo: MusicInfo,
     metadataPagingFlow: Flow<PagingData<MusicMetadata>>,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    onList: () -> Unit,
+    onFavorite: (String) -> Unit
 ) {
     val metadataPagingItems = metadataPagingFlow.collectAsLazyPagingItems()
 
@@ -98,8 +101,10 @@ fun ListScreen(
                 title = file.title,
                 artist = file.artist,
                 album = file.album,
+                isFavorite = file.isFavorite,
                 totalTime = file.duration.toHumanReadableDuration(),
-                onClick = { }
+                onClick = { },
+                onFavorite = { onFavorite(file.absolutePath) }
             )
         }
     }
@@ -112,7 +117,9 @@ fun ListScreenPreview() {
         ListScreen(
             musicInfo = PreviewMusicInfo,
             metadataPagingFlow = PreviewMusicMetadataPagingData,
-            navigateBack = {}
+            navigateBack = {},
+            onList = {},
+            onFavorite = {}
         )
     }
 }

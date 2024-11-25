@@ -9,17 +9,20 @@ import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.usecase.GetMetadataByAlbumUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataByArtistUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
+import com.litbig.spotify.core.domain.usecase.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     getMetadataUseCase: GetMetadataUseCase,
     getMetadataByAlbumUseCase: GetMetadataByAlbumUseCase,
     getMetadataByArtistUseCase: GetMetadataByArtistUseCase,
-    savedStateHandle: SavedStateHandle
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
     private val decoded = Uri.decode(savedStateHandle.get<String>(Screen.ARG_MUSIC_INFO))
     val musicInfo = Json.decodeFromString<MusicInfo>(decoded)
@@ -27,9 +30,17 @@ class ListViewModel @Inject constructor(
     val metadataPagingFlow = when (musicInfo.category) {
         "album" -> getMetadataByAlbumUseCase(musicInfo.title, pageSize = 10)
             .cachedIn(viewModelScope)
+
         "artist" -> getMetadataByArtistUseCase(musicInfo.title, pageSize = 10)
             .cachedIn(viewModelScope)
+
         else -> getMetadataUseCase(pageSize = 10)
             .cachedIn(viewModelScope)
+    }
+
+    fun toggleFavoriteTrack(absolutePath: String) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(absolutePath)
+        }
     }
 }

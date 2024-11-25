@@ -260,6 +260,14 @@ class MusicRepositoryImpl @Inject constructor(
         return roomDataSource.getMetadataCountByYear(year)
     }
 
+    override suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean) {
+        return roomDataSource.updateFavorite(absolutePath, isFavorite)
+    }
+
+    override suspend fun getFavorite(absolutePath: String): Boolean {
+        return roomDataSource.getFavorite(absolutePath)
+    }
+
     override suspend fun insertAlbumArt(albumArt: AlbumArt) {
         return roomDataSource.insertAlbumArt(albumArt.toAlbumArtEntity())
     }

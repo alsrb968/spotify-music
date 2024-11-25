@@ -45,7 +45,7 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideGetAlbums(
+    fun provideGetAlbumsUseCase(
         musicRepository: MusicRepository
     ): GetAlbumsUseCase = GetAlbumsUseCase(
         musicRepository
@@ -53,7 +53,7 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideGetArtists(
+    fun provideGetArtistsUseCase(
         musicRepository: MusicRepository
     ): GetArtistsUseCase = GetArtistsUseCase(
         musicRepository
@@ -61,9 +61,17 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideSearch(
+    fun provideSearchUseCase(
         musicRepository: MusicRepository
     ): SearchUseCase = SearchUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideToggleFavoriteUseCase(
+        musicRepository: MusicRepository
+    ): ToggleFavoriteUseCase = ToggleFavoriteUseCase(
         musicRepository
     )
 }

@@ -51,6 +51,9 @@ interface RoomMusicDataSource {
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
 
+    suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean)
+    suspend fun getFavorite(absolutePath: String): Boolean
+
     suspend fun insertAlbumArt(albumArt: AlbumArtEntity)
     suspend fun getAlbumArtByAlbum(album: String): AlbumArtEntity?
     suspend fun getAlbumArtById(id: String): AlbumArtEntity?
@@ -65,7 +68,7 @@ interface RoomMusicDataSource {
 class RoomMusicDataSourceImpl @Inject constructor(
     private val metadataDao: MusicMetadataDao,
     private val albumArtDao: AlbumArtDao,
-    private val artistInfoDao: ArtistInfoDao
+    private val artistInfoDao: ArtistInfoDao,
 ) : RoomMusicDataSource {
     override suspend fun insertMetadata(metadata: MusicMetadataEntity) {
         metadataDao.insertMetadata(metadata)
@@ -181,6 +184,14 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override suspend fun getMetadataCountByYear(year: String): Int {
         return metadataDao.getMetadataCountByYear(year)
+    }
+
+    override suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean) {
+        metadataDao.updateFavorite(absolutePath, isFavorite)
+    }
+
+    override suspend fun getFavorite(absolutePath: String): Boolean {
+        return metadataDao.getFavorite(absolutePath)
     }
 
     override suspend fun insertAlbumArt(albumArt: AlbumArtEntity) {

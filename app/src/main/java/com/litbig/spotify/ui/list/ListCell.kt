@@ -40,7 +40,8 @@ fun ListCell(
     album: String,
     isFavorite: Boolean = false,
     totalTime: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onFavorite: () -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -136,7 +137,7 @@ fun ListCell(
 
             IconButton(
                 modifier = Modifier,
-                onClick = { /*TODO*/ },
+                onClick = onFavorite,
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -196,7 +197,8 @@ fun ListCellPreview() {
             album = item.album,
             isFavorite = true,
             totalTime = item.duration.toHumanReadableDuration(),
-            onClick = {}
+            onClick = {},
+            onFavorite = {},
         )
     }
 }

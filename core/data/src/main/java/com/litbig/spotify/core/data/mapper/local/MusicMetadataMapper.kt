@@ -29,14 +29,9 @@ fun MusicMetadataEntity.toMusicMetadata(albumArtUrl: String?): MusicMetadata {
         compilation = compilation,
         hasAudio = hasAudio,
         bitrate = bitrate,
-        numTracks = numTracks
+        numTracks = numTracks,
+        isFavorite = isFavorite
     )
-}
-
-fun List<MusicMetadataEntity>.toMusicMetadataList(albumArtUrls: List<String?>): List<MusicMetadata> {
-    return mapIndexed { index, musicMetadataEntity ->
-        musicMetadataEntity.toMusicMetadata(albumArtUrls[index])
-    }
 }
 
 fun MusicMetadata.toMusicMetadataEntity(): MusicMetadataEntity {
@@ -58,7 +53,8 @@ fun MusicMetadata.toMusicMetadataEntity(): MusicMetadataEntity {
         compilation = compilation,
         hasAudio = hasAudio,
         bitrate = bitrate,
-        numTracks = numTracks
+        numTracks = numTracks,
+        isFavorite = isFavorite
     )
 }
 

@@ -64,6 +64,9 @@ interface MusicRepository {
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
 
+    suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean)
+    suspend fun getFavorite(absolutePath: String): Boolean
+
     suspend fun insertAlbumArt(albumArt: AlbumArt)
     suspend fun getAlbumArtByAlbum(album: String): AlbumArt?
     suspend fun getAlbumArtById(id: String): AlbumArt

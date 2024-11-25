@@ -257,4 +257,22 @@ interface MusicMetadataDao {
         """
     )
     suspend fun getMetadataCountByYear(year: String): Int
+
+    @Query(
+        """
+        UPDATE music_metadata 
+        SET isFavorite = :isFavorite 
+        WHERE absolutePath = :absolutePath
+        """
+    )
+    suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean)
+
+    @Query(
+        """
+        SELECT isFavorite
+        FROM music_metadata
+        WHERE absolutePath = :absolutePath
+        """
+    )
+    suspend fun getFavorite(absolutePath: String): Boolean
 }

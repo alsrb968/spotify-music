@@ -29,6 +29,7 @@ val PreviewMusicMetadata = MusicMetadata(
     hasAudio = true,
     bitrate = "320000",
     numTracks = "1",
+    isFavorite = false,
 )
 
 val PreviewMusicMetadataList = listOf(
