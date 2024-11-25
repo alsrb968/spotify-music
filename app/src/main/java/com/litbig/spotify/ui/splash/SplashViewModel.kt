@@ -17,15 +17,11 @@ class SplashViewModel @Inject constructor(
     private val syncMetadataUseCase: SyncMetadataUseCase
 ) : ViewModel() {
 
-    private val _isPermissionGranted = MutableStateFlow(false)
-    val isPermissionGranted = _isPermissionGranted
-
-    private val _isUsb2DetectedFlow = MutableStateFlow(File(USB2).exists())
-    val isUsb2DetectedFlow = _isUsb2DetectedFlow
-
-    val isPossibleScanFlow = combine(
-        _isUsb2DetectedFlow,
-        _isPermissionGranted
+    private val isPermissionGranted = MutableStateFlow(false)
+    private val isUsb2DetectedFlow = MutableStateFlow(File(USB2).exists())
+    private val isPossibleScanFlow = combine(
+        isUsb2DetectedFlow,
+        isPermissionGranted
     ) { isDetect, isPermission ->
         Timber.d("isDetect: $isDetect, isPermission: $isPermission")
         isDetect && isPermission
@@ -49,15 +45,14 @@ class SplashViewModel @Inject constructor(
     }
 
     fun setPermissionGranted(isGranted: Boolean) {
-        _isPermissionGranted.value = isGranted
+        isPermissionGranted.value = isGranted
     }
 
     fun setUsb2Detected(isDetected: Boolean) {
-        Timber.d("isDetected: $isDetected")
-        _isUsb2DetectedFlow.value = isDetected
+        isUsb2DetectedFlow.value = isDetected
     }
 
-    fun syncMetadata(path: String): Job = viewModelScope.launch {
+    private fun syncMetadata(path: String): Job = viewModelScope.launch {
         val files = scanForMusicFiles(path)
         Timber.i("scanForMusicFiles size=${files.size}")
 

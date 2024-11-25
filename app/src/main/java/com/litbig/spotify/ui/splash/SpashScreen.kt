@@ -22,6 +22,8 @@ import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 
 @Composable
 fun SplashScreen(
@@ -73,16 +75,21 @@ fun SplashScreen(
     // 권한 상태에 따른 처리
     if (permissionGranted) {
         viewModel.setPermissionGranted(true)
-        val scanProgress = viewModel.scanProgress.collectAsState()
 
         LaunchedEffect(Unit) {
-            if (scanProgress.value.first == scanProgress.value.second) {
-                snackbarHostState.showSnackbar("동기화 완료. 메인 화면으로 이동합니다.")
-                delay(1000L)
-                navigateToGrid()
+            viewModel.scanProgress.collectLatest { progress ->
+                Timber.i("scanProgress: $progress")
+                if (progress.second > 0 &&
+                    progress.first == progress.second
+                ) {
+                    snackbarHostState.showSnackbar("동기화 완료. 메인 화면으로 이동합니다.")
+                    delay(1000L)
+                    navigateToGrid()
+                }
             }
         }
 
+        val scanProgress = viewModel.scanProgress.collectAsState()
         if (scanProgress.value.second > 0) {
             Box(
                 modifier = Modifier.fillMaxSize(),

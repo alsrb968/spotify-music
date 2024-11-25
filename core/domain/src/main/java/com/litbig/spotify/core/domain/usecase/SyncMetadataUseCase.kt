@@ -18,14 +18,12 @@ class SyncMetadataUseCase @Inject constructor(
     ): Job {
         return scope.launch(Dispatchers.IO) {
             files.forEachIndexed { index, file ->
+                onProgress(index + 1, files.size)
                 if (musicRepository.isExistMetadata(file.absolutePath)) {
                     return@forEachIndexed
                 }
                 val metadata = musicRepository.getMusicMetadata(file)
-                metadata?.let {
-                    musicRepository.insertMetadata(it)
-                    onProgress(index + 1, files.size)
-                }
+                metadata?.let { musicRepository.insertMetadata(it) }
             }
         }
     }
