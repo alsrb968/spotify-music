@@ -42,7 +42,7 @@ val PreviewMusicMetadataPagingData = flow<PagingData<MusicMetadata>> {
 }
 
 val PreviewMusicInfo = MusicInfo(
-    imageUrl = null,
+    imageUrl = "https://example.com/image.jpg",
     title = "Ocean Eyes",
     content = "Billie Eilish",
     category = "album",
@@ -95,11 +95,7 @@ val PreviewArtistPagingData = flow<PagingData<Artist>> {
 val PreviewMusicInfoPagingData = flow<PagingData<MusicInfo>> {
     flowOf(
         PagingData.from(
-            listOf(
-                PreviewMusicInfo,
-                PreviewMusicInfo,
-                PreviewMusicInfo,
-            )
+            List(20) { PreviewMusicInfo}
         )
     )
 }

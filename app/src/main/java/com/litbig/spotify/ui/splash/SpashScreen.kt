@@ -22,12 +22,29 @@ import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 @Composable
 fun SplashScreen(
     viewModel: SplashViewModel = hiltViewModel(),
+    navigateToGrid: () -> Unit
+) {
+    SplashScreen(
+        scanProgressFlow = viewModel.scanProgress,
+        onPermissionGranted = { granted ->
+            viewModel.setPermissionGranted(granted)
+        },
+        navigateToGrid = navigateToGrid
+    )
+}
+
+@Composable
+fun SplashScreen(
+    scanProgressFlow: StateFlow<Pair<Int, Int>>,
+    onPermissionGranted: (Boolean) -> Unit,
     navigateToGrid: () -> Unit
 ) {
     val context = LocalContext.current
@@ -43,19 +60,17 @@ fun SplashScreen(
         if (isGranted) {
             // 권한이 허용되면 앱 계속 진행
             permissionGranted = true
-        } else {
+        } else if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                context as Activity,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        ) {
             // 권한이 거부되면 Rationale 여부 확인
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                    context as Activity,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-            ) {
-                // "다시 묻지 않기" 체크된 상태
-                shouldExitApp = true
-            } else {
-                // 권한을 단순히 거부한 상태, 다시 요청 가능
-                showPermissionRationale = true
-            }
+            // "다시 묻지 않기" 체크된 상태
+            shouldExitApp = true
+        } else {
+            // 권한을 단순히 거부한 상태, 다시 요청 가능
+            showPermissionRationale = true
         }
     }
 
@@ -74,21 +89,20 @@ fun SplashScreen(
 
     // 권한 상태에 따른 처리
     if (permissionGranted) {
-        viewModel.setPermissionGranted(true)
+        onPermissionGranted(true)
 
         LaunchedEffect(Unit) {
-            viewModel.scanProgress.collectLatest { progress ->
+            scanProgressFlow.collectLatest { progress ->
                 if (progress.second > 0 &&
                     progress.first == progress.second
                 ) {
                     snackbarHostState.showSnackbar("동기화 완료. 메인 화면으로 이동합니다.")
-                    delay(1000L)
                     navigateToGrid()
                 }
             }
         }
 
-        val scanProgress = viewModel.scanProgress.collectAsState()
+        val scanProgress = scanProgressFlow.collectAsState()
         if (scanProgress.value.second > 0) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -188,7 +202,11 @@ fun PermissionRationaleUI(
 @Composable
 fun PreviewSplashScreen() {
     SpotifyTheme {
-        SplashScreen(navigateToGrid = {})
+        SplashScreen(
+            scanProgressFlow = MutableStateFlow(0 to 0),
+            onPermissionGranted = {},
+            navigateToGrid = {}
+        )
     }
 }
 

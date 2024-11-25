@@ -3,6 +3,7 @@ package com.litbig.spotify.ui.grid
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,7 @@ import timber.log.Timber
 @Composable
 fun GridCategory(
     modifier: Modifier = Modifier,
-    shape: Shape = RectangleShape,
+    shape: Shape = RoundedCornerShape(4.dp),
     navigateToList: (MusicInfo) -> Unit,
     title: String,
     musicInfoPagingFlow: Flow<PagingData<MusicInfo>>
