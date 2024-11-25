@@ -48,6 +48,12 @@ val PreviewMusicInfo = MusicInfo(
     category = "album",
 )
 
+val PreviewMusicInfoList = listOf(
+    PreviewMusicInfo,
+    PreviewMusicInfo,
+    PreviewMusicInfo,
+)
+
 val PreviewAlbum = Album(
     name = "Ocean Eyes",
     artist = "Billie Eilish",
@@ -81,6 +87,18 @@ val PreviewArtistPagingData = flow<PagingData<Artist>> {
                 PreviewArtist,
                 PreviewArtist,
                 PreviewArtist,
+            )
+        )
+    )
+}
+
+val PreviewMusicInfoPagingData = flow<PagingData<MusicInfo>> {
+    flowOf(
+        PagingData.from(
+            listOf(
+                PreviewMusicInfo,
+                PreviewMusicInfo,
+                PreviewMusicInfo,
             )
         )
     )

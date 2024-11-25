@@ -78,7 +78,6 @@ fun SplashScreen(
 
         LaunchedEffect(Unit) {
             viewModel.scanProgress.collectLatest { progress ->
-                Timber.i("scanProgress: $progress")
                 if (progress.second > 0 &&
                     progress.first == progress.second
                 ) {

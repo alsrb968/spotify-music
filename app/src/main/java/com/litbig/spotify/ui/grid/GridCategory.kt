@@ -1,8 +1,89 @@
 package com.litbig.spotify.ui.grid
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.dp
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.litbig.spotify.core.domain.model.MusicInfo
+import com.litbig.spotify.ui.theme.SpotifyTheme
+import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewMusicInfoPagingData
+import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
+import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 @Composable
-fun GridCategory() {
+fun GridCategory(
+    modifier: Modifier = Modifier,
+    shape: Shape = RectangleShape,
+    navigateToList: (MusicInfo) -> Unit,
+    title: String,
+    musicInfoPagingFlow: Flow<PagingData<MusicInfo>>
+) {
+    val musicInfoPagingItems = musicInfoPagingFlow.collectAsLazyPagingItems()
 
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                text = "SEE ALL",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        LazyRow(state = rememberLazyListState()) {
+            items(musicInfoPagingItems.itemCount) { index ->
+                Timber.d("index=$index")
+                val dominantColor = getRandomPastelColor()
+                musicInfoPagingItems[index]?.let { musicInfo ->
+                    GridCell(
+                        modifier = Modifier.padding(15.dp),
+                        shape = shape,
+                        imageUrl = musicInfo.imageUrl,
+                        coreColor = dominantColor,
+                        title = musicInfo.title,
+                        artist = musicInfo.content,
+                        album = musicInfo.title,
+                        isPlayable = false,
+                        onClick = { navigateToList(musicInfo) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewGridCategory() {
+    SpotifyTheme {
+        GridCategory(
+            musicInfoPagingFlow = PreviewMusicInfoPagingData,
+            shape = RectangleShape,
+            title = "Your top albums",
+            navigateToList = {}
+        )
+    }
 }
