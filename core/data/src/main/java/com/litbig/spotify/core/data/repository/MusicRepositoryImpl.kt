@@ -224,6 +224,21 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getFavoriteMetadata(pageSize: Int): Flow<PagingData<MusicMetadata>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { roomDataSource.getFavoritePagedMetadata() }
+        ).flow.map { pagingData ->
+            pagingData.map { entity ->
+                val albumArt = getAlbumArtByAlbum(entity.album)
+                entity.toMusicMetadata(albumArt?.imageUrl)
+            }
+        }
+    }
+
     override suspend fun isExistMetadata(absolutePath: String): Boolean {
         return roomDataSource.isExistMetadata(absolutePath)
     }

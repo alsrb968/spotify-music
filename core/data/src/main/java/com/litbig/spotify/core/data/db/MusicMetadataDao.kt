@@ -179,6 +179,15 @@ interface MusicMetadataDao {
 
     @Query(
         """
+        SELECT * 
+        FROM music_metadata 
+        WHERE isFavorite = 1
+        """
+    )
+    fun getFavoritePagedMetadata(): PagingSource<Int, MusicMetadataEntity>
+
+    @Query(
+        """
         SELECT EXISTS(
             SELECT * 
             FROM music_metadata 

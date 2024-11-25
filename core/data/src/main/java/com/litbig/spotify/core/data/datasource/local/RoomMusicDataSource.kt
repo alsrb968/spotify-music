@@ -41,6 +41,8 @@ interface RoomMusicDataSource {
     fun getMetadataByYear(year: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity>
 
+    fun getFavoritePagedMetadata(): PagingSource<Int, MusicMetadataEntity>
+
     suspend fun isExistMetadata(absolutePath: String): Boolean
     suspend fun deleteAllMetadataList()
     suspend fun deleteMetadata(absolutePath: String)
@@ -148,6 +150,10 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity> {
         return metadataDao.getPagedMetadataByYear(year)
+    }
+
+    override fun getFavoritePagedMetadata(): PagingSource<Int, MusicMetadataEntity> {
+        return metadataDao.getFavoritePagedMetadata()
     }
 
     override suspend fun isExistMetadata(absolutePath: String): Boolean {

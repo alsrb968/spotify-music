@@ -54,6 +54,8 @@ interface MusicRepository {
         pageSize: Int = 20
     ): Flow<PagingData<MusicMetadata>>
 
+    fun getFavoriteMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
+
     suspend fun isExistMetadata(absolutePath: String): Boolean
     suspend fun deleteAllMetadataList()
     suspend fun deleteMetadata(absolutePath: String)

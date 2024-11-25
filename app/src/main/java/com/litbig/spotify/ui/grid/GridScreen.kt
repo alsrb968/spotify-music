@@ -34,6 +34,7 @@ fun GridScreen(
 ) {
     GridScreen(
         navigateToList = navigateToList,
+        favoritePagingFlow = viewModel.favoriteMetadataPagingFlow,
         albumsPagingFlow = viewModel.albumsPagingFlow,
         artistPagingFlow = viewModel.artistPagingFlow
     )
@@ -42,6 +43,7 @@ fun GridScreen(
 @Composable
 fun GridScreen(
     modifier: Modifier = Modifier,
+    favoritePagingFlow: Flow<PagingData<MusicInfo>>,
     albumsPagingFlow: Flow<PagingData<MusicInfo>>,
     artistPagingFlow: Flow<PagingData<MusicInfo>>,
     navigateToList: (MusicInfo) -> Unit
@@ -56,11 +58,18 @@ fun GridScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .gradientBackground(
-                        ratio = 0.5f,
+                        ratio = 0.3f,
                         startColor = getRandomPastelColor(),
                         endColor = MaterialTheme.colorScheme.surfaceDim
                     )
             ) {
+                GridMiniCategory(
+                    title = "Your favorite tracks",
+                    musicInfoPagingFlow = favoritePagingFlow
+                )
+
+                Spacer(modifier = Modifier.height(26.dp))
+
                 GridCategory(
                     navigateToList = navigateToList,
                     title = "Your top albums",
@@ -104,6 +113,7 @@ fun PreviewGridScreen() {
     SpotifyTheme {
         GridScreen(
             navigateToList = {},
+            favoritePagingFlow = PreviewMusicInfoPagingData,
             albumsPagingFlow = PreviewMusicInfoPagingData,
             artistPagingFlow = PreviewMusicInfoPagingData
         )

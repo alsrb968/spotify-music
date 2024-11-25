@@ -45,6 +45,14 @@ object UseCaseModule {
 
     @Provides
     @Singleton
+    fun provideGetFavoriteMetadataUseCase(
+        musicRepository: MusicRepository
+    ): GetFavoriteMetadataUseCase = GetFavoriteMetadataUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
     fun provideGetAlbumsUseCase(
         musicRepository: MusicRepository
     ): GetAlbumsUseCase = GetAlbumsUseCase(
