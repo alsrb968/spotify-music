@@ -54,23 +54,21 @@ fun ListHeader(
                 .size(230.dp)
         ) {
             val isPreview = LocalInspectionMode.current
-            val imageModifier = Modifier.also {
-                if (!isPreview) {
-                    val sharedTransitionScope = LocalSharedTransitionScope.current
-                        ?: throw IllegalStateException("No Scope found")
-                    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-                        ?: throw IllegalStateException("No animatedVisibilityScope found")
-                    with(sharedTransitionScope) {
-                        it.sharedBounds(
-                            sharedContentState = rememberSharedContentState("image-$title"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                            boundsTransform = imageBoundsTransform
-                        )
-                    }
+            val imageModifier = if (!isPreview) {
+                val sharedTransitionScope = LocalSharedTransitionScope.current
+                    ?: throw IllegalStateException("No Scope found")
+                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                    ?: throw IllegalStateException("No animatedVisibilityScope found")
+                with(sharedTransitionScope) {
+                    Modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState("image-$title"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        boundsTransform = imageBoundsTransform
+                    )
                 }
-            }
+            } else Modifier
 
             AsyncImage(
                 modifier = Modifier

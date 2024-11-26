@@ -39,6 +39,7 @@ import com.litbig.spotify.ui.LocalSharedTransitionScope
 import com.litbig.spotify.ui.imageBoundsTransform
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewMusicInfo
 
 @Composable
 fun GridCell(
@@ -60,24 +61,21 @@ fun GridCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val isPreview = LocalInspectionMode.current
-        val cardModifier = Modifier.also {
-            if (!isPreview) {
-                val sharedTransitionScope = LocalSharedTransitionScope.current
-                    ?: throw IllegalStateException("No Scope found")
-                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-                    ?: throw IllegalStateException("No animatedVisibilityScope found")
-
-                with(sharedTransitionScope) {
-                    it.sharedBounds(
-                        sharedContentState = rememberSharedContentState("image-$title"),
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        enter = fadeIn(),
-                        exit = fadeOut(),
-                        boundsTransform = imageBoundsTransform
-                    )
-                }
+        val cardModifier = if (!isPreview) {
+            val sharedTransitionScope = LocalSharedTransitionScope.current
+                ?: throw IllegalStateException("No Scope found")
+            val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                ?: throw IllegalStateException("No animatedVisibilityScope found")
+            with(sharedTransitionScope) {
+                Modifier.sharedBounds(
+                    sharedContentState = rememberSharedContentState("image-$title"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    boundsTransform = imageBoundsTransform
+                )
             }
-        }
+        } else Modifier
 
         Card(
             modifier = Modifier
@@ -189,6 +187,113 @@ fun SkeletonGridCell(
 }
 
 @Composable
+fun GridMiniCell(
+    modifier: Modifier = Modifier,
+    imageUrl: String? = null,
+    title: String,
+    content: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .size(width = 426.dp, height = 82.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f)
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize(),
+                model = imageUrl,
+                contentDescription = "Grid Thumbnail",
+                contentScale = ContentScale.Crop,
+                placeholder = shimmerPainter(),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+            )
+        }
+
+        Spacer(modifier = Modifier.width(21.dp))
+
+        Column(
+            modifier = Modifier
+                .widthIn(max = 300.dp)
+                .padding(top = 16.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun SkeletonGridMiniCell(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .size(width = 426.dp, height = 82.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shimmer(),
+            )
+        }
+
+        Spacer(modifier = Modifier.width(21.dp))
+
+        Column(
+            modifier = Modifier
+                .widthIn(max = 300.dp)
+                .padding(top = 16.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 200.dp, height = 20.dp)
+                    .shimmer()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(width = 150.dp, height = 16.dp)
+                    .shimmer()
+            )
+        }
+    }
+}
+
+@Composable
 fun LineOverlay(
     modifier: Modifier = Modifier,
     color: Color
@@ -279,5 +384,25 @@ fun GridCellPreview() {
 fun SkeletonGridCellPreview() {
     SpotifyTheme {
         SkeletonGridCell()
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewGridMiniCell() {
+    SpotifyTheme {
+        GridMiniCell(
+            title = PreviewMusicInfo.title,
+            content = "노래",
+            onClick = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewSkeletonGridMiniCell() {
+    SpotifyTheme {
+        SkeletonGridMiniCell()
     }
 }
