@@ -2,8 +2,6 @@ package com.litbig.spotify.ui.tooling
 
 import androidx.paging.PagingData
 import com.litbig.spotify.core.data.mapper.local.toDuration
-import com.litbig.spotify.core.domain.model.Album
-import com.litbig.spotify.core.domain.model.Artist
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import kotlinx.coroutines.flow.flow
@@ -29,14 +27,9 @@ val PreviewMusicMetadata = MusicMetadata(
     hasAudio = true,
     bitrate = "320000",
     numTracks = "1",
-    isFavorite = false,
 )
 
-val PreviewMusicMetadataList = listOf(
-    PreviewMusicMetadata,
-    PreviewMusicMetadata,
-    PreviewMusicMetadata,
-)
+val PreviewMusicMetadataList = List(20) { PreviewMusicMetadata }
 
 val PreviewMusicMetadataPagingData = flow<PagingData<MusicMetadata>> {
     flowOf(PagingData.from(PreviewMusicMetadataList))
@@ -49,54 +42,8 @@ val PreviewMusicInfo = MusicInfo(
     category = "album",
 )
 
-val PreviewMusicInfoList = listOf(
-    PreviewMusicInfo,
-    PreviewMusicInfo,
-    PreviewMusicInfo,
-)
-
-val PreviewAlbum = Album(
-    name = "Ocean Eyes",
-    artist = "Billie Eilish",
-    imageUrl = null,
-    musicCount = 3,
-)
-
-val PreviewArtist = Artist(
-    name = "Billie Eilish",
-    imageUrl = null,
-    albumCount = 3,
-    musicCount = 9,
-)
-
-val PreviewAlbumPagingData = flow<PagingData<Album>> {
-    flowOf(
-        PagingData.from(
-            listOf(
-                PreviewAlbum,
-                PreviewAlbum,
-                PreviewAlbum,
-            )
-        )
-    )
-}
-
-val PreviewArtistPagingData = flow<PagingData<Artist>> {
-    flowOf(
-        PagingData.from(
-            listOf(
-                PreviewArtist,
-                PreviewArtist,
-                PreviewArtist,
-            )
-        )
-    )
-}
+val PreviewMusicInfoList = List(20) { PreviewMusicInfo }
 
 val PreviewMusicInfoPagingData = flow<PagingData<MusicInfo>> {
-    flowOf(
-        PagingData.from(
-            List(20) { PreviewMusicInfo}
-        )
-    )
+    flowOf(PagingData.from(List(20) { PreviewMusicInfo }))
 }

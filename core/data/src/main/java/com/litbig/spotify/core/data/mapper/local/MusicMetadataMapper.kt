@@ -2,9 +2,11 @@ package com.litbig.spotify.core.data.mapper.local
 
 import com.litbig.spotify.core.data.model.local.AlbumArtEntity
 import com.litbig.spotify.core.data.model.local.ArtistInfoEntity
+import com.litbig.spotify.core.data.model.local.FavoriteEntity
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
 import com.litbig.spotify.core.domain.model.local.AlbumArt
 import com.litbig.spotify.core.domain.model.local.ArtistInfo
+import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -30,7 +32,6 @@ fun MusicMetadataEntity.toMusicMetadata(albumArtUrl: String?): MusicMetadata {
         hasAudio = hasAudio,
         bitrate = bitrate,
         numTracks = numTracks,
-        isFavorite = isFavorite
     )
 }
 
@@ -54,7 +55,6 @@ fun MusicMetadata.toMusicMetadataEntity(): MusicMetadataEntity {
         hasAudio = hasAudio,
         bitrate = bitrate,
         numTracks = numTracks,
-        isFavorite = isFavorite
     )
 }
 
@@ -99,5 +99,21 @@ fun ArtistInfo.toArtistInfoEntity(): ArtistInfoEntity {
         artist = artist,
         imageUrl = imageUrl,
         id = id
+    )
+}
+
+fun FavoriteEntity.toFavorite(): Favorite {
+    return Favorite(
+        name = name,
+        type = type,
+        imageUrl = imageUrl,
+    )
+}
+
+fun Favorite.toFavoriteEntity(): FavoriteEntity {
+    return FavoriteEntity(
+        name = name,
+        type = type,
+        imageUrl = imageUrl,
     )
 }

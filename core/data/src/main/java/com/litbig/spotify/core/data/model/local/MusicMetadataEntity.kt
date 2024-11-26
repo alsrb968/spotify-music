@@ -23,5 +23,4 @@ data class MusicMetadataEntity(
     val hasAudio: Boolean,
     val bitrate: String,
     val numTracks: String,
-    val isFavorite: Boolean,
 )

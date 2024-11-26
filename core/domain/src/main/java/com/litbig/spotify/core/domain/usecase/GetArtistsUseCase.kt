@@ -2,7 +2,7 @@ package com.litbig.spotify.core.domain.usecase
 
 import androidx.paging.PagingData
 import com.litbig.spotify.core.domain.extension.mapAsync
-import com.litbig.spotify.core.domain.model.Artist
+import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,7 @@ class GetArtistsUseCase @Inject constructor(
     private val repository: MusicRepository
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(pageSize: Int = 20): Flow<PagingData<Artist>> {
+    operator fun invoke(pageSize: Int = 20): Flow<PagingData<MusicInfo>> {
         return repository.getPagedArtists(pageSize).flatMapLatest { pagingData ->
             pagingData.mapAsync { artistName ->
                 val imageUrl = repository.getArtistInfoByArtist(artistName)?.imageUrl
@@ -25,11 +25,11 @@ class GetArtistsUseCase @Inject constructor(
                     Timber.w("$artistName has no image")
                 }
 
-                Artist(
-                    name = artistName,
+                MusicInfo(
                     imageUrl = imageUrl,
-                    albumCount = albumCount,
-                    musicCount = musicCount
+                    title = artistName,
+                    content = "$albumCount albums • $musicCount songs",
+                    category = "artist"
                 )
             }
         }

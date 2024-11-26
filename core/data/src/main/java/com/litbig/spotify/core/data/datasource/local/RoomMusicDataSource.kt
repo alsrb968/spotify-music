@@ -3,9 +3,11 @@ package com.litbig.spotify.core.data.datasource.local
 import androidx.paging.PagingSource
 import com.litbig.spotify.core.data.db.AlbumArtDao
 import com.litbig.spotify.core.data.db.ArtistInfoDao
+import com.litbig.spotify.core.data.db.FavoriteDao
 import com.litbig.spotify.core.data.db.MusicMetadataDao
 import com.litbig.spotify.core.data.model.local.AlbumArtEntity
 import com.litbig.spotify.core.data.model.local.ArtistInfoEntity
+import com.litbig.spotify.core.data.model.local.FavoriteEntity
 import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -41,8 +43,6 @@ interface RoomMusicDataSource {
     fun getMetadataByYear(year: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity>
 
-    fun getFavoritePagedMetadata(): PagingSource<Int, MusicMetadataEntity>
-
     suspend fun isExistMetadata(absolutePath: String): Boolean
     suspend fun deleteAllMetadataList()
     suspend fun deleteMetadata(absolutePath: String)
@@ -53,9 +53,6 @@ interface RoomMusicDataSource {
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
 
-    suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean)
-    suspend fun getFavorite(absolutePath: String): Boolean
-
     suspend fun insertAlbumArt(albumArt: AlbumArtEntity)
     suspend fun getAlbumArtByAlbum(album: String): AlbumArtEntity?
     suspend fun getAlbumArtById(id: String): AlbumArtEntity?
@@ -65,12 +62,20 @@ interface RoomMusicDataSource {
     suspend fun getArtistInfoByArtist(artist: String): ArtistInfoEntity?
     suspend fun getArtistInfoById(id: String): ArtistInfoEntity?
     suspend fun deleteAllArtistInfo()
+
+    suspend fun insertFavorite(favorite: FavoriteEntity)
+    fun isFavorite(name: String, type: String): Flow<Boolean>
+    fun getPagedFavorites(): PagingSource<Int, FavoriteEntity>
+    fun getPagedFavoritesByType(type: String): PagingSource<Int, FavoriteEntity>
+    suspend fun deleteFavorite(name: String, type: String)
+    suspend fun deleteAllFavorites()
 }
 
 class RoomMusicDataSourceImpl @Inject constructor(
     private val metadataDao: MusicMetadataDao,
     private val albumArtDao: AlbumArtDao,
     private val artistInfoDao: ArtistInfoDao,
+    private val favoriteDao: FavoriteDao,
 ) : RoomMusicDataSource {
     override suspend fun insertMetadata(metadata: MusicMetadataEntity) {
         metadataDao.insertMetadata(metadata)
@@ -152,10 +157,6 @@ class RoomMusicDataSourceImpl @Inject constructor(
         return metadataDao.getPagedMetadataByYear(year)
     }
 
-    override fun getFavoritePagedMetadata(): PagingSource<Int, MusicMetadataEntity> {
-        return metadataDao.getFavoritePagedMetadata()
-    }
-
     override suspend fun isExistMetadata(absolutePath: String): Boolean {
         return metadataDao.isExistMetadata(absolutePath)
     }
@@ -192,14 +193,6 @@ class RoomMusicDataSourceImpl @Inject constructor(
         return metadataDao.getMetadataCountByYear(year)
     }
 
-    override suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean) {
-        metadataDao.updateFavorite(absolutePath, isFavorite)
-    }
-
-    override suspend fun getFavorite(absolutePath: String): Boolean {
-        return metadataDao.getFavorite(absolutePath)
-    }
-
     override suspend fun insertAlbumArt(albumArt: AlbumArtEntity) {
         albumArtDao.insertAlbumArt(albumArt)
     }
@@ -230,5 +223,29 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override suspend fun deleteAllArtistInfo() {
         artistInfoDao.deleteAllArtistInfo()
+    }
+
+    override suspend fun insertFavorite(favorite: FavoriteEntity) {
+        favoriteDao.insertFavorite(favorite)
+    }
+
+    override fun isFavorite(name: String, type: String): Flow<Boolean> {
+        return favoriteDao.isFavorite(name, type)
+    }
+
+    override fun getPagedFavorites(): PagingSource<Int, FavoriteEntity> {
+        return favoriteDao.getPagedFavorites()
+    }
+
+    override fun getPagedFavoritesByType(type: String): PagingSource<Int, FavoriteEntity> {
+        return favoriteDao.getPagedFavoritesByType(type)
+    }
+
+    override suspend fun deleteFavorite(name: String, type: String) {
+        favoriteDao.deleteFavorite(name, type)
+    }
+
+    override suspend fun deleteAllFavorites() {
+        favoriteDao.deleteAllFavorites()
     }
 }

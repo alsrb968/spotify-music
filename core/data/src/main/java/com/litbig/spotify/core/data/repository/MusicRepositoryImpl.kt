@@ -15,6 +15,7 @@ import com.litbig.spotify.core.data.mapper.remote.toSearch
 import com.litbig.spotify.core.data.mapper.remote.toTrackDetails
 import com.litbig.spotify.core.domain.model.local.AlbumArt
 import com.litbig.spotify.core.domain.model.local.ArtistInfo
+import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.core.domain.model.remote.AlbumDetails
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
@@ -22,6 +23,7 @@ import com.litbig.spotify.core.domain.model.remote.Search
 import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import java.io.File
@@ -224,21 +226,6 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getFavoriteMetadata(pageSize: Int): Flow<PagingData<MusicMetadata>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = pageSize,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { roomDataSource.getFavoritePagedMetadata() }
-        ).flow.map { pagingData ->
-            pagingData.map { entity ->
-                val albumArt = getAlbumArtByAlbum(entity.album)
-                entity.toMusicMetadata(albumArt?.imageUrl)
-            }
-        }
-    }
-
     override suspend fun isExistMetadata(absolutePath: String): Boolean {
         return roomDataSource.isExistMetadata(absolutePath)
     }
@@ -273,14 +260,6 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun getMetadataCountByYear(year: String): Int {
         return roomDataSource.getMetadataCountByYear(year)
-    }
-
-    override suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean) {
-        return roomDataSource.updateFavorite(absolutePath, isFavorite)
-    }
-
-    override suspend fun getFavorite(absolutePath: String): Boolean {
-        return roomDataSource.getFavorite(absolutePath)
     }
 
     override suspend fun insertAlbumArt(albumArt: AlbumArt) {
@@ -374,7 +353,6 @@ class MusicRepositoryImpl @Inject constructor(
         limit: Int,
         offset: Int
     ): Search {
-        Timber.w("search query=$query, type=$type")
         return spotifyDataSource.search(query, type, market, limit, offset, getAccessToken())
             .toSearch()
     }
@@ -385,13 +363,11 @@ class MusicRepositoryImpl @Inject constructor(
             type = "track",
             accessToken = getAccessToken()
         ).let { search ->
-            Timber.w("searchTrack search=$search")
             search.tracks?.items?.firstOrNull()?.toTrackDetails()
         }
     }
 
     override suspend fun searchArtist(artistName: String): ArtistDetails? {
-        Timber.w("searchArtist artistName=$artistName")
         return spotifyDataSource.search(
             query = artistName,
             type = "artist",
@@ -403,7 +379,6 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchAlbum(albumName: String): AlbumDetails? {
-        Timber.w("searchAlbum albumName=$albumName")
         return spotifyDataSource.search(
             query = albumName,
             type = "album",
@@ -414,17 +389,58 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTrackDetails(trackId: String): TrackDetails {
-        Timber.w("getTrackDetails trackId=$trackId")
         return spotifyDataSource.getTrackDetails(trackId, getAccessToken()).toTrackDetails()
     }
 
     override suspend fun getArtistDetails(artistId: String): ArtistDetails {
-        Timber.w("getArtistDetails artistId=$artistId")
         return spotifyDataSource.getArtistDetails(artistId, getAccessToken()).toArtistDetails()
     }
 
     override suspend fun getAlbumDetails(albumId: String): AlbumDetails {
-        Timber.w("getAlbumDetails albumId=$albumId")
         return spotifyDataSource.getAlbumDetails(albumId, getAccessToken()).toAlbumDetails()
+    }
+
+    override suspend fun insertFavorite(favorite: Favorite) {
+        roomDataSource.insertFavorite(favorite.toFavoriteEntity())
+    }
+
+    override fun isFavorite(name: String, type: String): Flow<Boolean> {
+        return roomDataSource.isFavorite(name, type)
+    }
+
+    override fun getPagedFavorites(pageSize: Int): Flow<PagingData<Favorite>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { roomDataSource.getPagedFavorites() }
+        ).flow.map { pagingData ->
+            pagingData.map { entity ->
+                entity.toFavorite()
+            }
+        }
+    }
+
+    override fun getPagedFavoritesByType(type: String, pageSize: Int): Flow<PagingData<Favorite>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { roomDataSource.getPagedFavoritesByType(type) }
+        ).flow.map { pagingData ->
+            pagingData.map { entity ->
+                entity.toFavorite()
+            }
+        }
+    }
+
+    override suspend fun deleteFavorite(name: String, type: String) {
+        roomDataSource.deleteFavorite(name, type)
+    }
+
+    override suspend fun deleteAllFavorites() {
+        roomDataSource.deleteAllFavorites()
     }
 }

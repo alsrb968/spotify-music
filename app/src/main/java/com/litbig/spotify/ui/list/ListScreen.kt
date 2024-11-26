@@ -23,18 +23,49 @@ import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
 import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ListScreen(
     viewModel: ListViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
+    val onFavorite = {
+        when (viewModel.musicInfo.category) {
+            "album" ->
+                viewModel.toggleFavoriteAlbum(
+                    viewModel.musicInfo.title,
+                    viewModel.musicInfo.imageUrl
+                )
+
+            "artist" ->
+                viewModel.toggleFavoriteArtist(
+                    viewModel.musicInfo.title,
+                    viewModel.musicInfo.imageUrl
+                )
+
+            else -> viewModel.toggleFavoriteTrack(
+                viewModel.musicInfo.title,
+                viewModel.musicInfo.imageUrl
+            )
+        }
+    }
+
+    val isFavorite = when (viewModel.musicInfo.category) {
+        "album" -> viewModel.isFavoriteAlbum(viewModel.musicInfo.title)
+        "artist" -> viewModel.isFavoriteArtist(viewModel.musicInfo.title)
+        else -> viewModel.isFavoriteTrack(viewModel.musicInfo.title)
+    }
+
     ListScreen(
         musicInfo = viewModel.musicInfo,
         metadataPagingFlow = viewModel.metadataPagingFlow,
         navigateBack = navigateBack,
-        onList = { },
-        onFavorite = viewModel::toggleFavoriteTrack
+        onFavorite = onFavorite,
+        isFavorite = isFavorite,
+        onTrack = { },
+        onTrackFavorite = viewModel::toggleFavoriteTrack,
+        isTrackFavorite = viewModel::isFavoriteTrack
     )
 }
 
@@ -44,8 +75,11 @@ fun ListScreen(
     musicInfo: MusicInfo,
     metadataPagingFlow: Flow<PagingData<MusicMetadata>>,
     navigateBack: () -> Unit,
-    onList: () -> Unit,
-    onFavorite: (String) -> Unit
+    onFavorite: () -> Unit,
+    isFavorite: Flow<Boolean>,
+    onTrack: () -> Unit,
+    onTrackFavorite: (String, String?) -> Unit,
+    isTrackFavorite: (String) -> Flow<Boolean>
 ) {
     val metadataPagingItems = metadataPagingFlow.collectAsLazyPagingItems()
 
@@ -86,7 +120,10 @@ fun ListScreen(
                     )
                 }
 
-                ListTitle()
+                ListTitle(
+                    onFavorite = onFavorite,
+                    isFavorite = isFavorite
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
             }
@@ -94,6 +131,7 @@ fun ListScreen(
 
         items(metadataPagingItems.itemCount) { index ->
             val file = metadataPagingItems[index] ?: return@items
+            val isFav = isTrackFavorite(file.title).collectAsState(initial = false).value
             ListCell(
                 index = index + 1,
                 isPlaying = index == 0,
@@ -101,10 +139,10 @@ fun ListScreen(
                 title = file.title,
                 artist = file.artist,
                 album = file.album,
-                isFavorite = file.isFavorite,
+                isFavorite = isFav,
                 totalTime = file.duration.toHumanReadableDuration(),
                 onClick = { },
-                onFavorite = { onFavorite(file.absolutePath) }
+                onFavorite = { onTrackFavorite(file.title, file.albumArtUrl) }
             )
         }
     }
@@ -118,8 +156,11 @@ fun ListScreenPreview() {
             musicInfo = PreviewMusicInfo,
             metadataPagingFlow = PreviewMusicMetadataPagingData,
             navigateBack = {},
-            onList = {},
-            onFavorite = {}
+            onFavorite = {},
+            isFavorite = flowOf(false),
+            onTrack = {},
+            onTrackFavorite = { _, _ -> },
+            isTrackFavorite = { flowOf(false) }
         )
     }
 }

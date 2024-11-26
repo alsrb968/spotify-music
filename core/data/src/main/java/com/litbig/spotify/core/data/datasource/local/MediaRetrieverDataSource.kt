@@ -101,7 +101,6 @@ class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSou
                     ?: "",
                 numTracks = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS)
                     ?: "",
-                isFavorite = false
             )
             metadata
         } catch (e: Exception) {
@@ -157,7 +156,6 @@ class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSou
                         ?: "",
                     numTracks = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS)
                         ?: "",
-                    isFavorite = false
                 )
                 emit(metadata)
             } finally {

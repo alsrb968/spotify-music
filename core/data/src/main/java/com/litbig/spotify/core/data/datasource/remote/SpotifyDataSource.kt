@@ -3,6 +3,7 @@ package com.litbig.spotify.core.data.datasource.remote
 import com.litbig.spotify.core.data.api.SpotifyApi
 import com.litbig.spotify.core.data.api.SpotifyAuthApi
 import com.litbig.spotify.core.data.model.remote.*
+import timber.log.Timber
 import javax.inject.Inject
 
 interface SpotifyDataSource {
@@ -73,6 +74,7 @@ class SpotifyDataSourceImpl @Inject constructor(
         offset: Int,
         accessToken: String
     ): SearchResponse {
+        Timber.w("search query=$query, type=$type")
         return api.search(query, type, market, limit, offset, accessToken)
     }
 

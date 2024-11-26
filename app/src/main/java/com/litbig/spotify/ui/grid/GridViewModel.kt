@@ -3,51 +3,42 @@ package com.litbig.spotify.ui.grid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import androidx.paging.map
-import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.usecase.GetAlbumsUseCase
 import com.litbig.spotify.core.domain.usecase.GetArtistsUseCase
-import com.litbig.spotify.core.domain.usecase.GetFavoriteMetadataUseCase
+import com.litbig.spotify.core.domain.usecase.favorite.GetFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class GridViewModel @Inject constructor(
-    getFavoriteMetadataUseCase: GetFavoriteMetadataUseCase,
+    getFavoritesUseCase: GetFavoritesUseCase,
     getAlbumsUseCase: GetAlbumsUseCase,
     getArtistsUseCase: GetArtistsUseCase,
 ) : ViewModel() {
-    val favoriteMetadataPagingFlow = getFavoriteMetadataUseCase(pageSize = 10).map { pagingData ->
-        pagingData.map { favoriteMetadata ->
-            MusicInfo(
-                imageUrl = favoriteMetadata.albumArtUrl,
-                title = favoriteMetadata.title,
-                content = "",
-                category = "favorite"
-            )
-        }
-    }.cachedIn(viewModelScope)
+    val favoritesPagingFlow = getFavoritesUseCase(pageSize = 10).cachedIn(viewModelScope)
+    val albumsPagingFlow = getAlbumsUseCase(pageSize = 10).cachedIn(viewModelScope)
+    val artistPagingFlow = getArtistsUseCase(pageSize = 10).cachedIn(viewModelScope)
 
-    val albumsPagingFlow = getAlbumsUseCase(pageSize = 10).map { pagingData ->
-        pagingData.map { album ->
-            MusicInfo(
-                imageUrl = album.imageUrl,
-                title = album.name,
-                content = "${album.artist} • ${album.musicCount} songs",
-                category = "album"
-            )
+    init {
+        viewModelScope.launch {
+            launch {
+                favoritesPagingFlow.collectLatest {
+                    Timber.e("favoriteMetadataPagingFlow.collectLatest")
+                }
+            }
+            launch {
+                albumsPagingFlow.collectLatest {
+                    Timber.e("albumsPagingFlow.collectLatest")
+                }
+            }
+            launch {
+                artistPagingFlow.collectLatest {
+                    Timber.e("artistPagingFlow.collectLatest")
+                }
+            }
         }
-    }.cachedIn(viewModelScope)
-
-    val artistPagingFlow = getArtistsUseCase(pageSize = 10).map { pagingData ->
-        pagingData.map { artist ->
-            MusicInfo(
-                imageUrl = artist.imageUrl,
-                title = artist.name,
-                content = "${artist.albumCount} albums • ${artist.musicCount} songs",
-                category = "artist"
-            )
-        }
-    }.cachedIn(viewModelScope)
+    }
 }

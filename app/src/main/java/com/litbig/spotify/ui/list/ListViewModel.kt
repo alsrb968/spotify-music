@@ -9,9 +9,11 @@ import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.usecase.GetMetadataByAlbumUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataByArtistUseCase
 import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
-import com.litbig.spotify.core.domain.usecase.ToggleFavoriteUseCase
+import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
+import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -23,6 +25,7 @@ class ListViewModel @Inject constructor(
     getMetadataByAlbumUseCase: GetMetadataByAlbumUseCase,
     getMetadataByArtistUseCase: GetMetadataByArtistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val isFavoriteUseCase: IsFavoriteUseCase,
 ) : ViewModel() {
     private val decoded = Uri.decode(savedStateHandle.get<String>(Screen.ARG_MUSIC_INFO))
     val musicInfo = Json.decodeFromString<MusicInfo>(decoded)
@@ -38,9 +41,33 @@ class ListViewModel @Inject constructor(
             .cachedIn(viewModelScope)
     }
 
-    fun toggleFavoriteTrack(absolutePath: String) {
+    fun isFavoriteTrack(trackName: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteTrack(trackName)
+    }
+
+    fun toggleFavoriteTrack(trackName: String, imageUrl: String? = null) {
         viewModelScope.launch {
-            toggleFavoriteUseCase(absolutePath)
+            toggleFavoriteUseCase.toggleFavoriteTrack(trackName, imageUrl)
+        }
+    }
+
+    fun isFavoriteAlbum(albumName: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteAlbum(albumName)
+    }
+
+    fun toggleFavoriteAlbum(albumName: String, imageUrl: String? = null) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase.toggleFavoriteAlbum(albumName, imageUrl)
+        }
+    }
+
+    fun isFavoriteArtist(artistName: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteArtist(artistName)
+    }
+
+    fun toggleFavoriteArtist(artistName: String, imageUrl: String? = null) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase.toggleFavoriteArtist(artistName, imageUrl)
         }
     }
 }

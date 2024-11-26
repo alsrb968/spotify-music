@@ -10,10 +10,7 @@ import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSourceImpl
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSourceImpl
-import com.litbig.spotify.core.data.db.AlbumArtDao
-import com.litbig.spotify.core.data.db.ArtistInfoDao
-import com.litbig.spotify.core.data.db.MusicDatabase
-import com.litbig.spotify.core.data.db.MusicMetadataDao
+import com.litbig.spotify.core.data.db.*
 import com.litbig.spotify.core.data.repository.MusicRepositoryImpl
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import dagger.Module
@@ -52,6 +49,12 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideFavoriteDao(
+        database: MusicDatabase
+    ): FavoriteDao = database.favoriteDao()
+
+    @Provides
+    @Singleton
     fun provideSpotifyAuthApi(): SpotifyAuthApi =
         SpotifyClient.authRetrofit.create(SpotifyAuthApi::class.java)
 
@@ -66,10 +69,12 @@ object DataModule {
         musicMetadataDao: MusicMetadataDao,
         albumArtDao: AlbumArtDao,
         artistInfoDao: ArtistInfoDao,
+        favoriteDao: FavoriteDao,
     ): RoomMusicDataSource = RoomMusicDataSourceImpl(
         musicMetadataDao,
         albumArtDao,
         artistInfoDao,
+        favoriteDao,
     )
 
     @Provides

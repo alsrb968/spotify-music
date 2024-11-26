@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -34,7 +35,7 @@ fun GridScreen(
 ) {
     GridScreen(
         navigateToList = navigateToList,
-        favoritePagingFlow = viewModel.favoriteMetadataPagingFlow,
+        favoritePagingFlow = viewModel.favoritesPagingFlow,
         albumsPagingFlow = viewModel.albumsPagingFlow,
         artistPagingFlow = viewModel.artistPagingFlow
     )
@@ -48,43 +49,56 @@ fun GridScreen(
     artistPagingFlow: Flow<PagingData<MusicInfo>>,
     navigateToList: (MusicInfo) -> Unit
 ) {
+    val bgColor = remember { getRandomPastelColor() }
+
+    val favoritePagingItems = favoritePagingFlow.collectAsLazyPagingItems()
+    val albumsPagingItems = albumsPagingFlow.collectAsLazyPagingItems()
+    val artistPagingItems = artistPagingFlow.collectAsLazyPagingItems()
+
     LazyColumn(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surfaceDim),
         state = rememberLazyListState()
     ) {
-        item {
+        item(key = "favorite") {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .gradientBackground(
-                        ratio = 0.3f,
-                        startColor = getRandomPastelColor(),
+                        ratio = 1f,
+                        startColor = bgColor,
                         endColor = MaterialTheme.colorScheme.surfaceDim
                     )
             ) {
                 GridMiniCategory(
                     title = "Your favorite tracks",
-                    musicInfoPagingFlow = favoritePagingFlow
+                    musicInfoPagingItems = favoritePagingItems,
                 )
 
                 Spacer(modifier = Modifier.height(26.dp))
-
-                GridCategory(
-                    navigateToList = navigateToList,
-                    title = "Your top albums",
-                    musicInfoPagingFlow = albumsPagingFlow
-                )
-
-                Spacer(modifier = Modifier.height(26.dp))
-
-                GridCategory(
-                    shape = CircleShape,
-                    navigateToList = navigateToList,
-                    title = "Your top artists",
-                    musicInfoPagingFlow = artistPagingFlow
-                )
             }
+        }
+
+        item(key = "albums") {
+            GridCategory(
+                navigateToList = navigateToList,
+                title = "Your top albums",
+                musicInfoPagingItems = albumsPagingItems
+            )
+
+            Spacer(modifier = Modifier.height(26.dp))
+        }
+
+        item(key = "artists") {
+            GridCategory(
+                shape = CircleShape,
+                navigateToList = navigateToList,
+                title = "Your top artists",
+                musicInfoPagingItems = artistPagingItems
+            )
+
+            Spacer(modifier = Modifier.height(26.dp))
         }
     }
 }

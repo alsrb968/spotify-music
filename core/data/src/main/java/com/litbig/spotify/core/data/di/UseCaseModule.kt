@@ -2,6 +2,7 @@ package com.litbig.spotify.core.data.di
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import com.litbig.spotify.core.domain.usecase.*
+import com.litbig.spotify.core.domain.usecase.favorite.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,14 +46,6 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideGetFavoriteMetadataUseCase(
-        musicRepository: MusicRepository
-    ): GetFavoriteMetadataUseCase = GetFavoriteMetadataUseCase(
-        musicRepository
-    )
-
-    @Provides
-    @Singleton
     fun provideGetAlbumsUseCase(
         musicRepository: MusicRepository
     ): GetAlbumsUseCase = GetAlbumsUseCase(
@@ -72,6 +65,22 @@ object UseCaseModule {
     fun provideSearchUseCase(
         musicRepository: MusicRepository
     ): SearchUseCase = SearchUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideGetFavoritesUseCase(
+        musicRepository: MusicRepository
+    ): GetFavoritesUseCase = GetFavoritesUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideIsFavoriteUseCase(
+        musicRepository: MusicRepository
+    ): IsFavoriteUseCase = IsFavoriteUseCase(
         musicRepository
     )
 

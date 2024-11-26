@@ -7,10 +7,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,10 +22,14 @@ import androidx.compose.ui.unit.dp
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ListTitle(
     modifier: Modifier = Modifier,
+    onFavorite: () -> Unit,
+    isFavorite: Flow<Boolean>,
 ) {
     Column(
         modifier = modifier
@@ -50,13 +57,14 @@ fun ListTitle(
 
             IconButton(
                 modifier = Modifier,
-                onClick = { /*TODO*/ },
+                onClick = onFavorite,
             ) {
+                val isFav by isFavorite.collectAsState(initial = false)
                 Icon(
                     modifier = Modifier.size(40.dp),
-                    imageVector = Icons.Default.FavoriteBorder,
+                    imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = if (isFav) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -142,6 +150,9 @@ fun ListTitle(
 @Composable
 fun ListTitlePreview() {
     SpotifyTheme {
-        ListTitle()
+        ListTitle(
+            onFavorite = { },
+            isFavorite = remember { flowOf(false) }
+        )
     }
 }

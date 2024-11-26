@@ -3,6 +3,7 @@ package com.litbig.spotify.core.domain.repository
 import androidx.paging.PagingData
 import com.litbig.spotify.core.domain.model.local.AlbumArt
 import com.litbig.spotify.core.domain.model.local.ArtistInfo
+import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.core.domain.model.remote.AlbumDetails
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
@@ -14,47 +15,24 @@ import java.io.File
 interface MusicRepository {
     suspend fun insertMetadata(metadata: MusicMetadata)
     suspend fun insertMetadataList(metadataList: List<MusicMetadata>)
-
     fun getAlbums(): Flow<List<String>>
     fun getPagedAlbums(pageSize: Int = 20): Flow<PagingData<String>>
-
     fun getArtists(): Flow<List<String>>
     fun getPagedArtists(pageSize: Int = 20): Flow<PagingData<String>>
     fun getArtistFromAlbum(album: String): String
-
     fun getGenres(): Flow<List<String>>
     fun getPagedGenres(pageSize: Int = 20): Flow<PagingData<String>>
-
     fun getYears(): Flow<List<String>>
     fun getPagedYears(pageSize: Int = 20): Flow<PagingData<String>>
-
     fun getMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
-
     fun getMetadataByAlbum(album: String): Flow<MusicMetadata>
-    fun getMetadataByAlbum(
-        album: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadata>>
-
+    fun getMetadataByAlbum(album: String, pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
     fun getMetadataByArtist(artist: String): Flow<MusicMetadata>
-    fun getMetadataByArtist(
-        artist: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadata>>
-
+    fun getMetadataByArtist(artist: String, pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
     fun getMetadataByGenre(genre: String): Flow<MusicMetadata>
-    fun getMetadataByGenre(
-        genre: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadata>>
-
+    fun getMetadataByGenre(genre: String, pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
     fun getMetadataByYear(year: String): Flow<MusicMetadata>
-    fun getMetadataByYear(
-        year: String,
-        pageSize: Int = 20
-    ): Flow<PagingData<MusicMetadata>>
-
-    fun getFavoriteMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
+    fun getMetadataByYear(year: String, pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
 
     suspend fun isExistMetadata(absolutePath: String): Boolean
     suspend fun deleteAllMetadataList()
@@ -65,9 +43,6 @@ interface MusicRepository {
     suspend fun getMetadataCountByArtist(artist: String): Int
     suspend fun getMetadataCountByGenre(genre: String): Int
     suspend fun getMetadataCountByYear(year: String): Int
-
-    suspend fun updateFavorite(absolutePath: String, isFavorite: Boolean)
-    suspend fun getFavorite(absolutePath: String): Boolean
 
     suspend fun insertAlbumArt(albumArt: AlbumArt)
     suspend fun getAlbumArtByAlbum(album: String): AlbumArt?
@@ -97,4 +72,11 @@ interface MusicRepository {
     suspend fun getTrackDetails(trackId: String): TrackDetails
     suspend fun getArtistDetails(artistId: String): ArtistDetails
     suspend fun getAlbumDetails(albumId: String): AlbumDetails
+
+    suspend fun insertFavorite(favorite: Favorite)
+    fun isFavorite(name: String, type: String): Flow<Boolean>
+    fun getPagedFavorites(pageSize: Int = 20): Flow<PagingData<Favorite>>
+    fun getPagedFavoritesByType(type: String, pageSize: Int = 20): Flow<PagingData<Favorite>>
+    suspend fun deleteFavorite(name: String, type: String)
+    suspend fun deleteAllFavorites()
 }

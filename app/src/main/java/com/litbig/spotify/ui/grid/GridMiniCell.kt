@@ -17,12 +17,14 @@ import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewMusicInfo
 
 @Composable
 fun GridMiniCell(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     title: String,
+    content: String,
     onClick: () -> Unit
 ) {
     Row(
@@ -51,13 +53,29 @@ fun GridMiniCell(
 
         Spacer(modifier = Modifier.width(21.dp))
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Column(
+            modifier = Modifier
+                .widthIn(max = 300.dp)
+                .padding(top = 16.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
@@ -66,7 +84,8 @@ fun GridMiniCell(
 fun PreviewGridMiniCell() {
     SpotifyTheme {
         GridMiniCell(
-            title = "Title",
+            title = PreviewMusicInfo.title,
+            content = "노래",
             onClick = { }
         )
     }

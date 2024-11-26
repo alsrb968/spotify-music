@@ -14,14 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfoPagingData
 import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
-import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
 @Composable
@@ -30,9 +29,8 @@ fun GridCategory(
     shape: Shape = RoundedCornerShape(4.dp),
     navigateToList: (MusicInfo) -> Unit,
     title: String,
-    musicInfoPagingFlow: Flow<PagingData<MusicInfo>>
+    musicInfoPagingItems: LazyPagingItems<MusicInfo>
 ) {
-    val musicInfoPagingItems = musicInfoPagingFlow.collectAsLazyPagingItems()
 
     Column(
         modifier = modifier
@@ -82,9 +80,8 @@ fun GridCategory(
 fun GridMiniCategory(
     modifier: Modifier = Modifier,
     title: String,
-    musicInfoPagingFlow: Flow<PagingData<MusicInfo>>
+    musicInfoPagingItems: LazyPagingItems<MusicInfo>
 ) {
-    val musicInfoPagingItems = musicInfoPagingFlow.collectAsLazyPagingItems()
 
     Column(
         modifier = modifier
@@ -127,6 +124,7 @@ fun GridMiniCategory(
                         modifier = Modifier,
                         imageUrl = musicInfo.imageUrl,
                         title = musicInfo.title,
+                        content = musicInfo.content,
                         onClick = {  }
                     )
                 }
@@ -140,7 +138,7 @@ fun GridMiniCategory(
 fun PreviewGridCategory() {
     SpotifyTheme {
         GridCategory(
-            musicInfoPagingFlow = PreviewMusicInfoPagingData,
+            musicInfoPagingItems = PreviewMusicInfoPagingData.collectAsLazyPagingItems(),
             shape = RectangleShape,
             title = "Your top albums",
             navigateToList = {}
@@ -153,7 +151,7 @@ fun PreviewGridCategory() {
 fun PreviewGridMiniCategory() {
     SpotifyTheme {
         GridMiniCategory(
-            musicInfoPagingFlow = PreviewMusicInfoPagingData,
+            musicInfoPagingItems = PreviewMusicInfoPagingData.collectAsLazyPagingItems(),
             title = "Your top albums",
         )
     }
