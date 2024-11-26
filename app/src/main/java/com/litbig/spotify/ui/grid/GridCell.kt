@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -47,7 +48,6 @@ fun GridCell(
     coreColor: Color = Color.Yellow,
     title: String,
     artist: String,
-    album: String,
     isPlayable: Boolean,
     onClick: () -> Unit
 ) {
@@ -59,58 +59,64 @@ fun GridCell(
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val sharedTransitionScope = LocalSharedTransitionScope.current
-            ?: throw IllegalStateException("No Scope found")
-        val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-            ?: throw IllegalStateException("No animatedVisibilityScope found")
-        with(sharedTransitionScope) {
-            Card(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .size(182.dp)
-                    .sharedBounds(
+        val isPreview = LocalInspectionMode.current
+        val cardModifier = Modifier.also {
+            if (!isPreview) {
+                val sharedTransitionScope = LocalSharedTransitionScope.current
+                    ?: throw IllegalStateException("No Scope found")
+                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                    ?: throw IllegalStateException("No animatedVisibilityScope found")
+
+                with(sharedTransitionScope) {
+                    it.sharedBounds(
                         sharedContentState = rememberSharedContentState("image-$title"),
                         animatedVisibilityScope = animatedVisibilityScope,
                         enter = fadeIn(),
                         exit = fadeOut(),
                         boundsTransform = imageBoundsTransform
-                    ),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = shape,
-            ) {
-                Box(modifier = Modifier) {
-
-                    AsyncImage(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        model = imageUrl,
-                        contentDescription = "Grid Thumbnail",
-                        contentScale = ContentScale.Crop,
-                        placeholder = shimmerPainter(),
-                        error = painterResource(id = R.drawable.ic_launcher_foreground),
                     )
+                }
+            }
+        }
 
-                    if (isPlayable) {
-                        Image(
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = ripple(bounded = false, radius = 24.dp)
-                                ) { /* TODO */ }
-                                .size(62.dp)
+        Card(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .size(182.dp)
+                .then(cardModifier),
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = shape,
+        ) {
+            Box {
+                AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
+                    model = imageUrl,
+                    contentDescription = "Grid Thumbnail",
+                    contentScale = ContentScale.Crop,
+                    placeholder = shimmerPainter(),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                )
+
+                if (isPlayable) {
+                    Image(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple(bounded = false, radius = 24.dp)
+                            ) { /* TODO */ }
+                            .size(62.dp)
 //                        .padding(4.dp)
-                                .align(Alignment.BottomEnd)
-                                .semantics { role = Role.Button }
+                            .align(Alignment.BottomEnd)
+                            .semantics { role = Role.Button }
 //                        .shadow(
 //                            elevation = 8.dp,
 //                            shape = CircleShape,
 //                            clip = false
 //                        )
-                            ,
-                            painter = painterResource(id = R.drawable.play_green_hover),
-                            contentDescription = "Play"
-                        )
-                    }
+                        ,
+                        painter = painterResource(id = R.drawable.play_green_hover),
+                        contentDescription = "Play"
+                    )
                 }
             }
         }
@@ -262,7 +268,6 @@ fun GridCellPreview() {
         GridCell(
             title = "Folk & Acoustic Mix 2021",
             artist = "Canyon City, Crooked Still, Gregory Alan, Isakov, The Paper Kites",
-            album = "Folk & Acoustic",
             isPlayable = true,
             onClick = {}
         )

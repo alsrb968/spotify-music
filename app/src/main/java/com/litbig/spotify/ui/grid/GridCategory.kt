@@ -22,7 +22,6 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfoPagingData
 import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
-import timber.log.Timber
 
 @Composable
 fun GridCategory(
@@ -67,7 +66,6 @@ fun GridCategory(
                 }
             } else {
                 items(musicInfoPagingItems.itemCount) { index ->
-                    Timber.d("index=$index")
                     val dominantColor = getRandomPastelColor()
                     musicInfoPagingItems[index]?.let { musicInfo ->
                         GridCell(
@@ -77,7 +75,6 @@ fun GridCategory(
                             coreColor = dominantColor,
                             title = musicInfo.title,
                             artist = musicInfo.content,
-                            album = musicInfo.title,
                             isPlayable = false,
                             onClick = { navigateToList(musicInfo) }
                         )
@@ -137,7 +134,6 @@ fun GridMiniCategory(
                 }
             } else {
                 items(musicInfoPagingItems.itemCount) { index ->
-                    Timber.d("index=$index")
                     musicInfoPagingItems[index]?.let { musicInfo ->
                         GridMiniCell(
                             modifier = Modifier,

@@ -1,8 +1,7 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class, ExperimentalAnimationApi::class)
+@file:OptIn(ExperimentalSharedTransitionApi::class)
 
 package com.litbig.spotify.ui.list
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -53,28 +53,35 @@ fun ListHeader(
             modifier = Modifier
                 .size(230.dp)
         ) {
-            val sharedTransitionScope = LocalSharedTransitionScope.current
-                ?: throw IllegalStateException("No Scope found")
-            val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-                ?: throw IllegalStateException("No animatedVisibilityScope found")
-            with(sharedTransitionScope) {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .sharedBounds(
+            val isPreview = LocalInspectionMode.current
+            val imageModifier = Modifier.also {
+                if (!isPreview) {
+                    val sharedTransitionScope = LocalSharedTransitionScope.current
+                        ?: throw IllegalStateException("No Scope found")
+                    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                        ?: throw IllegalStateException("No animatedVisibilityScope found")
+                    with(sharedTransitionScope) {
+                        it.sharedBounds(
                             sharedContentState = rememberSharedContentState("image-$title"),
                             animatedVisibilityScope = animatedVisibilityScope,
                             enter = fadeIn(),
                             exit = fadeOut(),
                             boundsTransform = imageBoundsTransform
-                        ),
-                    model = musicInfo.imageUrl,
-                    contentDescription = "Album Art",
-                    contentScale = ContentScale.Crop,
-                    placeholder = shimmerPainter(),
-                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                )
+                        )
+                    }
+                }
             }
+
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(imageModifier),
+                model = musicInfo.imageUrl,
+                contentDescription = "Album Art",
+                contentScale = ContentScale.Crop,
+                placeholder = shimmerPainter(),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+            )
         }
 
         Spacer(modifier = Modifier.width(32.dp))
