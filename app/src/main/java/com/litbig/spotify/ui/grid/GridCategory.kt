@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.litbig.spotify.core.domain.model.MusicInfo
@@ -54,22 +55,33 @@ fun GridCategory(
             )
         }
 
+        val isLoading = musicInfoPagingItems.loadState.refresh is LoadState.Loading
+
         LazyRow(state = rememberLazyListState()) {
-            items(musicInfoPagingItems.itemCount) { index ->
-                Timber.d("index=$index")
-                val dominantColor = getRandomPastelColor()
-                musicInfoPagingItems[index]?.let { musicInfo ->
-                    GridCell(
+            if (isLoading) {
+                items(4) {
+                    SkeletonGridCell(
                         modifier = Modifier.padding(15.dp),
-                        shape = shape,
-                        imageUrl = musicInfo.imageUrl,
-                        coreColor = dominantColor,
-                        title = musicInfo.title,
-                        artist = musicInfo.content,
-                        album = musicInfo.title,
-                        isPlayable = false,
-                        onClick = { navigateToList(musicInfo) }
+                        shape = shape
                     )
+                }
+            } else {
+                items(musicInfoPagingItems.itemCount) { index ->
+                    Timber.d("index=$index")
+                    val dominantColor = getRandomPastelColor()
+                    musicInfoPagingItems[index]?.let { musicInfo ->
+                        GridCell(
+                            modifier = Modifier.padding(15.dp),
+                            shape = shape,
+                            imageUrl = musicInfo.imageUrl,
+                            coreColor = dominantColor,
+                            title = musicInfo.title,
+                            artist = musicInfo.content,
+                            album = musicInfo.title,
+                            isPlayable = false,
+                            onClick = { navigateToList(musicInfo) }
+                        )
+                    }
                 }
             }
         }
@@ -105,6 +117,8 @@ fun GridMiniCategory(
             )
         }
 
+        val isLoading = musicInfoPagingItems.loadState.refresh is LoadState.Loading
+
         LazyHorizontalGrid(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,16 +131,22 @@ fun GridMiniCategory(
             horizontalArrangement = Arrangement.spacedBy(30.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(musicInfoPagingItems.itemCount) { index ->
-                Timber.d("index=$index")
-                musicInfoPagingItems[index]?.let { musicInfo ->
-                    GridMiniCell(
-                        modifier = Modifier,
-                        imageUrl = musicInfo.imageUrl,
-                        title = musicInfo.title,
-                        content = musicInfo.content,
-                        onClick = {  }
-                    )
+            if (isLoading) {
+                items(6) {
+                    SkeletonGridMiniCell()
+                }
+            } else {
+                items(musicInfoPagingItems.itemCount) { index ->
+                    Timber.d("index=$index")
+                    musicInfoPagingItems[index]?.let { musicInfo ->
+                        GridMiniCell(
+                            modifier = Modifier,
+                            imageUrl = musicInfo.imageUrl,
+                            title = musicInfo.title,
+                            content = musicInfo.content,
+                            onClick = { }
+                        )
+                    }
                 }
             }
         }

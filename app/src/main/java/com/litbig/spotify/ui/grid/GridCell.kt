@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.component.shimmerPainter
+import com.litbig.spotify.core.design.extension.shimmer
 import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
 import com.litbig.spotify.ui.LocalSharedTransitionScope
 import com.litbig.spotify.ui.imageBoundsTransform
@@ -83,7 +86,7 @@ fun GridCell(
                         model = imageUrl,
                         contentDescription = "Grid Thumbnail",
                         contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        placeholder = shimmerPainter(),
                         error = painterResource(id = R.drawable.ic_launcher_foreground),
                     )
 
@@ -137,6 +140,49 @@ fun GridCell(
 }
 
 @Composable
+fun SkeletonGridCell(
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(4.dp),
+) {
+    Column(
+        modifier = modifier
+            .size(width = 224.dp, height = 324.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Card(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .size(182.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = shape,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shimmer()
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(top = 25.dp)
+                .size(width = 182.dp, height = 20.dp)
+                .shimmer(),
+        )
+
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .size(width = 182.dp, height = 18.dp)
+                .shimmer(),
+        )
+    }
+}
+
+@Composable
 fun LineOverlay(
     modifier: Modifier = Modifier,
     color: Color
@@ -147,14 +193,14 @@ fun LineOverlay(
     ) {
         drawLine(
             color = color,
-            start = androidx.compose.ui.geometry.Offset(0f, size.height - 40),
-            end = androidx.compose.ui.geometry.Offset(0f, size.height - 15),
+            start = Offset(0f, size.height - 40),
+            end = Offset(0f, size.height - 15),
             strokeWidth = 9.dp.toPx()
         )
         drawLine(
             color = color,
-            start = androidx.compose.ui.geometry.Offset(0f, size.height),
-            end = androidx.compose.ui.geometry.Offset(size.width, size.height),
+            start = Offset(0f, size.height),
+            end = Offset(size.width, size.height),
             strokeWidth = 8.dp.toPx()
         )
     }
@@ -220,5 +266,13 @@ fun GridCellPreview() {
             isPlayable = true,
             onClick = {}
         )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun SkeletonGridCellPreview() {
+    SpotifyTheme {
+        SkeletonGridCell()
     }
 }

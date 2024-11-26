@@ -75,7 +75,14 @@ class SpotifyDataSourceImpl @Inject constructor(
         accessToken: String
     ): SearchResponse {
         Timber.w("search query=$query, type=$type")
-        return api.search(query, type, market, limit, offset, accessToken)
+        return api.search(
+            query,
+            type,
+//            market,
+//            limit,
+//            offset,
+            accessToken
+        )
     }
 
     override suspend fun getTrackDetails(

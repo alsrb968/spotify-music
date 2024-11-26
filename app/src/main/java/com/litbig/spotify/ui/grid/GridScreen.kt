@@ -9,18 +9,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -61,7 +57,7 @@ fun GridScreen(
             .background(color = MaterialTheme.colorScheme.surfaceDim),
         state = rememberLazyListState()
     ) {
-        item(key = "favorite") {
+        item {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -72,7 +68,7 @@ fun GridScreen(
                     )
             ) {
                 GridMiniCategory(
-                    title = "Your favorite tracks",
+                    title = "Your favorites",
                     musicInfoPagingItems = favoritePagingItems,
                 )
 
@@ -80,7 +76,7 @@ fun GridScreen(
             }
         }
 
-        item(key = "albums") {
+        item {
             GridCategory(
                 navigateToList = navigateToList,
                 title = "Your top albums",
@@ -90,7 +86,7 @@ fun GridScreen(
             Spacer(modifier = Modifier.height(26.dp))
         }
 
-        item(key = "artists") {
+        item {
             GridCategory(
                 shape = CircleShape,
                 navigateToList = navigateToList,
@@ -101,24 +97,6 @@ fun GridScreen(
             Spacer(modifier = Modifier.height(26.dp))
         }
     }
-}
-
-fun Modifier.gradientBackground(
-    ratio: Float = 0.3f,
-    startColor: Color,
-    endColor: Color
-): Modifier = composed {
-    var boxSize by remember { mutableStateOf(IntSize.Zero) }
-
-    this
-        .onSizeChanged { boxSize = it }
-        .background(
-            brush = Brush.linearGradient(
-                colors = listOf(startColor, endColor),
-                start = Offset(0f, 0f),
-                end = Offset(0f, boxSize.height * ratio)
-            )
-        )
 }
 
 @DevicePreviews

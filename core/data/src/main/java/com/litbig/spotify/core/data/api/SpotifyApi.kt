@@ -14,9 +14,9 @@ interface SpotifyApi {
     suspend fun search(
         @Query("q") query: String,
         @Query("type") type: String,
-        @Query("market") market: String = "KR",
-        @Query("limit") limit: Int = 10,
-        @Query("offset") offset: Int = 0,
+//        @Query("market") market: String = "KR",
+//        @Query("limit") limit: Int = 10,
+//        @Query("offset") offset: Int = 0,
         @Header("Authorization") accessToken: String
     ): SearchResponse
 

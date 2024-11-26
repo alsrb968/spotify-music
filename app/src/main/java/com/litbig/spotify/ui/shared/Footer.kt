@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.data.mapper.local.toLong
+import com.litbig.spotify.core.design.component.shimmerPainter
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -97,7 +98,7 @@ fun FooterExpanded(
                     model = musicMetadata.albumArtUrl,
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    placeholder = shimmerPainter(),
                     error = painterResource(id = R.drawable.ic_launcher_foreground),
                 )
             }

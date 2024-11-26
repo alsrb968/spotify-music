@@ -11,11 +11,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
-import com.litbig.spotify.ui.grid.gradientBackground
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
@@ -91,9 +92,9 @@ fun ListScreen(
         dominantColor = extractDominantColorFromUrl(context, musicInfo.imageUrl)
     }
 
-    val listState = rememberLazyListState()
+    val isLoading = metadataPagingItems.loadState.refresh is LoadState.Loading
 
-    LazyColumn(state = listState) {
+    LazyColumn(state = rememberLazyListState()) {
 
         item {
             Column(
@@ -129,21 +130,27 @@ fun ListScreen(
             }
         }
 
-        items(metadataPagingItems.itemCount) { index ->
-            val file = metadataPagingItems[index] ?: return@items
-            val isFav = isTrackFavorite(file.title).collectAsState(initial = false).value
-            ListCell(
-                index = index + 1,
-                isPlaying = index == 0,
-                imageUrl = file.albumArtUrl,
-                title = file.title,
-                artist = file.artist,
-                album = file.album,
-                isFavorite = isFav,
-                totalTime = file.duration.toHumanReadableDuration(),
-                onClick = { },
-                onFavorite = { onTrackFavorite(file.title, file.albumArtUrl) }
-            )
+        if (isLoading) {
+            items(3) {
+                SkeletonListCell()
+            }
+        } else {
+            items(metadataPagingItems.itemCount) { index ->
+                val file = metadataPagingItems[index] ?: return@items
+                val isFav = isTrackFavorite(file.title).collectAsState(initial = false).value
+                ListCell(
+                    index = index + 1,
+                    isPlaying = index == 0,
+                    imageUrl = file.albumArtUrl,
+                    title = file.title,
+                    artist = file.artist,
+                    album = file.album,
+                    isFavorite = isFav,
+                    totalTime = file.duration.toHumanReadableDuration(),
+                    onClick = { },
+                    onFavorite = { onTrackFavorite(file.title, file.albumArtUrl) }
+                )
+            }
         }
     }
 }

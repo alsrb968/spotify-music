@@ -15,9 +15,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.component.shimmerPainter
+import com.litbig.spotify.core.design.extension.shimmer
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
+import kotlinx.serialization.json.JsonNull.content
 
 @Composable
 fun GridMiniCell(
@@ -46,7 +49,7 @@ fun GridMiniCell(
                 model = imageUrl,
                 contentDescription = "Grid Thumbnail",
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                placeholder = shimmerPainter(),
                 error = painterResource(id = R.drawable.ic_launcher_foreground),
             )
         }
@@ -79,6 +82,53 @@ fun GridMiniCell(
     }
 }
 
+@Composable
+fun SkeletonGridMiniCell(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .size(width = 426.dp, height = 82.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shimmer(),
+            )
+        }
+
+        Spacer(modifier = Modifier.width(21.dp))
+
+        Column(
+            modifier = Modifier
+                .widthIn(max = 300.dp)
+                .padding(top = 16.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 200.dp, height = 20.dp)
+                    .shimmer()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(width = 150.dp, height = 16.dp)
+                    .shimmer()
+            )
+        }
+    }
+}
+
 @DevicePreviews
 @Composable
 fun PreviewGridMiniCell() {
@@ -88,5 +138,13 @@ fun PreviewGridMiniCell() {
             content = "노래",
             onClick = { }
         )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewSkeletonGridMiniCell() {
+    SpotifyTheme {
+        SkeletonGridMiniCell()
     }
 }

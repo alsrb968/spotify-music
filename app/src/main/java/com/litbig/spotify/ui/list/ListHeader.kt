@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.component.shimmerPainter
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
@@ -70,7 +71,7 @@ fun ListHeader(
                     model = musicInfo.imageUrl,
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    placeholder = shimmerPainter(),
                     error = painterResource(id = R.drawable.ic_launcher_foreground),
                 )
             }
