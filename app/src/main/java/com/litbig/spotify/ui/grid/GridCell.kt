@@ -92,7 +92,7 @@ fun GridCell(
                     contentDescription = "Grid Thumbnail",
                     contentScale = ContentScale.Crop,
                     placeholder = shimmerPainter(),
-                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.baseline_image_not_supported_24),
                 )
 
                 if (isPlayable) {
@@ -214,7 +214,7 @@ fun GridMiniCell(
                 contentDescription = "Grid Thumbnail",
                 contentScale = ContentScale.Crop,
                 placeholder = shimmerPainter(),
-                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.baseline_image_not_supported_24),
             )
         }
 

@@ -12,11 +12,10 @@ import androidx.navigation.compose.rememberNavController
 import com.litbig.spotify.core.domain.model.MusicInfo
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import timber.log.Timber
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
-    data object Grid : Screen("grid")
+    data object Home : Screen("home")
     data object List : Screen("list/{$ARG_MUSIC_INFO}") {
         fun createRoute(musicInfo: String) = "list/$musicInfo"
     }
@@ -48,9 +47,9 @@ class SpotifyAppState(
         }
     }
 
-    fun navigateToGrid(from: NavBackStackEntry) {
+    fun navigateToHome(from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate(Screen.Grid.route) {
+            navController.navigate(Screen.Home.route) {
                 popUpTo(Screen.Splash.route) {
                     inclusive = true
                 }

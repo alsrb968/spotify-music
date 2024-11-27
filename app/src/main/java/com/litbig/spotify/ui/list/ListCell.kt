@@ -80,7 +80,7 @@ fun ListCell(
             contentDescription = "List Thumbnail",
             contentScale = ContentScale.Crop,
             placeholder = shimmerPainter(),
-            error = painterResource(id = R.drawable.ic_launcher_foreground)
+            error = painterResource(id = R.drawable.baseline_image_not_supported_24)
         )
 
         Spacer(modifier = Modifier.width(20.dp))

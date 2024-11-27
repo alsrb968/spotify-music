@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.sp
 val SpotifyTypography = androidx.compose.material3.Typography(
     displayLarge = TextStyle( // Chill Mix
         fontFamily = SpotifyFonts,
-        fontSize = 122.sp,
+        fontSize = 112.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = -(0.06).em
     ),

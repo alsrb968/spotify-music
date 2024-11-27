@@ -8,11 +8,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
@@ -54,7 +57,7 @@ fun ListHeader(
                 .size(230.dp)
         ) {
             val isPreview = LocalInspectionMode.current
-            val imageModifier = if (!isPreview) {
+            val cardModifier = if (!isPreview) {
                 val sharedTransitionScope = LocalSharedTransitionScope.current
                     ?: throw IllegalStateException("No Scope found")
                 val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
@@ -70,16 +73,23 @@ fun ListHeader(
                 }
             } else Modifier
 
-            AsyncImage(
+            Card(
                 modifier = Modifier
                     .fillMaxSize()
-                    .then(imageModifier),
-                model = musicInfo.imageUrl,
-                contentDescription = "Album Art",
-                contentScale = ContentScale.Crop,
-                placeholder = shimmerPainter(),
-                error = painterResource(id = R.drawable.ic_launcher_foreground),
-            )
+                    .then(cardModifier),
+                elevation = CardDefaults.cardElevation(8.dp),
+                shape = RectangleShape,
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    model = musicInfo.imageUrl,
+                    contentDescription = "Album Art",
+                    contentScale = ContentScale.Crop,
+                    placeholder = shimmerPainter(),
+                    error = painterResource(id = R.drawable.baseline_image_not_supported_24),
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(32.dp))
@@ -96,7 +106,7 @@ fun ListHeader(
             )
 
             Row(
-                modifier = Modifier.height(146.dp),
+                modifier = Modifier.height(126.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(

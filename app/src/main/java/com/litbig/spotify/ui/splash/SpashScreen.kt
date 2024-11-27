@@ -21,23 +21,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import timber.log.Timber
 
 @Composable
 fun SplashScreen(
     viewModel: SplashViewModel = hiltViewModel(),
-    navigateToGrid: () -> Unit
+    navigateToHome: () -> Unit
 ) {
     SplashScreen(
         scanProgressFlow = viewModel.scanProgress,
         onPermissionGranted = { granted ->
             viewModel.setPermissionGranted(granted)
         },
-        navigateToGrid = navigateToGrid
+        navigateToHome = navigateToHome
     )
 }
 
@@ -45,7 +43,7 @@ fun SplashScreen(
 fun SplashScreen(
     scanProgressFlow: StateFlow<Pair<Int, Int>>,
     onPermissionGranted: (Boolean) -> Unit,
-    navigateToGrid: () -> Unit
+    navigateToHome: () -> Unit
 ) {
     val context = LocalContext.current
     var permissionGranted by remember { mutableStateOf(false) }
@@ -97,7 +95,7 @@ fun SplashScreen(
                     progress.first == progress.second
                 ) {
                     snackbarHostState.showSnackbar("동기화 완료. 메인 화면으로 이동합니다.")
-                    navigateToGrid()
+                    navigateToHome()
                 }
             }
         }
@@ -205,7 +203,7 @@ fun PreviewSplashScreen() {
         SplashScreen(
             scanProgressFlow = MutableStateFlow(0 to 0),
             onPermissionGranted = {},
-            navigateToGrid = {}
+            navigateToHome = {}
         )
     }
 }

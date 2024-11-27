@@ -1,4 +1,4 @@
-package com.litbig.spotify.ui.shared
+package com.litbig.spotify.ui.player
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,14 +31,7 @@ import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import timber.log.Timber
 
 @Composable
-fun FooterCollapsed(
-    modifier: Modifier = Modifier
-) {
-
-}
-
-@Composable
-fun FooterExpanded(
+fun PlayerCollapsed(
     modifier: Modifier = Modifier,
     musicMetadata: MusicMetadata,
     playingTime: Long,
@@ -51,35 +44,6 @@ fun FooterExpanded(
         modifier = modifier
             .fillMaxWidth()
     ) {
-//        Box(
-//            modifier = Modifier
-//                .clickable { onClick() }
-//        ) {
-//            Box(
-//                modifier = Modifier.size(310.dp)
-//            ) {
-//                musicMetadata.albumArt?.let {
-//                    Image(
-//                        modifier = Modifier.fillMaxSize(),
-//                        bitmap = it,
-//                        contentDescription = "Album Art",
-//                    )
-//                } ?: Image(
-//                    modifier = Modifier.fillMaxSize(),
-//                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-//                    contentDescription = "Album Art",
-//                )
-//            }
-//            Image(
-//                modifier = Modifier
-//                    .size(30.dp)
-//                    .offset(x = (-10).dp, y = 10.dp)
-//                    .align(Alignment.TopEnd),
-//                painter = painterResource(id = R.drawable.forward),
-//                contentDescription = "Collapse Button",
-//            )
-//        }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -99,7 +63,7 @@ fun FooterExpanded(
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Crop,
                     placeholder = shimmerPainter(),
-                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.baseline_image_not_supported_24),
                 )
             }
 
@@ -266,9 +230,9 @@ fun RoundedMusicProgressBar(
 
 @DevicePreviews
 @Composable
-fun PreviewFooterExpanded() {
+fun PreviewPlayerCollapsed() {
     SpotifyTheme {
-        FooterExpanded(
+        PlayerCollapsed(
             musicMetadata = PreviewMusicMetadata,
             playingTime = 159000,
             isFavorite = true,
