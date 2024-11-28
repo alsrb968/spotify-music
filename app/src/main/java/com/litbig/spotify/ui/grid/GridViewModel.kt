@@ -29,21 +29,22 @@ class GridViewModel @Inject constructor(
 ) : ViewModel() {
     private val category = Uri.decode(savedStateHandle.get<String>(Screen.ARG_CATEGORY))
 
+    private val favoritesPagingDataFlow = getFavoritesUseCase(pageSize = 20).cachedIn(viewModelScope)
+    private val albumsPagingDataFlow = getAlbumsUseCase(pageSize = 20).cachedIn(viewModelScope)
+    private val artistsPagingDataFlow = getArtistsUseCase(pageSize = 20).cachedIn(viewModelScope)
+
     val state: StateFlow<GridUiState> = flow {
         when (category) {
             "favorite" -> {
-                val paging = getFavoritesUseCase(pageSize = 20).cachedIn(viewModelScope)
-                emit(GridUiState(category = category, paging = paging))
+                emit(GridUiState(category = category, paging = favoritesPagingDataFlow))
             }
 
             "album" -> {
-                val paging = getAlbumsUseCase(pageSize = 20).cachedIn(viewModelScope)
-                emit(GridUiState(category = category, paging = paging))
+                emit(GridUiState(category = category, paging = albumsPagingDataFlow))
             }
 
             "artist" -> {
-                val paging = getArtistsUseCase(pageSize = 20).cachedIn(viewModelScope)
-                emit(GridUiState(category = category, paging = paging))
+                emit(GridUiState(category = category, paging = artistsPagingDataFlow))
             }
         }
     }.stateIn(

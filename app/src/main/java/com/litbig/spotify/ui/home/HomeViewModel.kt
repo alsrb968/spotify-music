@@ -42,7 +42,6 @@ class HomeViewModel @Inject constructor(
         albumsFlow,
         artistsFlow,
     ) { favorites, albums, artists ->
-
         HomeUiState(
             favoriteState = CategoryUiState.Ready("favorite", favorites),
             albumState = CategoryUiState.Ready("album", albums),
@@ -53,6 +52,4 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = HomeUiState()
     )
-
-    fun onMore() {}
 }
