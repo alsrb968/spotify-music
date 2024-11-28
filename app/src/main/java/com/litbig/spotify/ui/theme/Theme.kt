@@ -1,12 +1,14 @@
 package com.litbig.spotify.ui.theme
 
-import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
 import com.litbig.spotify.core.design.theme.*
 
 private val LightColorScheme = lightColorScheme(
@@ -117,7 +119,15 @@ fun SpotifyTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = SpotifyTypography,
-            content = content
+            content = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    content()
+                }
+            }
         )
     }
 }

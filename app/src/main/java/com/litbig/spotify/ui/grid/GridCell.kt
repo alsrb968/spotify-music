@@ -46,10 +46,9 @@ fun GridCell(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(4.dp),
     imageUrl: String? = null,
-    coreColor: Color = Color.Yellow,
     title: String,
-    artist: String,
-    isPlayable: Boolean,
+    content: String,
+    isPlayable: Boolean = false,
     onClick: () -> Unit
 ) {
     Column(
@@ -134,7 +133,7 @@ fun GridCell(
             modifier = Modifier
                 .padding(top = 8.dp)
                 .width(182.dp),
-            text = artist,
+            text = content,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
@@ -372,7 +371,7 @@ fun GridCellPreview() {
     SpotifyTheme {
         GridCell(
             title = "Folk & Acoustic Mix 2021",
-            artist = "Canyon City, Crooked Still, Gregory Alan, Isakov, The Paper Kites",
+            content = "Canyon City, Crooked Still, Gregory Alan, Isakov, The Paper Kites",
             isPlayable = true,
             onClick = {}
         )

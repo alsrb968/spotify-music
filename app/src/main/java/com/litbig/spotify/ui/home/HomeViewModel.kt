@@ -21,7 +21,10 @@ data class HomeUiState(
 
 sealed interface CategoryUiState {
     data object Loading : CategoryUiState
-    data class Ready(val list: List<MusicInfo>) : CategoryUiState
+    data class Ready(
+        val category: String,
+        val list: List<MusicInfo>
+    ) : CategoryUiState
 }
 
 @HiltViewModel
@@ -41,13 +44,13 @@ class HomeViewModel @Inject constructor(
     ) { favorites, albums, artists ->
 
         HomeUiState(
-            favoriteState = CategoryUiState.Ready(favorites),
-            albumState = CategoryUiState.Ready(albums),
-            artistState = CategoryUiState.Ready(artists),
+            favoriteState = CategoryUiState.Ready("favorite", favorites),
+            albumState = CategoryUiState.Ready("album", albums),
+            artistState = CategoryUiState.Ready("artist", artists),
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Eagerly,
+        started = SharingStarted.WhileSubscribed(),
         initialValue = HomeUiState()
     )
 

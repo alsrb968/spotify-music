@@ -16,11 +16,15 @@ import kotlinx.serialization.json.Json
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
     data object Home : Screen("home")
+    data object Grid : Screen("grid/{$ARG_CATEGORY}") {
+        fun createRoute(category: String) = "grid/$category"
+    }
     data object List : Screen("list/{$ARG_MUSIC_INFO}") {
         fun createRoute(musicInfo: String) = "list/$musicInfo"
     }
 
     companion object {
+        const val ARG_CATEGORY = "category"
         const val ARG_MUSIC_INFO = "music_info"
     }
 }
@@ -57,10 +61,17 @@ class SpotifyAppState(
         }
     }
 
+    fun navigateToGrid(category: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            val encodedCategory = Uri.encode(category)
+            navController.navigate(Screen.Grid.createRoute(encodedCategory))
+        }
+    }
+
     fun navigateToList(musicInfo: MusicInfo, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            val serializedMusicInfo = Uri.encode(Json.encodeToString(musicInfo))
-            navController.navigate(Screen.List.createRoute(serializedMusicInfo))
+            val encodedMusicInfo = Uri.encode(Json.encodeToString(musicInfo))
+            navController.navigate(Screen.List.createRoute(encodedMusicInfo))
         }
     }
 
