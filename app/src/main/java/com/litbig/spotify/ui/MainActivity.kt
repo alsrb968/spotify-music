@@ -22,17 +22,8 @@ class MainActivity : ComponentActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val path = intent?.data?.path ?: return
             when (intent.action) {
-                Intent.ACTION_MEDIA_MOUNTED -> {
-                    when (path) {
-                        USB2 -> splashViewModel.setUsb2Detected(true)
-                    }
-                }
-
-                Intent.ACTION_MEDIA_EJECT -> {
-                    when (path) {
-                        USB2 -> splashViewModel.setUsb2Detected(false)
-                    }
-                }
+                Intent.ACTION_MEDIA_MOUNTED -> splashViewModel.setUsbDetected(path, true)
+                Intent.ACTION_MEDIA_EJECT -> splashViewModel.setUsbDetected(path, false)
             }
         }
     }
@@ -74,10 +65,5 @@ class MainActivity : ComponentActivity() {
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
                     View.SYSTEM_UI_FLAG_FULLSCREEN or
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-    }
-
-    companion object {
-        private const val USB1 = "/storage/usbdisk1"
-        private const val USB2 = "/storage/usbdisk2"
     }
 }

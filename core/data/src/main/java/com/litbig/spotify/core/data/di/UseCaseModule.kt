@@ -1,8 +1,12 @@
 package com.litbig.spotify.core.data.di
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
+import com.litbig.spotify.core.domain.repository.StorageRepository
 import com.litbig.spotify.core.domain.usecase.*
 import com.litbig.spotify.core.domain.usecase.favorite.*
+import com.litbig.spotify.core.domain.usecase.metadata.*
+import com.litbig.spotify.core.domain.usecase.storage.AddStorageHashUseCase
+import com.litbig.spotify.core.domain.usecase.storage.GetStorageHashUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -90,5 +94,21 @@ object UseCaseModule {
         musicRepository: MusicRepository
     ): ToggleFavoriteUseCase = ToggleFavoriteUseCase(
         musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideAddStorageHashUseCase(
+        storageRepository: StorageRepository
+    ): AddStorageHashUseCase = AddStorageHashUseCase(
+        storageRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideGetStorageHashUseCase(
+        storageRepository: StorageRepository
+    ): GetStorageHashUseCase = GetStorageHashUseCase(
+        storageRepository
     )
 }

@@ -1,4 +1,4 @@
-package com.litbig.spotify.core.domain.usecase
+package com.litbig.spotify.core.domain.usecase.metadata
 
 import androidx.paging.PagingData
 import com.litbig.spotify.core.domain.model.local.MusicMetadata

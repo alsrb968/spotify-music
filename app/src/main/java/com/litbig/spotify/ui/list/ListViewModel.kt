@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.litbig.spotify.core.domain.model.MusicInfo
-import com.litbig.spotify.core.domain.usecase.GetMetadataByAlbumUseCase
-import com.litbig.spotify.core.domain.usecase.GetMetadataByArtistUseCase
-import com.litbig.spotify.core.domain.usecase.GetMetadataUseCase
+import com.litbig.spotify.core.domain.usecase.metadata.GetMetadataByAlbumUseCase
+import com.litbig.spotify.core.domain.usecase.metadata.GetMetadataByArtistUseCase
+import com.litbig.spotify.core.domain.usecase.metadata.GetMetadataUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.Screen

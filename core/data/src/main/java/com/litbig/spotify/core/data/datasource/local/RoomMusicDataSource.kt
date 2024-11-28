@@ -1,48 +1,32 @@
 package com.litbig.spotify.core.data.datasource.local
 
 import androidx.paging.PagingSource
-import com.litbig.spotify.core.data.db.AlbumArtDao
-import com.litbig.spotify.core.data.db.ArtistInfoDao
-import com.litbig.spotify.core.data.db.FavoriteDao
-import com.litbig.spotify.core.data.db.MusicMetadataDao
-import com.litbig.spotify.core.data.model.local.AlbumArtEntity
-import com.litbig.spotify.core.data.model.local.ArtistInfoEntity
-import com.litbig.spotify.core.data.model.local.FavoriteEntity
-import com.litbig.spotify.core.data.model.local.MusicMetadataEntity
+import com.litbig.spotify.core.data.db.*
+import com.litbig.spotify.core.data.model.local.*
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 interface RoomMusicDataSource {
     suspend fun insertMetadata(metadata: MusicMetadataEntity)
     suspend fun insertMetadataList(metadataList: List<MusicMetadataEntity>)
-
     fun getAlbums(): Flow<List<String>>
     fun getPagedAlbums(): PagingSource<Int, String>
-
     fun getArtists(): Flow<List<String>>
     fun getPagedArtists(): PagingSource<Int, String>
     fun getArtistFromAlbum(album: String): String
-
     fun getGenres(): Flow<List<String>>
     fun getPagedGenres(): PagingSource<Int, String>
-
     fun getYears(): Flow<List<String>>
     fun getPagedYears(): PagingSource<Int, String>
-
     fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity>
-
     fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByAlbum(album: String): PagingSource<Int, MusicMetadataEntity>
-
     fun getMetadataByArtist(artist: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByArtist(artist: String): PagingSource<Int, MusicMetadataEntity>
-
     fun getMetadataByGenre(genre: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByGenre(genre: String): PagingSource<Int, MusicMetadataEntity>
-
     fun getMetadataByYear(year: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByYear(year: String): PagingSource<Int, MusicMetadataEntity>
-
     suspend fun isExistMetadata(absolutePath: String): Boolean
     suspend fun deleteAllMetadataList()
     suspend fun deleteMetadata(absolutePath: String)
@@ -69,6 +53,11 @@ interface RoomMusicDataSource {
     fun getPagedFavoritesByType(type: String): PagingSource<Int, FavoriteEntity>
     suspend fun deleteFavorite(name: String, type: String)
     suspend fun deleteAllFavorites()
+
+    suspend fun insertStorageHash(storageHash: StorageHashEntity)
+    suspend fun getHash(path: String): String?
+    suspend fun deleteStorageHash(path: String)
+    suspend fun deleteAllStorageHash()
 }
 
 class RoomMusicDataSourceImpl @Inject constructor(
@@ -76,6 +65,7 @@ class RoomMusicDataSourceImpl @Inject constructor(
     private val albumArtDao: AlbumArtDao,
     private val artistInfoDao: ArtistInfoDao,
     private val favoriteDao: FavoriteDao,
+    private val storageHashDao: StorageHashDao,
 ) : RoomMusicDataSource {
     override suspend fun insertMetadata(metadata: MusicMetadataEntity) {
         metadataDao.insertMetadata(metadata)
@@ -247,5 +237,21 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override suspend fun deleteAllFavorites() {
         favoriteDao.deleteAllFavorites()
+    }
+
+    override suspend fun insertStorageHash(storageHash: StorageHashEntity) {
+        storageHashDao.insertStorageHash(storageHash)
+    }
+
+    override suspend fun getHash(path: String): String? {
+        return storageHashDao.getHash(path)
+    }
+
+    override suspend fun deleteStorageHash(path: String) {
+        storageHashDao.deleteStorageHash(path)
+    }
+
+    override suspend fun deleteAllStorageHash() {
+        storageHashDao.deleteAllStorageHash()
     }
 }

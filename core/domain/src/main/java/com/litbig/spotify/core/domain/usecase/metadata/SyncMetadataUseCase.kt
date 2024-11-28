@@ -1,4 +1,4 @@
-package com.litbig.spotify.core.domain.usecase
+package com.litbig.spotify.core.domain.usecase.metadata
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.CoroutineScope
@@ -14,11 +14,11 @@ class SyncMetadataUseCase @Inject constructor(
     operator fun invoke(
         scope: CoroutineScope,
         files: List<File>,
-        onProgress: (Int, Int) -> Unit
+        onProgress: (Int) -> Unit
     ): Job {
         return scope.launch(Dispatchers.IO) {
             files.forEachIndexed { index, file ->
-                onProgress(index + 1, files.size)
+                onProgress(((index + 1).toFloat() / files.size.toFloat() * 100f).toInt())
                 if (musicRepository.isExistMetadata(file.absolutePath)) {
                     return@forEachIndexed
                 }

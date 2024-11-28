@@ -104,6 +104,7 @@ class MediaRetrieverDataSourceImpl @Inject constructor() : MediaRetrieverDataSou
             )
             metadata
         } catch (e: Exception) {
+            Timber.w("exception: ${file.absolutePath}")
             e.printStackTrace()
             null
         } finally {
