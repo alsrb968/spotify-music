@@ -9,14 +9,14 @@ import javax.inject.Inject
 interface RoomMusicDataSource {
     suspend fun insertMetadata(metadata: MusicMetadataEntity)
     suspend fun insertMetadataList(metadataList: List<MusicMetadataEntity>)
-    fun getAlbums(): Flow<List<String>>
+    fun getAlbums(count: Int = 10): Flow<List<String>>
     fun getPagedAlbums(): PagingSource<Int, String>
-    fun getArtists(): Flow<List<String>>
+    fun getArtists(count: Int = 10): Flow<List<String>>
     fun getPagedArtists(): PagingSource<Int, String>
     fun getArtistFromAlbum(album: String): String
-    fun getGenres(): Flow<List<String>>
+    fun getGenres(count: Int = 10): Flow<List<String>>
     fun getPagedGenres(): PagingSource<Int, String>
-    fun getYears(): Flow<List<String>>
+    fun getYears(count: Int = 10): Flow<List<String>>
     fun getPagedYears(): PagingSource<Int, String>
     fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity>
     fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity>
@@ -49,6 +49,7 @@ interface RoomMusicDataSource {
 
     suspend fun insertFavorite(favorite: FavoriteEntity)
     fun isFavorite(name: String, type: String): Flow<Boolean>
+    fun getFavorites(count: Int = 10): Flow<List<FavoriteEntity>>
     fun getPagedFavorites(): PagingSource<Int, FavoriteEntity>
     fun getPagedFavoritesByType(type: String): PagingSource<Int, FavoriteEntity>
     suspend fun deleteFavorite(name: String, type: String)
@@ -75,16 +76,16 @@ class RoomMusicDataSourceImpl @Inject constructor(
         metadataDao.insertMetadataList(metadataList)
     }
 
-    override fun getAlbums(): Flow<List<String>> {
-        return metadataDao.getAlbums()
+    override fun getAlbums(count: Int): Flow<List<String>> {
+        return metadataDao.getAlbums(count)
     }
 
     override fun getPagedAlbums(): PagingSource<Int, String> {
         return metadataDao.getPagedAlbums()
     }
 
-    override fun getArtists(): Flow<List<String>> {
-        return metadataDao.getArtists()
+    override fun getArtists(count: Int): Flow<List<String>> {
+        return metadataDao.getArtists(count)
     }
 
     override fun getPagedArtists(): PagingSource<Int, String> {
@@ -95,16 +96,16 @@ class RoomMusicDataSourceImpl @Inject constructor(
         return metadataDao.getArtistFromAlbum(album)
     }
 
-    override fun getGenres(): Flow<List<String>> {
-        return metadataDao.getGenres()
+    override fun getGenres(count: Int): Flow<List<String>> {
+        return metadataDao.getGenres(count)
     }
 
     override fun getPagedGenres(): PagingSource<Int, String> {
         return metadataDao.getPagedGenres()
     }
 
-    override fun getYears(): Flow<List<String>> {
-        return metadataDao.getYears()
+    override fun getYears(count: Int): Flow<List<String>> {
+        return metadataDao.getYears(count)
     }
 
     override fun getPagedYears(): PagingSource<Int, String> {
@@ -221,6 +222,10 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override fun isFavorite(name: String, type: String): Flow<Boolean> {
         return favoriteDao.isFavorite(name, type)
+    }
+
+    override fun getFavorites(count: Int): Flow<List<FavoriteEntity>> {
+        return favoriteDao.getFavorites(count)
     }
 
     override fun getPagedFavorites(): PagingSource<Int, FavoriteEntity> {

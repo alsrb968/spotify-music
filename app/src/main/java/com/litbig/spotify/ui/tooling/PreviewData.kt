@@ -44,6 +44,8 @@ val PreviewMusicInfo = MusicInfo(
 
 val PreviewMusicInfoList = List(20) { PreviewMusicInfo }
 
+val PreviewMusicInfoListFlow = flowOf(PreviewMusicInfoList)
+
 val PreviewMusicInfoPagingData = flow<PagingData<MusicInfo>> {
     flowOf(PagingData.from(List(20) { PreviewMusicInfo }))
 }

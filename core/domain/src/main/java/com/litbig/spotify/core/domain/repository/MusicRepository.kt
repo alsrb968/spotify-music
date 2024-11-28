@@ -15,14 +15,14 @@ import java.io.File
 interface MusicRepository {
     suspend fun insertMetadata(metadata: MusicMetadata)
     suspend fun insertMetadataList(metadataList: List<MusicMetadata>)
-    fun getAlbums(): Flow<List<String>>
+    fun getAlbums(count: Int = 10): Flow<List<String>>
     fun getPagedAlbums(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getArtists(): Flow<List<String>>
+    fun getArtists(count: Int = 10): Flow<List<String>>
     fun getPagedArtists(pageSize: Int = 20): Flow<PagingData<String>>
     fun getArtistFromAlbum(album: String): String
-    fun getGenres(): Flow<List<String>>
+    fun getGenres(count: Int = 10): Flow<List<String>>
     fun getPagedGenres(pageSize: Int = 20): Flow<PagingData<String>>
-    fun getYears(): Flow<List<String>>
+    fun getYears(count: Int = 10): Flow<List<String>>
     fun getPagedYears(pageSize: Int = 20): Flow<PagingData<String>>
     fun getMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
     fun getMetadataByAlbum(album: String): Flow<MusicMetadata>
@@ -74,6 +74,7 @@ interface MusicRepository {
 
     suspend fun insertFavorite(favorite: Favorite)
     fun isFavorite(name: String, type: String): Flow<Boolean>
+    fun getFavorites(count: Int = 10): Flow<List<Favorite>>
     fun getPagedFavorites(pageSize: Int = 20): Flow<PagingData<Favorite>>
     fun getPagedFavoritesByType(type: String, pageSize: Int = 20): Flow<PagingData<Favorite>>
     suspend fun deleteFavorite(name: String, type: String)

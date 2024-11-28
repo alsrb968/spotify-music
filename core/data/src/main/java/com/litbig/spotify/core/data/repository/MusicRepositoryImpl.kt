@@ -58,8 +58,8 @@ class MusicRepositoryImpl @Inject constructor(
         roomDataSource.insertMetadataList(metadataList.toMusicMetadataEntityList())
     }
 
-    override fun getAlbums(): Flow<List<String>> {
-        return roomDataSource.getAlbums()
+    override fun getAlbums(count: Int): Flow<List<String>> {
+        return roomDataSource.getAlbums(count)
     }
 
     override fun getPagedAlbums(pageSize: Int): Flow<PagingData<String>> {
@@ -72,8 +72,8 @@ class MusicRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun getArtists(): Flow<List<String>> {
-        return roomDataSource.getArtists()
+    override fun getArtists(count: Int): Flow<List<String>> {
+        return roomDataSource.getArtists(count)
     }
 
     override fun getPagedArtists(pageSize: Int): Flow<PagingData<String>> {
@@ -90,8 +90,8 @@ class MusicRepositoryImpl @Inject constructor(
         return roomDataSource.getArtistFromAlbum(album)
     }
 
-    override fun getGenres(): Flow<List<String>> {
-        return roomDataSource.getGenres()
+    override fun getGenres(count: Int): Flow<List<String>> {
+        return roomDataSource.getGenres(count)
     }
 
     override fun getPagedGenres(pageSize: Int): Flow<PagingData<String>> {
@@ -104,8 +104,8 @@ class MusicRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun getYears(): Flow<List<String>> {
-        return roomDataSource.getYears()
+    override fun getYears(count: Int): Flow<List<String>> {
+        return roomDataSource.getYears(count)
     }
 
     override fun getPagedYears(pageSize: Int): Flow<PagingData<String>> {
@@ -404,6 +404,10 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun isFavorite(name: String, type: String): Flow<Boolean> {
         return roomDataSource.isFavorite(name, type)
+    }
+
+    override fun getFavorites(count: Int): Flow<List<Favorite>> {
+        return roomDataSource.getFavorites(count).map { it.toFavoriteList() }
     }
 
     override fun getPagedFavorites(pageSize: Int): Flow<PagingData<Favorite>> {

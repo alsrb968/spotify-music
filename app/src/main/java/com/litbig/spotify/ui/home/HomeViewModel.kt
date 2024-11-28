@@ -2,12 +2,27 @@ package com.litbig.spotify.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
+import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.usecase.GetAlbumsUseCase
 import com.litbig.spotify.core.domain.usecase.GetArtistsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.GetFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+
+data class HomeUiState(
+    val favoriteState: CategoryUiState = CategoryUiState.Loading,
+    val albumState: CategoryUiState = CategoryUiState.Loading,
+    val artistState: CategoryUiState = CategoryUiState.Loading,
+)
+
+sealed interface CategoryUiState {
+    data object Loading : CategoryUiState
+    data class Ready(val list: List<MusicInfo>) : CategoryUiState
+}
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -15,7 +30,26 @@ class HomeViewModel @Inject constructor(
     getAlbumsUseCase: GetAlbumsUseCase,
     getArtistsUseCase: GetArtistsUseCase,
 ) : ViewModel() {
-    val favoritesPagingFlow = getFavoritesUseCase(pageSize = 10).cachedIn(viewModelScope)
-    val albumsPagingFlow = getAlbumsUseCase(pageSize = 10).cachedIn(viewModelScope)
-    val artistPagingFlow = getArtistsUseCase(pageSize = 10).cachedIn(viewModelScope)
+    private val favoritesFlow = getFavoritesUseCase.getFavorites(count = 8)
+    private val albumsFlow = getAlbumsUseCase.getAlbums(count = 8)
+    private val artistsFlow = getArtistsUseCase.getArtists(count = 8)
+
+    val state: StateFlow<HomeUiState> = combine(
+        favoritesFlow,
+        albumsFlow,
+        artistsFlow,
+    ) { favorites, albums, artists ->
+
+        HomeUiState(
+            favoriteState = CategoryUiState.Ready(favorites),
+            albumState = CategoryUiState.Ready(albums),
+            artistState = CategoryUiState.Ready(artists),
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = HomeUiState()
+    )
+
+    fun onMore() {}
 }

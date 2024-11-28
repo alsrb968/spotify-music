@@ -18,3 +18,11 @@ fun Favorite.toFavoriteEntity(): FavoriteEntity {
         imageUrl = imageUrl,
     )
 }
+
+fun List<FavoriteEntity>.toFavoriteList(): List<Favorite> {
+    return map { it.toFavorite() }
+}
+
+fun List<Favorite>.toFavoriteEntityList(): List<FavoriteEntity> {
+    return map { it.toFavoriteEntity() }
+}

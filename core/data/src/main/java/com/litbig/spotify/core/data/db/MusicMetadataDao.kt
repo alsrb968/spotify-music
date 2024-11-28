@@ -18,12 +18,13 @@ interface MusicMetadataDao {
 
     @Query(
         """
-        SELECT DISTINCT album 
-        FROM music_metadata 
+        SELECT DISTINCT album
+        FROM music_metadata
         ORDER BY album
+        LIMIT :count
         """
     )
-    fun getAlbums(): Flow<List<String>>
+    fun getAlbums(count: Int = 10): Flow<List<String>>
 
     @Query(
         """
@@ -39,9 +40,10 @@ interface MusicMetadataDao {
         SELECT DISTINCT artist 
         FROM music_metadata 
         ORDER BY artist
+        LIMIT :count
         """
     )
-    fun getArtists(): Flow<List<String>>
+    fun getArtists(count: Int = 10): Flow<List<String>>
 
     @Query(
         """
@@ -66,9 +68,10 @@ interface MusicMetadataDao {
         SELECT DISTINCT genre 
         FROM music_metadata 
         ORDER BY genre
+        LIMIT :count
         """
     )
-    fun getGenres(): Flow<List<String>>
+    fun getGenres(count: Int = 10): Flow<List<String>>
 
     @Query(
         """
@@ -84,9 +87,10 @@ interface MusicMetadataDao {
         SELECT DISTINCT SUBSTR(year, 1, 4) AS year_only 
         FROM music_metadata 
         ORDER BY year_only
+        LIMIT :count
         """
     )
-    fun getYears(): Flow<List<String>>
+    fun getYears(count: Int = 10): Flow<List<String>>
 
     @Query(
         """

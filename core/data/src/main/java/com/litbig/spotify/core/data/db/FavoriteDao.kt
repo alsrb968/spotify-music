@@ -26,6 +26,16 @@ interface FavoriteDao {
         SELECT *
         FROM favorite
         ORDER BY ROWID DESC
+        LIMIT :count
+        """
+    )
+    fun getFavorites(count: Int = 10): Flow<List<FavoriteEntity>>
+
+    @Query(
+        """
+        SELECT *
+        FROM favorite
+        ORDER BY ROWID DESC
         """
     )
     fun getPagedFavorites(): PagingSource<Int, FavoriteEntity>
