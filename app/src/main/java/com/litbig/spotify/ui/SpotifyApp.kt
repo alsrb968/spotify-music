@@ -55,7 +55,8 @@ fun SpotifyApp(
                     GridScreen(
                         navigateToList = { musicInfo ->
                             appState.navigateToList(musicInfo, backStackEntry)
-                        }
+                        },
+                        navigateBack = appState::navigateBack
                     )
                 }
 
