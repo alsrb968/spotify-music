@@ -64,7 +64,8 @@ fun ListScreen(
         navigateBack = navigateBack,
         onFavorite = onFavorite,
         isFavorite = isFavorite,
-        onTrack = { },
+        onTrack = viewModel::play,
+        onTracks = viewModel::play,
         onTrackFavorite = viewModel::toggleFavoriteTrack,
         isTrackFavorite = viewModel::isFavoriteTrack
     )
@@ -78,7 +79,8 @@ fun ListScreen(
     navigateBack: () -> Unit,
     onFavorite: () -> Unit,
     isFavorite: Flow<Boolean>,
-    onTrack: () -> Unit,
+    onTrack: (MusicMetadata) -> Unit,
+    onTracks: (List<MusicMetadata>) -> Unit,
     onTrackFavorite: (String, String?) -> Unit,
     isTrackFavorite: (String) -> Flow<Boolean>
 ) {
@@ -122,6 +124,10 @@ fun ListScreen(
                 }
 
                 ListTitle(
+                    onPlay = {
+                        val items = metadataPagingItems.itemSnapshotList.items
+                        onTracks(items)
+                    },
                     onFavorite = onFavorite,
                     isFavorite = isFavorite
                 )
@@ -136,19 +142,19 @@ fun ListScreen(
             }
         } else {
             items(metadataPagingItems.itemCount) { index ->
-                val file = metadataPagingItems[index] ?: return@items
-                val isFav = isTrackFavorite(file.title).collectAsState(initial = false).value
+                val metadata = metadataPagingItems[index] ?: return@items
+                val isFav = isTrackFavorite(metadata.title).collectAsState(initial = false).value
                 ListCell(
                     index = index + 1,
                     isPlaying = index == 0,
-                    imageUrl = file.albumArtUrl,
-                    title = file.title,
-                    artist = file.artist,
-                    album = file.album,
+                    imageUrl = metadata.albumArtUrl,
+                    title = metadata.title,
+                    artist = metadata.artist,
+                    album = metadata.album,
                     isFavorite = isFav,
-                    totalTime = file.duration.toHumanReadableDuration(),
-                    onClick = { },
-                    onFavorite = { onTrackFavorite(file.title, file.albumArtUrl) }
+                    totalTime = metadata.duration.toHumanReadableDuration(),
+                    onClick = { onTrack(metadata) },
+                    onFavorite = { onTrackFavorite(metadata.title, metadata.albumArtUrl) }
                 )
             }
         }
@@ -166,6 +172,7 @@ fun ListScreenPreview() {
             onFavorite = {},
             isFavorite = flowOf(false),
             onTrack = {},
+            onTracks = {},
             onTrackFavorite = { _, _ -> },
             isTrackFavorite = { flowOf(false) }
         )

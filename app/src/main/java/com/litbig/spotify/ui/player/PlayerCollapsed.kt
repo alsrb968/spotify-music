@@ -2,6 +2,7 @@ package com.litbig.spotify.ui.player
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,6 +13,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,27 +21,57 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.data.mapper.local.toLong
 import com.litbig.spotify.core.design.component.shimmerPainter
-import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
+import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
-import timber.log.Timber
 
 @Composable
-fun PlayerCollapsed(
+fun PlayerBar(
     modifier: Modifier = Modifier,
-    musicMetadata: MusicMetadata,
-    playingTime: Long,
-    isFavorite: Boolean,
-    onClick: () -> Unit
+    viewModel: PlayerViewModel = hiltViewModel(),
+    navigateToPlayer: () -> Unit,
 ) {
-    Timber.i("musicMetadata: $musicMetadata")
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
+    when (val s = state) {
+        is PlayerUiState.Idle -> {
+            // Do nothing
+        }
+
+        is PlayerUiState.Ready -> {
+            PlayerBar(
+                modifier = modifier,
+                uiState = s,
+                actions = PlayerBarActions(
+                    onFavorite = viewModel::onFavorite,
+                    onPlayOrPause = viewModel::onPlayOrPause,
+                    onPrevious = viewModel::onPrevious,
+                    onNext = viewModel::onNext,
+                    onShuffle = viewModel::onShuffle,
+                    onRepeat = viewModel::onRepeat,
+                    onProgress = viewModel::onProgress,
+                ),
+                navigateToPlayer = navigateToPlayer,
+            )
+        }
+    }
+}
+
+@Composable
+fun PlayerBar(
+    modifier: Modifier = Modifier,
+    uiState: PlayerUiState.Ready,
+    actions: PlayerBarActions,
+    navigateToPlayer: () -> Unit,
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -59,7 +91,7 @@ fun PlayerCollapsed(
             ) {
                 AsyncImage(
                     modifier = Modifier.fillMaxSize(),
-                    model = musicMetadata.albumArtUrl,
+                    model = uiState.nowPlaying.albumArtUrl,
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Crop,
                     placeholder = shimmerPainter(),
@@ -76,14 +108,14 @@ fun PlayerCollapsed(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = musicMetadata.title,
+                    text = uiState.nowPlaying.title,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = musicMetadata.artist,
+                    text = uiState.nowPlaying.artist,
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -95,20 +127,20 @@ fun PlayerCollapsed(
 
             IconButton(
                 modifier = Modifier,
-                onClick = { /*TODO*/ },
+                onClick = actions.onFavorite,
             ) {
                 Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             ControlBar(
-                playingTime = playingTime,
-                totalTime = musicMetadata.duration.toLong(),
+                uiState = uiState,
+                actions = actions,
             )
         }
     }
@@ -117,8 +149,8 @@ fun PlayerCollapsed(
 @Composable
 fun ControlBar(
     modifier: Modifier = Modifier,
-    playingTime: Long,
-    totalTime: Long,
+    uiState: PlayerUiState.Ready,
+    actions: PlayerBarActions,
 ) {
     Column(
         modifier = modifier,
@@ -131,7 +163,8 @@ fun ControlBar(
 
             Image(
                 modifier = Modifier
-                    .size(32.dp),
+                    .size(32.dp)
+                    .clickable { actions.onShuffle() },
                 painter = painterResource(id = R.drawable.shuffle_s),
                 contentDescription = "Shuffle Button",
             )
@@ -140,7 +173,8 @@ fun ControlBar(
 
             Image(
                 modifier = Modifier
-                    .size(32.dp),
+                    .size(32.dp)
+                    .clickable { actions.onPrevious() },
                 painter = painterResource(id = R.drawable.property_1_prev_s),
                 contentDescription = "Previous Button",
             )
@@ -149,7 +183,8 @@ fun ControlBar(
 
             Image(
                 modifier = Modifier
-                    .size(48.dp),
+                    .size(48.dp)
+                    .clickable { actions.onPlayOrPause() },
                 painter = painterResource(id = R.drawable.property_1_pause),
                 contentDescription = "Play/Pause Button",
             )
@@ -158,7 +193,8 @@ fun ControlBar(
 
             Image(
                 modifier = Modifier
-                    .size(32.dp),
+                    .size(32.dp)
+                    .clickable { actions.onNext() },
                 painter = painterResource(id = R.drawable.property_1_next_s),
                 contentDescription = "Next Button",
             )
@@ -167,7 +203,8 @@ fun ControlBar(
 
             Image(
                 modifier = Modifier
-                    .size(32.dp),
+                    .size(32.dp)
+                    .clickable { actions.onRepeat() },
                 painter = painterResource(id = R.drawable.repeat_s),
                 contentDescription = "Repeat Button",
             )
@@ -179,6 +216,9 @@ fun ControlBar(
             modifier = Modifier,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val playingTime = uiState.playingTime
+            val totalTime = uiState.nowPlaying.duration.toLong()
+            val progress = playingTime.toFloat() / totalTime.toFloat()
 
             Text(
                 text = playingTime.toHumanReadableDuration(),
@@ -191,7 +231,7 @@ fun ControlBar(
             RoundedMusicProgressBar(
                 modifier = Modifier
                     .width(250.dp),
-                progress = playingTime.toFloat() / totalTime.toFloat(),
+                progress = progress,
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -205,6 +245,16 @@ fun ControlBar(
         }
     }
 }
+
+data class PlayerBarActions(
+    val onFavorite: () -> Unit,
+    val onPlayOrPause: () -> Unit,
+    val onPrevious: () -> Unit,
+    val onNext: () -> Unit,
+    val onShuffle: () -> Unit,
+    val onRepeat: () -> Unit,
+    val onProgress: (Long) -> Unit,
+)
 
 @Composable
 fun RoundedMusicProgressBar(
@@ -230,13 +280,29 @@ fun RoundedMusicProgressBar(
 
 @DevicePreviews
 @Composable
-fun PreviewPlayerCollapsed() {
+fun PreviewPlayerBar() {
     SpotifyTheme {
-        PlayerCollapsed(
-            musicMetadata = PreviewMusicMetadata,
-            playingTime = 159000,
-            isFavorite = true,
-            onClick = {}
+        PlayerBar(
+            uiState = PlayerUiState.Ready(
+                indexOfList = 0,
+                nowPlaying = PreviewMusicMetadata,
+                playList = PreviewMusicMetadataList,
+                playingTime = 159000,
+                isPlaying = true,
+                isShuffle = false,
+                repeatMode = 0,
+                isFavorite = false,
+            ),
+            actions = PlayerBarActions(
+                onFavorite = {},
+                onPlayOrPause = {},
+                onPrevious = {},
+                onNext = {},
+                onShuffle = {},
+                onRepeat = {},
+                onProgress = {},
+            ),
+            navigateToPlayer = {},
         )
     }
 }
@@ -246,8 +312,25 @@ fun PreviewPlayerCollapsed() {
 fun PreviewControlBar() {
     SpotifyTheme {
         ControlBar(
-            playingTime = 159000,
-            totalTime = 262000,
+            uiState = PlayerUiState.Ready(
+                indexOfList = 0,
+                nowPlaying = PreviewMusicMetadata,
+                playList = PreviewMusicMetadataList,
+                playingTime = 159000,
+                isPlaying = true,
+                isShuffle = false,
+                repeatMode = 0,
+                isFavorite = false,
+            ),
+            actions = PlayerBarActions(
+                onFavorite = {},
+                onPlayOrPause = {},
+                onPrevious = {},
+                onNext = {},
+                onShuffle = {},
+                onRepeat = {},
+                onProgress = {},
+            )
         )
     }
 }

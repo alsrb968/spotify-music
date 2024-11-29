@@ -119,15 +119,7 @@ fun SpotifyTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = SpotifyTypography,
-            content = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    content()
-                }
-            }
+            content = content
         )
     }
 }

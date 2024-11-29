@@ -113,6 +113,15 @@ interface MusicMetadataDao {
         """
         SELECT * 
         FROM music_metadata 
+        WHERE absolutePath = :absolutePath LIMIT 1
+        """
+    )
+    fun getMetadataByAbsolutePath(absolutePath: String): Flow<MusicMetadataEntity>
+
+    @Query(
+        """
+        SELECT * 
+        FROM music_metadata 
         WHERE album = :album LIMIT 1
         """
     )

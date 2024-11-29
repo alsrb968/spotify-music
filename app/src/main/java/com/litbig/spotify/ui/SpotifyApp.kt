@@ -6,9 +6,14 @@ package com.litbig.spotify.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
@@ -18,6 +23,7 @@ import androidx.navigation.compose.composable
 import com.litbig.spotify.ui.grid.GridScreen
 import com.litbig.spotify.ui.home.HomeScreen
 import com.litbig.spotify.ui.list.ListScreen
+import com.litbig.spotify.ui.player.PlayerBar
 import com.litbig.spotify.ui.splash.SplashScreen
 
 @Composable
@@ -28,44 +34,57 @@ fun SpotifyApp(
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
         ) {
-            NavHost(
-                navController = appState.navController,
-                startDestination = Screen.Splash.route
-            ) {
-                composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
-                    SplashScreen(
-                        navigateToHome = {
-                            appState.navigateToHome(backStackEntry)
+            Scaffold(
+                content = { paddingValues ->
+                    NavHost(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .background(MaterialTheme.colorScheme.background),
+                        navController = appState.navController,
+                        startDestination = Screen.Splash.route
+                    ) {
+                        composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
+                            SplashScreen(
+                                navigateToHome = {
+                                    appState.navigateToHome(backStackEntry)
+                                }
+                            )
                         }
-                    )
-                }
 
-                composableWithCompositionLocal(Screen.Home.route) { backStackEntry ->
-                    HomeScreen(
-                        navigateToGrid = { category ->
-                            appState.navigateToGrid(category, backStackEntry)
-                        },
-                        navigateToList = { musicInfo ->
-                            appState.navigateToList(musicInfo, backStackEntry)
+                        composableWithCompositionLocal(Screen.Home.route) { backStackEntry ->
+                            HomeScreen(
+                                navigateToGrid = { category ->
+                                    appState.navigateToGrid(category, backStackEntry)
+                                },
+                                navigateToList = { musicInfo ->
+                                    appState.navigateToList(musicInfo, backStackEntry)
+                                }
+                            )
                         }
-                    )
-                }
 
-                composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
-                    GridScreen(
-                        navigateToList = { musicInfo ->
-                            appState.navigateToList(musicInfo, backStackEntry)
-                        },
-                        navigateBack = appState::navigateBack
-                    )
-                }
+                        composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
+                            GridScreen(
+                                navigateToList = { musicInfo ->
+                                    appState.navigateToList(musicInfo, backStackEntry)
+                                },
+                                navigateBack = appState::navigateBack
+                            )
+                        }
 
-                composableWithCompositionLocal(Screen.List.route) {
-                    ListScreen(
-                        navigateBack = appState::navigateBack
+                        composableWithCompositionLocal(Screen.List.route) {
+                            ListScreen(
+                                navigateBack = appState::navigateBack
+                            )
+                        }
+                    }
+                },
+                bottomBar = {
+                    PlayerBar(
+                        navigateToPlayer = {}
                     )
                 }
-            }
+            )
+
         }
     }
 }

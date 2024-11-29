@@ -133,6 +133,13 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getMetadataByAbsolutePath(absolutePath: String): Flow<MusicMetadata> {
+        return roomDataSource.getMetadataByAbsolutePath(absolutePath).map { entity ->
+            val albumArt = getAlbumArtByAlbum(entity.album)
+            entity.toMusicMetadata(albumArt?.imageUrl)
+        }
+    }
+
     override fun getMetadataByAlbum(album: String): Flow<MusicMetadata> {
         return roomDataSource.getMetadataByAlbum(album).map { entity ->
             val albumArt = getAlbumArtByAlbum(entity.album)

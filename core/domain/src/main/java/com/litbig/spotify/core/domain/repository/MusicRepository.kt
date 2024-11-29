@@ -25,6 +25,7 @@ interface MusicRepository {
     fun getYears(count: Int = 10): Flow<List<String>>
     fun getPagedYears(pageSize: Int = 20): Flow<PagingData<String>>
     fun getMetadata(pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
+    fun getMetadataByAbsolutePath(absolutePath: String): Flow<MusicMetadata>
     fun getMetadataByAlbum(album: String): Flow<MusicMetadata>
     fun getMetadataByAlbum(album: String, pageSize: Int = 20): Flow<PagingData<MusicMetadata>>
     fun getMetadataByArtist(artist: String): Flow<MusicMetadata>

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun ListTitle(
     modifier: Modifier = Modifier,
+    onPlay: () -> Unit,
     onFavorite: () -> Unit,
     isFavorite: Flow<Boolean>,
 ) {
@@ -48,7 +49,7 @@ fun ListTitle(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = ripple(bounded = false, radius = 24.dp)
-                    ) { /* TODO */ },
+                    ) { onPlay() },
                 painter = painterResource(id = R.drawable.play_green_hover),
                 contentDescription = "Play"
             )
@@ -151,6 +152,7 @@ fun ListTitle(
 fun ListTitlePreview() {
     SpotifyTheme {
         ListTitle(
+            onPlay = { },
             onFavorite = { },
             isFavorite = remember { flowOf(false) }
         )

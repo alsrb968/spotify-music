@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.litbig.spotify.core.domain.model.MusicInfo
+import com.litbig.spotify.core.domain.model.local.MusicMetadata
+import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.metadata.GetMetadataByAlbumUseCase
 import com.litbig.spotify.core.domain.usecase.metadata.GetMetadataByArtistUseCase
 import com.litbig.spotify.core.domain.usecase.metadata.GetMetadataUseCase
@@ -16,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,6 +29,7 @@ class ListViewModel @Inject constructor(
     getMetadataByArtistUseCase: GetMetadataByArtistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
+    private val playerRepository: PlayerRepository,
 ) : ViewModel() {
     private val decoded = Uri.decode(savedStateHandle.get<String>(Screen.ARG_MUSIC_INFO))
     val musicInfo = Json.decodeFromString<MusicInfo>(decoded)
@@ -69,5 +73,15 @@ class ListViewModel @Inject constructor(
         viewModelScope.launch {
             toggleFavoriteUseCase.toggleFavoriteArtist(artistName, imageUrl)
         }
+    }
+
+    fun play(metadata: MusicMetadata) {
+        Timber.w("play metadata: $metadata")
+        playerRepository.play(metadata.absolutePath)
+    }
+
+    fun play(metadataList: List<MusicMetadata>) {
+        Timber.w("play metadataList: $metadataList")
+        playerRepository.play(metadataList.map { it.absolutePath })
     }
 }

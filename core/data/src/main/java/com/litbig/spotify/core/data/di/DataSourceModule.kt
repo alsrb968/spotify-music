@@ -1,11 +1,9 @@
 package com.litbig.spotify.core.data.di
 
+import androidx.media3.exoplayer.ExoPlayer
 import com.litbig.spotify.core.data.api.SpotifyApi
 import com.litbig.spotify.core.data.api.SpotifyAuthApi
-import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
-import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSourceImpl
-import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
-import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSourceImpl
+import com.litbig.spotify.core.data.datasource.local.*
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSourceImpl
 import com.litbig.spotify.core.data.db.*
@@ -46,5 +44,13 @@ object DataSourceModule {
     ): SpotifyDataSource = SpotifyDataSourceImpl(
         spotifyAuthApi,
         spotifyApi
+    )
+
+    @Provides
+    @Singleton
+    fun providePlayerDataSource(
+        exoPlayer: ExoPlayer
+    ): PlayerDataSource = PlayerDataSourceImpl(
+        exoPlayer
     )
 }

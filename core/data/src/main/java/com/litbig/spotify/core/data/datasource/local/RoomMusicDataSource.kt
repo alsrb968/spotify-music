@@ -19,6 +19,7 @@ interface RoomMusicDataSource {
     fun getYears(count: Int = 10): Flow<List<String>>
     fun getPagedYears(): PagingSource<Int, String>
     fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity>
+    fun getMetadataByAbsolutePath(absolutePath: String): Flow<MusicMetadataEntity>
     fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity>
     fun getPagedMetadataByAlbum(album: String): PagingSource<Int, MusicMetadataEntity>
     fun getMetadataByArtist(artist: String): Flow<MusicMetadataEntity>
@@ -114,6 +115,10 @@ class RoomMusicDataSourceImpl @Inject constructor(
 
     override fun getPagedMetadata(): PagingSource<Int, MusicMetadataEntity> {
         return metadataDao.getPagedMetadata()
+    }
+
+    override fun getMetadataByAbsolutePath(absolutePath: String): Flow<MusicMetadataEntity> {
+        return metadataDao.getMetadataByAbsolutePath(absolutePath)
     }
 
     override fun getMetadataByAlbum(album: String): Flow<MusicMetadataEntity> {
