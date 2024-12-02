@@ -6,18 +6,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -31,6 +29,7 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
+import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 
 @Composable
@@ -72,22 +71,36 @@ fun PlayerBar(
     actions: PlayerBarActions,
     navigateToPlayer: () -> Unit,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
+            .padding(
+                horizontal = 8.dp,
+                vertical = 4.dp
+            )
+            .clickable { navigateToPlayer() }
     ) {
+        val context = LocalContext.current
+        var dominantColor by remember { mutableStateOf(Color.Transparent) }
+
+        LaunchedEffect(uiState.nowPlaying.albumArtUrl) {
+            dominantColor = extractDominantColorFromUrl(context, uiState.nowPlaying.albumArtUrl)
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(85.dp)
-                .background(color = MaterialTheme.colorScheme.surfaceContainer),
+                .height(70.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(color = dominantColor.copy(alpha = 0.9f)),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(modifier = Modifier.width(18.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Box(
                 modifier = Modifier
-                    .size(72.dp)
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(5.dp))
             ) {
                 AsyncImage(
                     modifier = Modifier.fillMaxSize(),
@@ -103,8 +116,9 @@ fun PlayerBar(
 
             Column(
                 modifier = Modifier
-                    .widthIn(max = 150.dp)
-                    .height(43.dp),
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .padding(end = 150.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -117,32 +131,33 @@ fun PlayerBar(
                 Text(
                     text = uiState.nowPlaying.artist,
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            IconButton(
-                modifier = Modifier,
-                onClick = actions.onFavorite,
-            ) {
-                Icon(
-                    imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorite",
-                    tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            ControlBar(
-                uiState = uiState,
-                actions = actions,
-            )
         }
+
+        ControlBar(
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .align(Alignment.CenterEnd),
+            uiState = uiState,
+            actions = actions,
+        )
+
+        LinearProgressIndicator(
+            progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration.toLong() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .padding(horizontal = 10.dp)
+                .align(Alignment.BottomCenter),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            gapSize = 0.dp,
+        )
     }
 }
 
@@ -152,97 +167,36 @@ fun ControlBar(
     uiState: PlayerUiState.Ready,
     actions: PlayerBarActions,
 ) {
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
+
+        IconButton(
             modifier = Modifier,
-            verticalAlignment = Alignment.CenterVertically,
+            onClick = actions.onFavorite,
         ) {
-
-            Image(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable { actions.onShuffle() },
-                painter = painterResource(id = R.drawable.shuffle_s),
-                contentDescription = "Shuffle Button",
-            )
-
-            Spacer(modifier = Modifier.width(22.dp))
-
-            Image(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable { actions.onPrevious() },
-                painter = painterResource(id = R.drawable.property_1_prev_s),
-                contentDescription = "Previous Button",
-            )
-
-            Spacer(modifier = Modifier.width(22.dp))
-
-            Image(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable { actions.onPlayOrPause() },
-                painter = painterResource(id = R.drawable.property_1_pause),
-                contentDescription = "Play/Pause Button",
-            )
-
-            Spacer(modifier = Modifier.width(22.dp))
-
-            Image(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable { actions.onNext() },
-                painter = painterResource(id = R.drawable.property_1_next_s),
-                contentDescription = "Next Button",
-            )
-
-            Spacer(modifier = Modifier.width(22.dp))
-
-            Image(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable { actions.onRepeat() },
-                painter = painterResource(id = R.drawable.repeat_s),
-                contentDescription = "Repeat Button",
+            Icon(
+                imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Row(
-            modifier = Modifier,
-            verticalAlignment = Alignment.CenterVertically,
+        IconButton(
+            modifier = Modifier
+                .size(48.dp),
+            onClick = actions.onPlayOrPause,
         ) {
-            val playingTime = uiState.playingTime
-            val totalTime = uiState.nowPlaying.duration.toLong()
-            val progress = playingTime.toFloat() / totalTime.toFloat()
-
-            Text(
-                text = playingTime.toHumanReadableDuration(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            RoundedMusicProgressBar(
+            Icon(
                 modifier = Modifier
-                    .width(250.dp),
-                progress = progress,
+                    .size(48.dp),
+                imageVector = if (uiState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                contentDescription = "Play/Pause",
+                tint = MaterialTheme.colorScheme.onSurface
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = totalTime.toHumanReadableDuration(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
         }
+
     }
 }
 

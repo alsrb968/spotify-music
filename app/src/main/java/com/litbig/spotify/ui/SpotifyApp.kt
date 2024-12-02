@@ -7,12 +7,13 @@ package com.litbig.spotify.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -34,57 +35,57 @@ fun SpotifyApp(
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
         ) {
-            Scaffold(
-                content = { paddingValues ->
-                    NavHost(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .background(MaterialTheme.colorScheme.background),
-                        navController = appState.navController,
-                        startDestination = Screen.Splash.route
-                    ) {
-                        composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
-                            SplashScreen(
-                                navigateToHome = {
-                                    appState.navigateToHome(backStackEntry)
-                                }
-                            )
-                        }
-
-                        composableWithCompositionLocal(Screen.Home.route) { backStackEntry ->
-                            HomeScreen(
-                                navigateToGrid = { category ->
-                                    appState.navigateToGrid(category, backStackEntry)
-                                },
-                                navigateToList = { musicInfo ->
-                                    appState.navigateToList(musicInfo, backStackEntry)
-                                }
-                            )
-                        }
-
-                        composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
-                            GridScreen(
-                                navigateToList = { musicInfo ->
-                                    appState.navigateToList(musicInfo, backStackEntry)
-                                },
-                                navigateBack = appState::navigateBack
-                            )
-                        }
-
-                        composableWithCompositionLocal(Screen.List.route) {
-                            ListScreen(
-                                navigateBack = appState::navigateBack
-                            )
-                        }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                NavHost(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.background),
+                    navController = appState.navController,
+                    startDestination = Screen.Splash.route
+                ) {
+                    composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
+                        SplashScreen(
+                            navigateToHome = {
+                                appState.navigateToHome(backStackEntry)
+                            }
+                        )
                     }
-                },
-                bottomBar = {
-                    PlayerBar(
-                        navigateToPlayer = {}
-                    )
-                }
-            )
 
+                    composableWithCompositionLocal(Screen.Home.route) { backStackEntry ->
+                        HomeScreen(
+                            navigateToGrid = { category ->
+                                appState.navigateToGrid(category, backStackEntry)
+                            },
+                            navigateToList = { musicInfo ->
+                                appState.navigateToList(musicInfo, backStackEntry)
+                            }
+                        )
+                    }
+
+                    composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
+                        GridScreen(
+                            navigateToList = { musicInfo ->
+                                appState.navigateToList(musicInfo, backStackEntry)
+                            },
+                            navigateBack = appState::navigateBack
+                        )
+                    }
+
+                    composableWithCompositionLocal(Screen.List.route) {
+                        ListScreen(
+                            navigateBack = appState::navigateBack
+                        )
+                    }
+                }
+
+                PlayerBar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter),
+                    navigateToPlayer = {}
+                )
+            }
         }
     }
 }
