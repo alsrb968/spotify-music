@@ -107,7 +107,7 @@ fun ListScreen(
     val isLoading = metadataPagingItems.loadState.refresh is LoadState.Loading
 
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LazyColumn(state = rememberLazyListState()) {
 
