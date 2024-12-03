@@ -186,22 +186,24 @@ class PlayerDataSourceImpl @Inject constructor(
 
     init {
         exoPlayer.addListener(listener)
-        exoPlayer.playWhenReady = true
     }
 
     override fun play(uri: Uri) {
+        exoPlayer.playWhenReady = true
         exoPlayer.setMediaItem(MediaItem.fromUri(uri))
         exoPlayer.prepare()
     }
 
     override fun play(uris: List<Uri>, indexToPlay: Int?) {
+        exoPlayer.playWhenReady = true
         exoPlayer.setMediaItems(uris.map { MediaItem.fromUri(it) })
         indexToPlay?.let { exoPlayer.seekToDefaultPosition(it) }
         exoPlayer.prepare()
     }
 
     override fun playIndex(index: Int) {
-        if (index in 0 until exoPlayer.mediaItemCount && exoPlayer.isPlaying) {
+        if (index in 0 until exoPlayer.mediaItemCount) {
+            exoPlayer.playWhenReady = true
             exoPlayer.seekToDefaultPosition(index)
         }
     }
@@ -225,12 +227,14 @@ class PlayerDataSourceImpl @Inject constructor(
 
     override fun next() {
         if (exoPlayer.hasNextMediaItem()) {
+            exoPlayer.playWhenReady = true
             exoPlayer.seekToNextMediaItem()
         }
     }
 
     override fun previous() {
         if (exoPlayer.hasPreviousMediaItem()) {
+            exoPlayer.playWhenReady = true
             exoPlayer.seekToPreviousMediaItem()
         }
     }

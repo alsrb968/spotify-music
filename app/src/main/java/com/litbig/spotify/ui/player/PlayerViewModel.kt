@@ -1,5 +1,6 @@
 package com.litbig.spotify.ui.player
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.domain.extension.combine
@@ -8,6 +9,7 @@ import com.litbig.spotify.core.domain.repository.MusicRepository
 import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
+import com.litbig.spotify.util.darkenColor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -25,6 +27,7 @@ sealed interface PlayerUiState {
         val isShuffle: Boolean,
         val repeatMode: Int,
         val isFavorite: Boolean,
+        val dominantColor: Color,
     ) : PlayerUiState
 }
 
@@ -55,6 +58,8 @@ class PlayerViewModel @Inject constructor(
         metadata?.let { isFavoriteUseCase.isFavoriteTrack(it.title) } ?: flowOf(false)
     }
 
+    private val dominantColor = MutableStateFlow(Color.Transparent)
+
     val state: StateFlow<PlayerUiState> = combine(
         nowPlaying,
         playList,
@@ -63,7 +68,8 @@ class PlayerViewModel @Inject constructor(
         playerRepository.isShuffle,
         playerRepository.repeatMode,
         isFavorite,
-    ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode, isFavorite ->
+        dominantColor,
+    ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode, isFavorite, color ->
 
         if (nowPlaying == null) {
             PlayerUiState.Idle
@@ -84,6 +90,7 @@ class PlayerViewModel @Inject constructor(
                 isShuffle,
                 repeatMode,
                 isFavorite,
+                color,
             )
         }
     }.stateIn(
@@ -154,5 +161,9 @@ class PlayerViewModel @Inject constructor(
 
     fun isFavoriteTrack(trackName: String): Flow<Boolean> {
         return isFavoriteUseCase.isFavoriteTrack(trackName)
+    }
+
+    fun setDominantColor(color: Color) {
+        dominantColor.value = color.darkenColor(0.5f)
     }
 }

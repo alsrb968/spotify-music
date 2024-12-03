@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,8 +22,8 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
-import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
+import com.litbig.spotify.util.extractDominantColorFromUrl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -105,7 +106,7 @@ fun ListScreen(
                     .gradientBackground(
                         ratio = 1f,
                         startColor = dominantColor,
-                        endColor = Color.Transparent
+                        endColor = MaterialTheme.colorScheme.background
                     )
             ) {
                 Row(

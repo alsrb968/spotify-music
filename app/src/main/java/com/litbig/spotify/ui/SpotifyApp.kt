@@ -7,6 +7,7 @@ package com.litbig.spotify.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -76,8 +77,12 @@ fun SpotifyApp(
                 sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
                 sheetDragHandle = null,
                 sheetPeekHeight = with(LocalDensity.current) { (playerBarHeight * 0.99f).toInt().toDp() },
-//                sheetShape = RoundedCornerShape(16.dp),
-//                sheetContentColor = MaterialTheme.colorScheme.onSurface,
+                sheetShape = RoundedCornerShape(
+                    topStart = 8.dp,
+                    topEnd = 8.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp
+                ),
                 sheetContainerColor = Color.Transparent,
             ) {
 

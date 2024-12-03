@@ -10,7 +10,9 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,7 +32,7 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
-import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
+import com.litbig.spotify.util.extractDominantColorFromUrl
 
 @Composable
 fun PlayerBar(
@@ -40,15 +42,22 @@ fun PlayerBar(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    when (state) {
+    when (val s = state) {
         is PlayerUiState.Idle -> {
             // Do nothing
         }
 
         is PlayerUiState.Ready -> {
+
+            val context = LocalContext.current
+            LaunchedEffect(s.nowPlaying.albumArtUrl) {
+                val color = extractDominantColorFromUrl(context, s.nowPlaying.albumArtUrl)
+                viewModel.setDominantColor(color)
+            }
+
             PlayerBar(
                 modifier = modifier,
-                uiState = state as PlayerUiState.Ready,
+                uiState = s,
                 actions = PlayerBarActions(
                     onFavorite = viewModel::onFavorite,
                     onPlayOrPause = viewModel::onPlayOrPause,
@@ -76,19 +85,12 @@ fun PlayerBar(
             )
             .clickable { navigateToPlayer() }
     ) {
-        val context = LocalContext.current
-        var dominantColor by remember { mutableStateOf(Color.Transparent) }
-
-        LaunchedEffect(uiState.nowPlaying.albumArtUrl) {
-            dominantColor = extractDominantColorFromUrl(context, uiState.nowPlaying.albumArtUrl)
-        }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(color = dominantColor.copy(alpha = 0.9f)),
+                .background(color = uiState.dominantColor.copy(alpha = 0.95f)),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(modifier = Modifier.width(10.dp))
@@ -199,28 +201,6 @@ data class PlayerBarActions(
     val onProgress: (Long) -> Unit,
 )
 
-@Composable
-fun RoundedMusicProgressBar(
-    modifier: Modifier = Modifier,
-    progress: Float,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(5.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(fraction = progress)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = MaterialTheme.colorScheme.onSurface)
-        )
-    }
-}
-
 @DevicePreviews
 @Composable
 fun PreviewPlayerBar() {
@@ -235,6 +215,7 @@ fun PreviewPlayerBar() {
                 isShuffle = false,
                 repeatMode = 0,
                 isFavorite = false,
+                dominantColor = Color.Gray
             ),
             actions = PlayerBarActions(
                 onFavorite = {},

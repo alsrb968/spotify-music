@@ -1,6 +1,5 @@
 package com.litbig.spotify.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +18,7 @@ import com.litbig.spotify.ui.home.category.Category
 import com.litbig.spotify.ui.home.category.MiniCategory
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.util.ColorExtractor.getRandomPastelColor
+import com.litbig.spotify.util.getRandomPastelColor
 
 @Composable
 fun HomeScreen(
@@ -57,7 +56,7 @@ fun HomeScreen(
                     .gradientBackground(
                         ratio = 1f,
                         startColor = bgColor,
-                        endColor = MaterialTheme.colorScheme.surfaceDim
+                        endColor = MaterialTheme.colorScheme.background
                     )
             ) {
                 MiniCategory(

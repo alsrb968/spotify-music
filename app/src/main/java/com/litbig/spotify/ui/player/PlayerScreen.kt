@@ -8,12 +8,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -29,8 +36,8 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
-import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
+import com.litbig.spotify.util.extractDominantColorFromUrl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -42,15 +49,22 @@ fun PlayerScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    when (state) {
+    when (val s = state) {
         is PlayerUiState.Idle -> {
 
         }
 
         is PlayerUiState.Ready -> {
+
+            val context = LocalContext.current
+            LaunchedEffect(s.nowPlaying.albumArtUrl) {
+                val color = extractDominantColorFromUrl(context, s.nowPlaying.albumArtUrl)
+                viewModel.setDominantColor(color)
+            }
+
             PlayerScreen(
                 modifier = modifier,
-                uiState = state as PlayerUiState.Ready,
+                uiState = s,
                 actions = PlayerScreenActions(
                     isFavorite = viewModel::isFavoriteTrack,
                     onFavorite = viewModel::onFavorite,
@@ -63,7 +77,7 @@ fun PlayerScreen(
                     onRepeat = viewModel::onRepeat,
                     onProgress = viewModel::onProgress
                 ),
-                onCollapse = onCollapse
+                onCollapse = onCollapse,
             )
         }
     }
@@ -76,17 +90,19 @@ fun PlayerScreen(
     actions: PlayerScreenActions,
     onCollapse: () -> Unit,
 ) {
-    val context = LocalContext.current
-    var dominantColor by remember { mutableStateOf(Color.Transparent) }
-
-    LaunchedEffect(uiState.nowPlaying.albumArtUrl) {
-        dominantColor = extractDominantColorFromUrl(context, uiState.nowPlaying.albumArtUrl)
-    }
-
     Row(
         modifier = modifier
             .fillMaxSize()
-            .background(color = dominantColor)
+            .background(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        uiState.dominantColor,
+                        MaterialTheme.colorScheme.background
+                    ),
+                    center = Offset(200f, 200f),
+                    radius = 2000f
+                )
+            )
     ) {
 
         Column(
@@ -101,12 +117,13 @@ fun PlayerScreen(
                 onCollapse = onCollapse
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Box(
+            Card(
                 modifier = Modifier
-                    .size(260.dp)
-                    .clip(RoundedCornerShape(5.dp))
+                    .size(230.dp),
+                elevation = CardDefaults.cardElevation(8.dp),
+                shape = RoundedCornerShape(5.dp),
             ) {
                 AsyncImage(
                     modifier = Modifier
@@ -119,7 +136,7 @@ fun PlayerScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier
@@ -131,6 +148,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .fillMaxWidth()
+                        .padding(end = 50.dp)
                         .basicMarquee(),
                     text = uiState.nowPlaying.title,
                     style = MaterialTheme.typography.bodyLarge,
@@ -142,12 +160,25 @@ fun PlayerScreen(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
+                        .padding(end = 50.dp)
                         .basicMarquee(),
                     text = uiState.nowPlaying.artist,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
                 )
+
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd),
+                    onClick = actions.onFavorite,
+                ) {
+                    Icon(
+                        imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
 
             ControlPanelProgress(
@@ -400,6 +431,7 @@ fun PreviewPlayerScreen() {
                 isShuffle = false,
                 repeatMode = 0,
                 isFavorite = false,
+                dominantColor = Color.DarkGray
             ),
             actions = PlayerScreenActions(
                 isFavorite = { flowOf(false) },
