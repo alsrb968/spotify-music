@@ -84,4 +84,8 @@ class ListViewModel @Inject constructor(
         Timber.w("play metadataList: $metadataList")
         playerRepository.play(metadataList.map { it.absolutePath })
     }
+
+    fun addPlaylist(metadataList: List<MusicMetadata>) {
+        playerRepository.addPlayLists(metadataList.map { it.absolutePath })
+    }
 }

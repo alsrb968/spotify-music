@@ -1,14 +1,21 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.litbig.spotify.ui.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,7 +75,8 @@ fun ListScreen(
         onTrack = viewModel::play,
         onTracks = viewModel::play,
         onTrackFavorite = viewModel::toggleFavoriteTrack,
-        isTrackFavorite = viewModel::isFavoriteTrack
+        isTrackFavorite = viewModel::isFavoriteTrack,
+        onAddPlaylist = viewModel::addPlaylist
     )
 }
 
@@ -83,7 +91,8 @@ fun ListScreen(
     onTrack: (MusicMetadata) -> Unit,
     onTracks: (List<MusicMetadata>) -> Unit,
     onTrackFavorite: (String, String?) -> Unit,
-    isTrackFavorite: (String) -> Flow<Boolean>
+    isTrackFavorite: (String) -> Flow<Boolean>,
+    onAddPlaylist: (List<MusicMetadata>) -> Unit
 ) {
     val metadataPagingItems = metadataPagingFlow.collectAsLazyPagingItems()
 
@@ -96,6 +105,9 @@ fun ListScreen(
     }
 
     val isLoading = metadataPagingItems.loadState.refresh is LoadState.Loading
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     LazyColumn(state = rememberLazyListState()) {
 
@@ -130,7 +142,10 @@ fun ListScreen(
                         onTracks(items)
                     },
                     onFavorite = onFavorite,
-                    isFavorite = isFavorite
+                    isFavorite = isFavorite,
+                    onMore = {
+                        showBottomSheet = true
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -164,6 +179,160 @@ fun ListScreen(
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
+
+    if (showBottomSheet) {
+        OptionBottomSheet(
+            sheetState = sheetState,
+            onShow = { showBottomSheet = it },
+            title = musicInfo.title,
+            subTitle = musicInfo.content,
+            optionActions = OptionActions(
+                onPlaylistPlay = {
+                    val items = metadataPagingItems.itemSnapshotList.items
+                    onAddPlaylist(items)
+                },
+                onPlaylistAdd = {},
+                onShare = {}
+            )
+        )
+    }
+}
+
+@Composable
+fun OptionBottomSheet(
+    modifier: Modifier = Modifier,
+    sheetState: SheetState,
+    onShow: (Boolean) -> Unit,
+    title: String = "",
+    subTitle: String = "",
+    optionActions: OptionActions
+) {
+    ModalBottomSheet(
+        modifier = modifier,
+        sheetState = sheetState,
+        onDismissRequest = {
+            onShow(false)
+        },
+        properties = ModalBottomSheetProperties(
+            shouldDismissOnBackPress = true,
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(start = 60.dp),
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                modifier = Modifier
+                    .padding(start = 60.dp),
+                text = subTitle,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                color = MaterialTheme.colorScheme.outline,
+                thickness = 1.dp,
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                CardButton(
+                    imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
+                    text = "다음에 재생",
+                    onClick = {
+                        onShow(false)
+                        optionActions.onPlaylistPlay()
+                    }
+                )
+
+                CardButton(
+                    imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+                    text = "재생목록에 저장",
+                    onClick = {
+                        onShow(false)
+                        optionActions.onPlaylistAdd()
+                    }
+                )
+
+                CardButton(
+                    imageVector = Icons.Default.Share,
+                    text = "공유",
+                    onClick = {
+                        onShow(false)
+                        optionActions.onShare()
+                    }
+                )
+            }
+        }
+
+
+    }
+}
+
+data class OptionActions(
+    val onPlaylistPlay: () -> Unit,
+    val onPlaylistAdd: () -> Unit,
+    val onShare: () -> Unit
+)
+
+@Composable
+fun CardButton(
+    modifier: Modifier = Modifier,
+    imageVector: ImageVector,
+    text: String = "",
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Card(
+            modifier = Modifier
+                .size(width = 120.dp, height = 90.dp)
+                .clickable {
+                    onClick()
+                }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    modifier = Modifier.size(40.dp),
+                    imageVector = imageVector,
+                    contentDescription = text,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (text.isNotEmpty()) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @DevicePreviews
@@ -179,7 +348,27 @@ fun ListScreenPreview() {
             onTrack = {},
             onTracks = {},
             onTrackFavorite = { _, _ -> },
-            isTrackFavorite = { flowOf(false) }
+            isTrackFavorite = { flowOf(false) },
+            onAddPlaylist = {}
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@DevicePreviews
+@Composable
+fun OptionBottomSheetPreview() {
+    SpotifyTheme {
+        OptionBottomSheet(
+            sheetState = rememberStandardBottomSheetState(),
+            onShow = {},
+            title = PreviewMusicInfo.title,
+            subTitle = PreviewMusicInfo.content,
+            optionActions = OptionActions(
+                onPlaylistPlay = {},
+                onPlaylistAdd = {},
+                onShare = {}
+            )
         )
     }
 }

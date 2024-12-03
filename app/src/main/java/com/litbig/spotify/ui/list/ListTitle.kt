@@ -30,6 +30,7 @@ fun ListTitle(
     modifier: Modifier = Modifier,
     onPlay: () -> Unit,
     onFavorite: () -> Unit,
+    onMore:() -> Unit,
     isFavorite: Flow<Boolean>,
 ) {
     Column(
@@ -87,12 +88,12 @@ fun ListTitle(
 
             IconButton(
                 modifier = Modifier,
-                onClick = { /*TODO*/ },
+                onClick = onMore,
             ) {
                 Icon(
                     modifier = Modifier.size(40.dp),
                     imageVector = Icons.Default.MoreHoriz,
-                    contentDescription = "Download",
+                    contentDescription = "More",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -154,6 +155,7 @@ fun ListTitlePreview() {
         ListTitle(
             onPlay = { },
             onFavorite = { },
+            onMore = { },
             isFavorite = remember { flowOf(false) }
         )
     }
