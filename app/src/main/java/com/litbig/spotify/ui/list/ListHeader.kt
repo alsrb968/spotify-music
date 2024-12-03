@@ -1,10 +1,5 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package com.litbig.spotify.ui.list
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
@@ -17,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -25,9 +19,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.component.shimmerPainter
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
-import com.litbig.spotify.ui.LocalNavAnimatedVisibilityScope
-import com.litbig.spotify.ui.LocalSharedTransitionScope
-import com.litbig.spotify.ui.imageBoundsTransform
+import com.litbig.spotify.ui.shared.getSharedModifier
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
@@ -56,27 +48,10 @@ fun ListHeader(
             modifier = Modifier
                 .size(230.dp)
         ) {
-            val isPreview = LocalInspectionMode.current
-            val cardModifier = if (!isPreview) {
-                val sharedTransitionScope = LocalSharedTransitionScope.current
-                    ?: throw IllegalStateException("No Scope found")
-                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-                    ?: throw IllegalStateException("No animatedVisibilityScope found")
-                with(sharedTransitionScope) {
-                    Modifier.sharedBounds(
-                        sharedContentState = rememberSharedContentState("image-$title"),
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        enter = fadeIn(),
-                        exit = fadeOut(),
-                        boundsTransform = imageBoundsTransform
-                    )
-                }
-            } else Modifier
-
             Card(
                 modifier = Modifier
                     .fillMaxSize()
-                    .then(cardModifier),
+                    .then(getSharedModifier("image-$title")),
                 elevation = CardDefaults.cardElevation(8.dp),
                 shape = RectangleShape,
             ) {
