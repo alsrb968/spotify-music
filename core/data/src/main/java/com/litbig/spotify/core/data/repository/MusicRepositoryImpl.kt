@@ -66,7 +66,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedAlbums() }
         ).flow
@@ -80,7 +80,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedArtists() }
         ).flow
@@ -98,7 +98,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedGenres() }
         ).flow
@@ -112,7 +112,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedYears() }
         ).flow
@@ -122,7 +122,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedMetadata() }
         ).flow.map { pagingData ->
@@ -151,7 +151,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedMetadataByAlbum(album) }
         ).flow.map { pagingData ->
@@ -176,7 +176,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedMetadataByArtist(artist) }
         ).flow.map { pagingData ->
@@ -198,7 +198,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedMetadataByGenre(genre) }
         ).flow.map { pagingData ->
@@ -220,7 +220,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedMetadataByYear(year) }
         ).flow.map { pagingData ->
@@ -421,7 +421,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedFavorites() }
         ).flow.map { pagingData ->
@@ -435,7 +435,7 @@ class MusicRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,
-                enablePlaceholders = false
+                enablePlaceholders = true
             ),
             pagingSourceFactory = { roomDataSource.getPagedFavoritesByType(type) }
         ).flow.map { pagingData ->

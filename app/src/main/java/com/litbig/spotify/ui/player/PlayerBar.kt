@@ -1,19 +1,20 @@
 package com.litbig.spotify.ui.player
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -30,7 +31,6 @@ import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
 import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
-import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 
 @Composable
 fun PlayerBar(
@@ -40,7 +40,7 @@ fun PlayerBar(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    when (val s = state) {
+    when (state) {
         is PlayerUiState.Idle -> {
             // Do nothing
         }
@@ -48,14 +48,10 @@ fun PlayerBar(
         is PlayerUiState.Ready -> {
             PlayerBar(
                 modifier = modifier,
-                uiState = s,
+                uiState = state as PlayerUiState.Ready,
                 actions = PlayerBarActions(
                     onFavorite = viewModel::onFavorite,
                     onPlayOrPause = viewModel::onPlayOrPause,
-                    onPrevious = viewModel::onPrevious,
-                    onNext = viewModel::onNext,
-                    onShuffle = viewModel::onShuffle,
-                    onRepeat = viewModel::onRepeat,
                     onProgress = viewModel::onProgress,
                 ),
                 navigateToPlayer = navigateToPlayer,
@@ -154,9 +150,6 @@ fun PlayerBar(
                 .height(4.dp)
                 .padding(horizontal = 10.dp)
                 .align(Alignment.BottomCenter),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            gapSize = 0.dp,
         )
     }
 }
@@ -203,10 +196,6 @@ fun ControlBar(
 data class PlayerBarActions(
     val onFavorite: () -> Unit,
     val onPlayOrPause: () -> Unit,
-    val onPrevious: () -> Unit,
-    val onNext: () -> Unit,
-    val onShuffle: () -> Unit,
-    val onRepeat: () -> Unit,
     val onProgress: (Long) -> Unit,
 )
 
@@ -250,41 +239,9 @@ fun PreviewPlayerBar() {
             actions = PlayerBarActions(
                 onFavorite = {},
                 onPlayOrPause = {},
-                onPrevious = {},
-                onNext = {},
-                onShuffle = {},
-                onRepeat = {},
                 onProgress = {},
             ),
             navigateToPlayer = {},
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewControlBar() {
-    SpotifyTheme {
-        ControlBar(
-            uiState = PlayerUiState.Ready(
-                indexOfList = 0,
-                nowPlaying = PreviewMusicMetadata,
-                playList = PreviewMusicMetadataList,
-                playingTime = 159000,
-                isPlaying = true,
-                isShuffle = false,
-                repeatMode = 0,
-                isFavorite = false,
-            ),
-            actions = PlayerBarActions(
-                onFavorite = {},
-                onPlayOrPause = {},
-                onPrevious = {},
-                onNext = {},
-                onShuffle = {},
-                onRepeat = {},
-                onProgress = {},
-            )
         )
     }
 }

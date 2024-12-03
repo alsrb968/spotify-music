@@ -12,7 +12,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 sealed interface PlayerUiState {
@@ -51,16 +50,10 @@ class PlayerViewModel @Inject constructor(
         item?.let { musicRepository.getMetadataByAbsolutePath(it) } ?: flowOf(null)
     }
 
-//    private val isFavorite = combine(
-//        nowPlaying,
-//        isFavoriteUseCase.isFavoriteTrack(nowPlaying.firstOrNull()?.title ?: "")
-//    ) { nowPlaying, isFavorite ->
-//        nowPlaying to isFavorite
-//    }.stateIn(
-//        scope = viewModelScope,
-//        started = SharingStarted.WhileSubscribed(),
-//        initialValue = null
-//    )
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val isFavorite = nowPlaying.flatMapLatest { metadata ->
+        metadata?.let { isFavoriteUseCase.isFavoriteTrack(it.title) } ?: flowOf(false)
+    }
 
     val state: StateFlow<PlayerUiState> = combine(
         nowPlaying,
@@ -69,15 +62,13 @@ class PlayerViewModel @Inject constructor(
         playerRepository.isPlaying,
         playerRepository.isShuffle,
         playerRepository.repeatMode,
-    ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode ->
-
-        Timber.w("playingTime=$playingTime, isPlaying=$isPlaying, isShuffle=$isShuffle, repeatMode=$repeatMode")
+        isFavorite,
+    ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode, isFavorite ->
 
         if (nowPlaying == null) {
             PlayerUiState.Idle
         } else {
             val index = playList.indexOf(nowPlaying)
-            val isFavorite = isFavoriteUseCase.isFavoriteTrack(nowPlaying.title).first()
 
             _nowPlaying = nowPlaying
             _isPlaying = isPlaying

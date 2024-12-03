@@ -222,7 +222,7 @@ fun AnimatedEQDrawable(
 }
 
 @Composable
-private fun TitleAndContent(
+fun TitleAndContent(
     modifier: Modifier = Modifier,
     title: String,
     content: String,

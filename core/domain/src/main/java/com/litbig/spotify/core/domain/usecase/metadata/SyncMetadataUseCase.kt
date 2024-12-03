@@ -23,6 +23,9 @@ class SyncMetadataUseCase @Inject constructor(
                     return@forEachIndexed
                 }
                 val metadata = musicRepository.getMusicMetadata(file)
+                if (metadata?.artist.isNullOrEmpty() || metadata?.album.isNullOrEmpty()) {
+                    return@forEachIndexed
+                }
                 metadata?.let { musicRepository.insertMetadata(it) }
             }
         }
