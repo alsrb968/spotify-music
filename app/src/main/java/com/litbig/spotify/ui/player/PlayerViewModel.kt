@@ -140,4 +140,19 @@ class PlayerViewModel @Inject constructor(
             }
         }
     }
+
+    fun onFavoriteIndex(index: Int) {
+        viewModelScope.launch {
+            playList.firstOrNull()?.getOrNull(index)?.let {
+                toggleFavoriteUseCase.toggleFavoriteTrack(
+                    trackName = it.title,
+                    imageUrl = it.albumArtUrl,
+                )
+            }
+        }
+    }
+
+    fun isFavoriteTrack(trackName: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteTrack(trackName)
+    }
 }

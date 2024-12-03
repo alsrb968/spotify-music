@@ -158,6 +158,10 @@ fun ListScreen(
                 )
             }
         }
+
+        item {
+            Spacer(modifier = Modifier.height(80.dp))
+        }
     }
 }
 

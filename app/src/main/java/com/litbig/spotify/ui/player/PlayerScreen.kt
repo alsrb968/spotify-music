@@ -1,9 +1,7 @@
 package com.litbig.spotify.ui.player
 
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -11,9 +9,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +31,8 @@ import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
 import com.litbig.spotify.util.ColorExtractor.extractDominantColorFromUrl
 import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun PlayerScreen(
@@ -55,8 +52,11 @@ fun PlayerScreen(
                 modifier = modifier,
                 uiState = state as PlayerUiState.Ready,
                 actions = PlayerScreenActions(
+                    isFavorite = viewModel::isFavoriteTrack,
                     onFavorite = viewModel::onFavorite,
+                    onFavoriteIndex = viewModel::onFavoriteIndex,
                     onPlayOrPause = viewModel::onPlayOrPause,
+                    onPlayIndex = viewModel::onPlayIndex,
                     onPrevious = viewModel::onPrevious,
                     onNext = viewModel::onNext,
                     onShuffle = viewModel::onShuffle,
@@ -129,18 +129,24 @@ fun PlayerScreen(
             ) {
                 Text(
                     modifier = Modifier
-                        .align(Alignment.TopStart),
+                        .align(Alignment.TopStart)
+                        .fillMaxWidth()
+                        .basicMarquee(),
                     text = uiState.nowPlaying.title,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
                 )
 
                 Text(
                     modifier = Modifier
-                        .align(Alignment.BottomStart),
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .basicMarquee(),
                     text = uiState.nowPlaying.artist,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
             }
 
@@ -166,15 +172,16 @@ fun PlayerScreen(
         ) {
             items(uiState.playList.size) { index ->
                 val metadata = uiState.playList[index]
+                val isFav = actions.isFavorite(metadata.title).collectAsState(initial = false).value
                 PlayerCell(
                     isPlaying = index == uiState.indexOfList,
                     imageUrl = metadata.albumArtUrl,
                     title = metadata.title,
                     artist = metadata.artist,
-                    isFavorite = uiState.isFavorite,
+                    isFavorite = isFav,
                     totalTime = metadata.duration.toLong().toHumanReadableDuration(),
-                    onClick = {},
-                    onFavorite = {},
+                    onClick = { actions.onPlayIndex(index) },
+                    onFavorite = { actions.onFavoriteIndex(index) },
                 )
             }
         }
@@ -241,7 +248,9 @@ fun ControlPanelProgress(
             onValueChange = { value ->
                 actions.onProgress((value * uiState.nowPlaying.duration.toLong()).toLong())
             },
-            onValueChangeFinished = { /*TODO*/ },
+            onValueChangeFinished = {
+
+            },
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
                 activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -393,8 +402,11 @@ fun PreviewPlayerScreen() {
                 isFavorite = false,
             ),
             actions = PlayerScreenActions(
+                isFavorite = { flowOf(false) },
                 onFavorite = {},
+                onFavoriteIndex = {},
                 onPlayOrPause = {},
+                onPlayIndex = {},
                 onPrevious = {},
                 onNext = {},
                 onShuffle = {},
@@ -407,8 +419,11 @@ fun PreviewPlayerScreen() {
 }
 
 data class PlayerScreenActions(
+    val isFavorite: (String) -> Flow<Boolean>,
     val onFavorite: () -> Unit,
+    val onFavoriteIndex: (Int) -> Unit,
     val onPlayOrPause: () -> Unit,
+    val onPlayIndex: (Int) -> Unit,
     val onPrevious: () -> Unit,
     val onNext: () -> Unit,
     val onShuffle: () -> Unit,

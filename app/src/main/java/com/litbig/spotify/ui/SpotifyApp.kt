@@ -75,7 +75,7 @@ fun SpotifyApp(
                 },
                 sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
                 sheetDragHandle = null,
-                sheetPeekHeight = with(LocalDensity.current) { playerBarHeight.toDp() },
+                sheetPeekHeight = with(LocalDensity.current) { (playerBarHeight * 0.99f).toInt().toDp() },
 //                sheetShape = RoundedCornerShape(16.dp),
 //                sheetContentColor = MaterialTheme.colorScheme.onSurface,
                 sheetContainerColor = Color.Transparent,
