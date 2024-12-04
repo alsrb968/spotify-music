@@ -62,6 +62,7 @@ fun SpotifyApp(
                                 }
                             )
                         }
+
                         SheetValue.Expanded -> {
                             PlayerScreen(
                                 onCollapse = {
@@ -71,12 +72,15 @@ fun SpotifyApp(
                                 }
                             )
                         }
+
                         else -> {}
                     }
                 },
                 sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
                 sheetDragHandle = null,
-                sheetPeekHeight = with(LocalDensity.current) { (playerBarHeight * 0.99f).toInt().toDp() },
+                sheetPeekHeight = with(LocalDensity.current) {
+                    (playerBarHeight * 0.99f).toInt().toDp()
+                },
                 sheetShape = RoundedCornerShape(
                     topStart = 8.dp,
                     topEnd = 8.dp,
@@ -86,51 +90,68 @@ fun SpotifyApp(
                 sheetContainerColor = Color.Transparent,
             ) {
 
-                NavHost(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background),
-                    navController = appState.navController,
-                    startDestination = Screen.Splash.route
-                ) {
-                    composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
-                        SplashScreen(
-                            navigateToHome = {
-                                appState.navigateToHome(backStackEntry)
-                            }
-                        )
-                    }
+                if (appState.isOnline) {
+                    NavHost(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background),
+                        navController = appState.navController,
+                        startDestination = Screen.Splash.route
+                    ) {
+                        composableWithCompositionLocal(Screen.Splash.route) { backStackEntry ->
+                            SplashScreen(
+                                navigateToHome = {
+                                    appState.navigateToHome(backStackEntry)
+                                }
+                            )
+                        }
 
-                    composableWithCompositionLocal(Screen.Home.route) { backStackEntry ->
-                        HomeScreen(
-                            navigateToGrid = { category ->
-                                appState.navigateToGrid(category, backStackEntry)
-                            },
-                            navigateToList = { musicInfo ->
-                                appState.navigateToList(musicInfo, backStackEntry)
-                            }
-                        )
-                    }
+                        composableWithCompositionLocal(Screen.Home.route) { backStackEntry ->
+                            HomeScreen(
+                                navigateToGrid = { category ->
+                                    appState.navigateToGrid(category, backStackEntry)
+                                },
+                                navigateToList = { musicInfo ->
+                                    appState.navigateToList(musicInfo, backStackEntry)
+                                }
+                            )
+                        }
 
-                    composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
-                        GridScreen(
-                            navigateToList = { musicInfo ->
-                                appState.navigateToList(musicInfo, backStackEntry)
-                            },
-                            navigateBack = appState::navigateBack
-                        )
-                    }
+                        composableWithCompositionLocal(Screen.Grid.route) { backStackEntry ->
+                            GridScreen(
+                                navigateToList = { musicInfo ->
+                                    appState.navigateToList(musicInfo, backStackEntry)
+                                },
+                                navigateBack = appState::navigateBack
+                            )
+                        }
 
-                    composableWithCompositionLocal(Screen.List.route) {
-                        ListScreen(
-                            navigateBack = appState::navigateBack
-                        )
+                        composableWithCompositionLocal(Screen.List.route) {
+                            ListScreen(
+                                navigateBack = appState::navigateBack
+                            )
+                        }
                     }
+                } else {
+                    OfflineDialog { appState.refreshOnline() }
                 }
+
             }
-
-
         }
     }
+}
+
+@Composable
+fun OfflineDialog(onRetry: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(text = "인터넷 연결 오류") },
+        text = { Text(text = "음악 정보 리스트를 가져올 수 없습니다.\n인터넷 연결을 확인 후 다시 시도해주세요.") },
+        confirmButton = {
+            TextButton(onClick = onRetry) {
+                Text(text = "재시도")
+            }
+        }
+    )
 }
 
 fun NavGraphBuilder.composableWithCompositionLocal(

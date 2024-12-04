@@ -1,10 +1,14 @@
 package com.litbig.spotify.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import android.os.Build
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -41,6 +45,13 @@ class SpotifyAppState(
     val navController: NavHostController,
     private val context: Context
 ) {
+    var isOnline by mutableStateOf(checkIfOnline())
+        private set
+
+    fun refreshOnline() {
+        isOnline = checkIfOnline()
+    }
+
     fun navigateToSplash(from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate(Screen.Splash.route) {
@@ -77,6 +88,20 @@ class SpotifyAppState(
 
     fun navigateBack() {
         navController.popBackStack()
+    }
+
+    @SuppressLint("ObsoleteSdkInt")
+    @Suppress("DEPRECATION")
+    private fun checkIfOnline(): Boolean {
+        val cm = getSystemService(context, ConnectivityManager::class.java)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val capabilities = cm?.getNetworkCapabilities(cm.activeNetwork) ?: return false
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        } else {
+            cm?.activeNetworkInfo?.isConnectedOrConnecting == true
+        }
     }
 }
 
