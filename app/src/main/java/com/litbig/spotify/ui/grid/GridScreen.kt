@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -39,8 +40,10 @@ fun GridScreen(
         "artist" -> "Your top artists"
         else -> ""
     }
+    val shape = if (state.value.category == "artist") CircleShape else RoundedCornerShape(4.dp)
 
     GridScreen(
+        shape = shape,
         title = title,
         uiState = state.value,
         navigateToList = navigateToList,
