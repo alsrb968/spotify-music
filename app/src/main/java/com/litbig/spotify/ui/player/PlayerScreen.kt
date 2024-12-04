@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.litbig.spotify.ui.player
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
@@ -12,17 +15,14 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -40,6 +40,76 @@ import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import com.litbig.spotify.util.extractDominantColorFromUrl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import timber.log.Timber
+
+@Composable
+fun PlayerBottomSheet(
+    modifier: Modifier = Modifier,
+    viewModel: PlayerViewModel = hiltViewModel(),
+    content: @Composable () -> Unit
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val sheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        skipHiddenState = true
+    )
+    val scope = rememberCoroutineScope()
+    var playerBarHeight by remember { mutableStateOf(0.dp) }
+
+    playerBarHeight = when (state) {
+        is PlayerUiState.Idle -> {
+            0.dp
+        }
+
+        is PlayerUiState.Ready -> {
+            70.dp
+        }
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = sheetState
+        ),
+        sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
+        sheetPeekHeight = playerBarHeight,
+        sheetDragHandle = null,
+        sheetContainerColor = Color.Transparent,
+        sheetShape = RoundedCornerShape(
+            topStart = 8.dp,
+            topEnd = 8.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        ),
+        sheetContent = {
+
+            Crossfade(targetState = sheetState.currentValue, label = "") {
+                when (it) {
+                    SheetValue.PartiallyExpanded -> {
+                        PlayerBar {
+                            scope.launch {
+                                sheetState.expand()
+                            }
+                        }
+                    }
+
+                    SheetValue.Expanded -> {
+                        PlayerScreen {
+                            scope.launch {
+                                sheetState.partialExpand()
+                            }
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun PlayerScreen(
@@ -93,16 +163,7 @@ fun PlayerScreen(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        uiState.dominantColor,
-                        MaterialTheme.colorScheme.background
-                    ),
-                    center = Offset(200f, 200f),
-                    radius = 2000f
-                )
-            )
+            .background(color = uiState.dominantColor)
     ) {
 
         Column(
@@ -263,7 +324,6 @@ fun ControlPanelTop(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControlPanelProgress(
     modifier: Modifier = Modifier,

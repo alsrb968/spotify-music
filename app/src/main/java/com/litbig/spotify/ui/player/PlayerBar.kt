@@ -38,7 +38,7 @@ import com.litbig.spotify.util.extractDominantColorFromUrl
 fun PlayerBar(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
-    navigateToPlayer: () -> Unit,
+    onExpand: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -63,7 +63,7 @@ fun PlayerBar(
                     onPlayOrPause = viewModel::onPlayOrPause,
                     onProgress = viewModel::onProgress,
                 ),
-                navigateToPlayer = navigateToPlayer,
+                onExpand = onExpand,
             )
         }
     }
@@ -74,86 +74,95 @@ fun PlayerBar(
     modifier: Modifier = Modifier,
     uiState: PlayerUiState.Ready,
     actions: PlayerBarActions,
-    navigateToPlayer: () -> Unit,
+    onExpand: () -> Unit,
 ) {
     Box(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(
                 horizontal = 8.dp,
-                vertical = 4.dp
             )
-            .clickable { navigateToPlayer() }
+            .clip(RoundedCornerShape(6.dp))
+            .background(color = uiState.dominantColor)
     ) {
-        Row(
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(color = uiState.dominantColor.copy(alpha = 0.95f)),
-            verticalAlignment = Alignment.CenterVertically,
+                .clickable { onExpand() }
         ) {
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(5.dp))
-            ) {
-                AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
-                    model = uiState.nowPlaying.albumArtUrl,
-                    contentDescription = "Album Art",
-                    contentScale = ContentScale.Crop,
-                    placeholder = shimmerPainter(),
-                    error = painterResource(id = R.drawable.baseline_image_not_supported_24),
-                )
-            }
-
-            Spacer(modifier = Modifier.width(18.dp))
-
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(38.dp)
-                    .padding(end = 150.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .height(70.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(color = uiState.dominantColor),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = uiState.nowPlaying.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = uiState.nowPlaying.artist,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                ) {
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = uiState.nowPlaying.albumArtUrl,
+                        contentDescription = "Album Art",
+                        contentScale = ContentScale.Crop,
+                        placeholder = shimmerPainter(),
+                        error = painterResource(id = R.drawable.baseline_image_not_supported_24),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(18.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(38.dp)
+                        .padding(end = 150.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = uiState.nowPlaying.title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = uiState.nowPlaying.artist,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
             }
 
+            ControlBar(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .align(Alignment.CenterEnd),
+                uiState = uiState,
+                actions = actions,
+            )
+
+            LinearProgressIndicator(
+                progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration.toLong() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .padding(horizontal = 10.dp)
+                    .align(Alignment.BottomCenter),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
-
-        ControlBar(
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .align(Alignment.CenterEnd),
-            uiState = uiState,
-            actions = actions,
-        )
-
-        LinearProgressIndicator(
-            progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration.toLong() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .padding(horizontal = 10.dp)
-                .align(Alignment.BottomCenter),
-        )
     }
+
 }
 
 @Composable
@@ -222,7 +231,7 @@ fun PreviewPlayerBar() {
                 onPlayOrPause = {},
                 onProgress = {},
             ),
-            navigateToPlayer = {},
+            onExpand = {},
         )
     }
 }

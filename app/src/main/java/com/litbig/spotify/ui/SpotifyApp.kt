@@ -7,15 +7,14 @@ package com.litbig.spotify.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
@@ -25,12 +24,9 @@ import androidx.navigation.compose.composable
 import com.litbig.spotify.ui.grid.GridScreen
 import com.litbig.spotify.ui.home.HomeScreen
 import com.litbig.spotify.ui.list.ListScreen
-import com.litbig.spotify.ui.player.PlayerBar
-import com.litbig.spotify.ui.player.PlayerScreen
+import com.litbig.spotify.ui.player.PlayerBottomSheet
 import com.litbig.spotify.ui.splash.SplashScreen
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpotifyApp(
     appState: SpotifyAppState = rememberSpotifyAppState()
@@ -39,56 +35,7 @@ fun SpotifyApp(
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
         ) {
-            val sheetState = rememberStandardBottomSheetState(
-                initialValue = SheetValue.PartiallyExpanded
-            )
-            val scope = rememberCoroutineScope()
-            var playerBarHeight by remember { mutableIntStateOf(0) }
-            BottomSheetScaffold(
-                scaffoldState = rememberBottomSheetScaffoldState(
-                    bottomSheetState = sheetState
-                ),
-                sheetContent = {
-                    when (sheetState.currentValue) {
-                        SheetValue.PartiallyExpanded -> {
-                            PlayerBar(
-                                modifier = Modifier.onSizeChanged { size ->
-                                    playerBarHeight = size.height
-                                },
-                                navigateToPlayer = {
-                                    scope.launch {
-                                        sheetState.expand()
-                                    }
-                                }
-                            )
-                        }
-
-                        SheetValue.Expanded -> {
-                            PlayerScreen(
-                                onCollapse = {
-                                    scope.launch {
-                                        sheetState.partialExpand()
-                                    }
-                                }
-                            )
-                        }
-
-                        else -> {}
-                    }
-                },
-                sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
-                sheetDragHandle = null,
-                sheetPeekHeight = with(LocalDensity.current) {
-                    (playerBarHeight * 0.99f).toInt().toDp()
-                },
-                sheetShape = RoundedCornerShape(
-                    topStart = 8.dp,
-                    topEnd = 8.dp,
-                    bottomStart = 0.dp,
-                    bottomEnd = 0.dp
-                ),
-                sheetContainerColor = Color.Transparent,
-            ) {
+            PlayerBottomSheet {
 
                 if (appState.isOnline) {
                     NavHost(
@@ -131,6 +78,7 @@ fun SpotifyApp(
                             )
                         }
                     }
+
                 } else {
                     OfflineDialog { appState.refreshOnline() }
                 }
