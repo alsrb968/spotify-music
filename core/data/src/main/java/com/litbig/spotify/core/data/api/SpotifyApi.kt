@@ -11,9 +11,9 @@ interface SpotifyApi {
     suspend fun search(
         @Query("q") query: String,
         @Query("type") type: String,
-//        @Query("market") market: String = "KR",
-//        @Query("limit") limit: Int = 10,
-//        @Query("offset") offset: Int = 0,
+        @Query("market") market: String = "KR",
+        @Query("limit") limit: Int = 10,
+        @Query("offset") offset: Int = 0,
         @Header("Authorization") accessToken: String
     ): SearchResponse
 
@@ -45,7 +45,7 @@ interface SpotifyApi {
     suspend fun getAlbumsOfArtist(
         @Path("id") artistId: String,
 //        @Query("include_groups") includeGroups: String,
-//        @Query("market") market: String,
+        @Query("market") market: String = "KR",
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
         @Header("Authorization") accessToken: String
@@ -54,7 +54,7 @@ interface SpotifyApi {
     @GET("v1/artists/{id}/top-tracks")
     suspend fun getTopTracksOfArtist(
         @Path("id") artistId: String,
-//        @Query("market") market: String,
+        @Query("market") market: String = "KR",
         @Header("Authorization") accessToken: String
     ): TopTracksResponse
 

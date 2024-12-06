@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.ConfigurationCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -26,6 +25,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.ui.home.feed.FeedScreen
 import com.litbig.spotify.ui.home.search.SearchScreen
 import com.litbig.spotify.ui.theme.SpotifyTheme
+import com.litbig.spotify.ui.tooling.DevicePreviews
 import java.util.Locale
 
 fun NavGraphBuilder.addHomeGraph(
@@ -127,7 +127,7 @@ fun SpotifyBottomBar(
 }
 
 
-@Preview
+@DevicePreviews
 @Composable
 fun PreviewSpotifyBottomBar() {
     SpotifyTheme {

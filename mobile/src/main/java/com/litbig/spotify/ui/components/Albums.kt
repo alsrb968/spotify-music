@@ -1,6 +1,5 @@
 package com.litbig.spotify.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -8,7 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,13 +17,15 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.ui.home.feed.FeedAlbum
 import com.litbig.spotify.ui.home.feed.FeedCollection
 import com.litbig.spotify.ui.theme.SpotifyTheme
+import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewFeedCollection
 
 @Composable
 fun AlbumCollection(
@@ -58,7 +58,7 @@ fun AlbumCollection(
                 text = stringResource(R.string.show_all),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.clickable { onMore() }
+                modifier = Modifier.clickableScaled { onMore() }
             )
         }
 
@@ -101,13 +101,13 @@ fun AlbumItem(
 ) {
     Column(
         modifier = modifier
-            .width(154.dp),
+            .width(154.dp)
+            .clickableScaled { onClick() },
     ) {
         Box(
             modifier = Modifier
                 .size(154.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .clickable { onClick() },
+                .clip(RoundedCornerShape(16.dp)),
         ) {
             AsyncImage(
                 modifier = Modifier
@@ -125,7 +125,8 @@ fun AlbumItem(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
+                .height(40.dp)
+            ,
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
@@ -135,15 +136,12 @@ fun AlbumItem(
     }
 }
 
-@Preview
+@DevicePreviews
 @Composable
 fun AlbumCollectionPreview() {
     SpotifyTheme {
         AlbumCollection(
-            feedCollection = FeedCollection(
-                title = "Albums",
-                feeds = emptyList()
-            ),
+            feedCollection = PreviewFeedCollection,
             onAlbum = {},
             onMore = {}
         )

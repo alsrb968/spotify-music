@@ -94,12 +94,12 @@ class SpotifyDataSourceImpl @Inject constructor(
     ): SearchResponse {
         Timber.w("search query=$query, type=$type")
         return api.search(
-            query,
-            type,
+            query = query,
+            type = type,
 //            market,
 //            limit,
 //            offset,
-            accessToken
+            accessToken = accessToken
         )
     }
 
@@ -137,14 +137,22 @@ class SpotifyDataSourceImpl @Inject constructor(
         offset: Int,
         accessToken: String
     ): AlbumsResponse {
-        return api.getAlbumsOfArtist(artistId, limit, offset, accessToken)
+        return api.getAlbumsOfArtist(
+            artistId = artistId,
+            limit = limit,
+            offset = offset,
+            accessToken = accessToken
+        )
     }
 
     override suspend fun getTopTracksOfArtist(
         artistId: String,
         accessToken: String
     ): List<TrackDetailsResponse> {
-        return api.getTopTracksOfArtist(artistId, accessToken).tracks
+        return api.getTopTracksOfArtist(
+            artistId = artistId,
+            accessToken = accessToken
+        ).tracks
     }
 
     override suspend fun getAlbumDetails(

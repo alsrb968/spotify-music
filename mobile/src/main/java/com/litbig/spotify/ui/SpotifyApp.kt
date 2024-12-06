@@ -17,6 +17,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.ui.home.HomeSections
 import com.litbig.spotify.ui.home.SpotifyBottomBar
 import com.litbig.spotify.ui.home.addHomeGraph
+import timber.log.Timber
 
 @Composable
 fun SpotifyApp(
@@ -32,6 +33,7 @@ fun SpotifyApp(
             composable(Screen.Home.route) { backStackEntry ->
                 MainContainer(
                     onTrackSelected = { trackId, from ->
+                        Timber.i("trackId: $trackId, from: $from")
                         appState.navigateToPlayer(trackId, from)
                     }
                 )

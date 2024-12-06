@@ -1,23 +1,16 @@
 package com.litbig.spotify.ui.home.feed
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.ui.components.AlbumCollection
 import com.litbig.spotify.ui.theme.SpotifyTheme
+import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewFeedCollections
+import timber.log.Timber
 
 @Composable
 fun FeedScreen(
@@ -45,36 +38,27 @@ fun FeedScreen(
 ) {
     LazyColumn(
         modifier = modifier,
-
     ) {
         items(feedCollections.size) { index ->
             val feedCollection = feedCollections[index]
             AlbumCollection(
-                modifier = modifier,
                 feedCollection = feedCollection,
                 onAlbum = onAlbum,
-                onMore = {}
+                onMore = {
+                    Timber.i("onMore")
+                }
             )
-            HorizontalDivider()
         }
     }
 }
 
+@DevicePreviews
 @Composable
-fun Loading(
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier) {
-        CircularProgressIndicator(
-            modifier = Modifier.align(Alignment.Center)
-        )
-    }
-}
-
-@Preview
-@Composable
-fun LoadingPreview() {
+fun PreviewFeedScreen() {
     SpotifyTheme {
-        Loading()
+        FeedScreen(
+            feedCollections = PreviewFeedCollections,
+            onAlbum = {}
+        )
     }
 }
