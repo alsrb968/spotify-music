@@ -49,13 +49,13 @@ fun AlbumsResponse.toAlbums(): Albums {
 
 fun TrackDetailsResponse.toTrackDetails(): TrackDetails {
     return TrackDetails(
-        album = album.toAlbumDetails(),
+        album = album?.toAlbumDetails(),
         artists = artists.toArtistDetails(),
         availableMarkets = availableMarkets,
         discNumber = discNumber,
         durationMs = durationMs,
         explicit = explicit,
-        externalIds = externalIds.toExternalIds(),
+        externalIds = externalIds?.toExternalIds(),
         externalUrls = externalUrls.toExternalUrls(),
         href = href,
         id = id,

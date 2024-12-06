@@ -31,6 +31,7 @@ import com.litbig.spotify.ui.tooling.PreviewFeedCollection
 fun AlbumCollection(
     modifier: Modifier = Modifier,
     feedCollection: FeedCollection,
+    onTrack: (String) -> Unit,
     onAlbum: (String) -> Unit,
     onMore:() -> Unit
 ) {
@@ -142,6 +143,7 @@ fun AlbumCollectionPreview() {
     SpotifyTheme {
         AlbumCollection(
             feedCollection = PreviewFeedCollection,
+            onTrack = {},
             onAlbum = {},
             onMore = {}
         )

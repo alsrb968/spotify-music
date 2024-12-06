@@ -3,13 +3,13 @@ package com.litbig.spotify.core.data.model.remote
 import com.google.gson.annotations.SerializedName
 
 data class TrackDetailsResponse(
-    @SerializedName("album") val album: AlbumDetailsResponse,
+    @SerializedName("album") val album: AlbumDetailsResponse?,
     @SerializedName("artists") val artists: List<ArtistDetailsResponse>,
     @SerializedName("available_markets") val availableMarkets: List<String>?,
     @SerializedName("disc_number") val discNumber: Int,
     @SerializedName("duration_ms") val durationMs: Int,
     @SerializedName("explicit") val explicit: Boolean,
-    @SerializedName("external_ids") val externalIds: ExternalIdsResponse,
+    @SerializedName("external_ids") val externalIds: ExternalIdsResponse?,
     @SerializedName("external_urls") val externalUrls: ExternalUrlsResponse,
     @SerializedName("href") val href: String,
     @SerializedName("id") val id: String,

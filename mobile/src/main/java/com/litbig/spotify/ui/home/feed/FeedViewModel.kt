@@ -101,7 +101,7 @@ class FeedViewModel @Inject constructor(
                     val trackFeeds = topTracks.map { track ->
                         FeedAlbum(
                             id = track.id,
-                            imageUrl = track.album.images.firstOrNull()?.url,
+                            imageUrl = track.album?.images?.firstOrNull()?.url,
                             name = track.name,
                         )
                     }

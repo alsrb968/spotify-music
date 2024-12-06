@@ -1,13 +1,13 @@
 package com.litbig.spotify.core.domain.model.remote
 
 data class TrackDetails(
-    val album: AlbumDetails,
+    val album: AlbumDetails?,
     val artists: List<ArtistDetails>,
     val availableMarkets: List<String>?,
     val discNumber: Int,
     val durationMs: Int,
     val explicit: Boolean,
-    val externalIds: ExternalIds,
+    val externalIds: ExternalIds?,
     val externalUrls: ExternalUrls,
     val href: String,
     val id: String,

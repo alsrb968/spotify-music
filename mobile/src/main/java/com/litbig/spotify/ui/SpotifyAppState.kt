@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -14,14 +15,18 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.litbig.spotify.ui.home.feed.FeedSection
 
 sealed class Screen(val route: String) {
-    data object Home : Screen("home")
-    data object Player : Screen("player/{$ARG_TRACK_ID}") {
-        fun createRoute(trackId: String) = "player/$trackId"
+    data object Home : Screen(ROUTE_HOME)
+    data object Player : Screen("${ROUTE_PLAYER}/{$ARG_TRACK_ID}") {
+        fun createRoute(trackId: String) = "${ROUTE_PLAYER}/$trackId"
     }
 
     companion object {
+        const val ROUTE_HOME = "home"
+        const val ROUTE_PLAYER = "player"
+
         const val ARG_TRACK_ID = "track_id"
     }
 }
@@ -60,6 +65,12 @@ class SpotifyAppState(
                     saveState = true
                 }
             }
+        }
+    }
+
+    fun navigateToAlbum(albumId: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(FeedSection.Album.createRoute(Uri.encode(albumId)))
         }
     }
 

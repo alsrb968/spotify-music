@@ -3,6 +3,8 @@ package com.litbig.spotify.ui.home
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.Home
@@ -20,55 +22,122 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.os.ConfigurationCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.litbig.spotify.R
+import com.litbig.spotify.ui.Screen
+import com.litbig.spotify.ui.home.feed.FeedContainer
 import com.litbig.spotify.ui.home.feed.FeedScreen
 import com.litbig.spotify.ui.home.search.SearchScreen
+import com.litbig.spotify.ui.rememberSpotifyAppState
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import java.util.Locale
+
+sealed class HomeSection(
+    @StringRes val title: Int,
+    val icon: ImageVector,
+    val route: String
+) {
+    data object Feed : HomeSection(
+        title = R.string.home_feed,
+        icon = Icons.Outlined.Home,
+        route = ROUTE_FEED
+    )
+
+    data object Search : HomeSection(
+        title = R.string.home_search,
+        icon = Icons.Outlined.Search,
+        route = ROUTE_SEARCH
+    )
+
+    data object Library : HomeSection(
+        title = R.string.home_library,
+        icon = Icons.Outlined.LibraryMusic,
+        route = ROUTE_LIBRARY
+    )
+
+    data object Premium : HomeSection(
+        title = R.string.home_premium,
+        icon = Icons.Outlined.AcUnit,
+        route = ROUTE_PREMIUM
+    )
+
+    companion object {
+        const val ROUTE_FEED = "${Screen.ROUTE_HOME}/feed"
+        const val ROUTE_SEARCH = "${Screen.ROUTE_HOME}/search"
+        const val ROUTE_LIBRARY = "${Screen.ROUTE_HOME}/library"
+        const val ROUTE_PREMIUM = "${Screen.ROUTE_HOME}/premium"
+
+        val sections = listOf(Feed, Search, Library, Premium)
+    }
+}
 
 fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
     onTrackSelected: (String, NavBackStackEntry) -> Unit
 ) {
-    composable(HomeSections.FEED.route) { from ->
-        FeedScreen(
+    composable(HomeSection.Feed.route) { from ->
+        FeedContainer(
             modifier = modifier,
-            onTrackClick = { trackId -> onTrackSelected(trackId, from) }
+            onTrackSelected = onTrackSelected
         )
     }
 
-    composable(HomeSections.SEARCH.route) { from ->
+    composable(HomeSection.Search.route) { from ->
         SearchScreen(
             modifier = modifier,
             onTrackClick = { trackId -> onTrackSelected(trackId, from) }
         )
     }
 
-    composable(HomeSections.LIBRARY.route) { from ->
+    composable(HomeSection.Library.route) { from ->
 
     }
 
-    composable(HomeSections.PREMIUM.route) { from ->
+    composable(HomeSection.Premium.route) { from ->
 
     }
 }
 
-enum class HomeSections(
-    @StringRes val title: Int,
-    val icon: ImageVector,
-    val route: String
+@Composable
+fun HomeContainer(
+    modifier: Modifier = Modifier,
+    onTrackSelected: (String, NavBackStackEntry) -> Unit
 ) {
-    FEED(R.string.home_feed, Icons.Outlined.Home, "home/feed"),
-    SEARCH(R.string.home_search, Icons.Outlined.Search, "home/search"),
-    LIBRARY(R.string.home_library, Icons.Outlined.LibraryMusic, "home/library"),
-    PREMIUM(R.string.home_premium, Icons.Outlined.AcUnit, "home/premium")
+    val appState = rememberSpotifyAppState()
+    val navBackStackEntry by appState.navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            SpotifyBottomBar(
+                tabs = HomeSection.sections,
+                currentRoute = currentRoute ?: HomeSection.Feed.route,
+                navigateToRoute = appState::navigateToBottomBarRoute
+            )
+        }
+    ) { padding ->
+        NavHost(
+            modifier = Modifier
+                .padding(padding),
+            navController = appState.navController,
+            startDestination = HomeSection.Feed.route
+        ) {
+            addHomeGraph(
+                modifier = Modifier
+                    .consumeWindowInsets(padding),
+                onTrackSelected = onTrackSelected
+            )
+        }
+    }
 }
 
 @Composable
 fun SpotifyBottomBar(
-    tabs: List<HomeSections>,
+    tabs: List<HomeSection>,
     currentRoute: String,
     navigateToRoute: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -77,7 +146,7 @@ fun SpotifyBottomBar(
 ) {
     val routes = remember { tabs.map { it.route } }
     val currentSection = tabs.first { it.route == currentRoute }
-    
+
     AnimatedVisibility(
         visible = tabs.map { it.route }.contains(currentRoute)
     ) {
@@ -132,8 +201,8 @@ fun SpotifyBottomBar(
 fun PreviewSpotifyBottomBar() {
     SpotifyTheme {
         SpotifyBottomBar(
-            tabs = HomeSections.entries,
-            currentRoute = HomeSections.FEED.route,
+            tabs = HomeSection.sections,
+            currentRoute = HomeSection.Feed.route,
             navigateToRoute = { }
         )
     }
