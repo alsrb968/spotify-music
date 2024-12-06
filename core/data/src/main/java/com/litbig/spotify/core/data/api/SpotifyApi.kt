@@ -1,9 +1,6 @@
 package com.litbig.spotify.core.data.api
 
-import com.litbig.spotify.core.data.model.remote.AlbumDetailsResponse
-import com.litbig.spotify.core.data.model.remote.ArtistDetailsResponse
-import com.litbig.spotify.core.data.model.remote.SearchResponse
-import com.litbig.spotify.core.data.model.remote.TrackDetailsResponse
+import com.litbig.spotify.core.data.model.remote.*
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
@@ -44,6 +41,23 @@ interface SpotifyApi {
         @Header("Authorization") accessToken: String
     ): List<ArtistDetailsResponse>
 
+    @GET("v1/artists/{id}/albums")
+    suspend fun getAlbumsOfArtist(
+        @Path("id") artistId: String,
+//        @Query("include_groups") includeGroups: String,
+//        @Query("market") market: String,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Header("Authorization") accessToken: String
+    ): AlbumsResponse
+
+    @GET("v1/artists/{id}/top-tracks")
+    suspend fun getTopTracksOfArtist(
+        @Path("id") artistId: String,
+//        @Query("market") market: String,
+        @Header("Authorization") accessToken: String
+    ): TopTracksResponse
+
     @GET("v1/albums/{id}")
     suspend fun getAlbumDetails(
         @Path("id") albumId: String,
@@ -55,4 +69,11 @@ interface SpotifyApi {
         @Query("ids") albumIds: String,
         @Header("Authorization") accessToken: String
     ): List<AlbumDetailsResponse>
+
+    @GET("v1/browse/new-releases")
+    suspend fun getNewAlbumReleases(
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Header("Authorization") accessToken: String
+    ): SearchResponse
 }

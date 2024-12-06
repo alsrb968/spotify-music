@@ -31,6 +31,7 @@ gson = "2.10.1"
 coil = "2.7.0"
 serialization = "1.7.2"
 media3 = "1.4.1"
+lifecycleRuntimeKtx = "2.8.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -76,6 +77,7 @@ jakewharton-timber = { group = "com.jakewharton.timber", name = "timber", versio
 javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "inject" }
 io-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 jetbrains-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

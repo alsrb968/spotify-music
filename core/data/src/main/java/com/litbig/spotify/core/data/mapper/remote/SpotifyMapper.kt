@@ -51,6 +51,7 @@ fun TrackDetailsResponse.toTrackDetails(): TrackDetails {
     return TrackDetails(
         album = album.toAlbumDetails(),
         artists = artists.toArtistDetails(),
+        availableMarkets = availableMarkets,
         discNumber = discNumber,
         durationMs = durationMs,
         explicit = explicit,

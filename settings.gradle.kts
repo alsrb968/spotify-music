@@ -21,8 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "Spotify"
 include(":app")
+include(":mobile")
 include(":core:design")
 include(":core:data")
 include(":core:domain")
-
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

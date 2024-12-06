@@ -9,21 +9,16 @@ import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
 import com.litbig.spotify.core.data.mapper.local.*
-import com.litbig.spotify.core.data.mapper.remote.toAlbumDetails
-import com.litbig.spotify.core.data.mapper.remote.toArtistDetails
-import com.litbig.spotify.core.data.mapper.remote.toSearch
-import com.litbig.spotify.core.data.mapper.remote.toTrackDetails
+import com.litbig.spotify.core.data.mapper.remote.*
 import com.litbig.spotify.core.domain.model.local.AlbumArt
 import com.litbig.spotify.core.domain.model.local.ArtistInfo
 import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
-import com.litbig.spotify.core.domain.model.remote.AlbumDetails
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.Search
-import com.litbig.spotify.core.domain.model.remote.TrackDetails
+import com.litbig.spotify.core.domain.model.remote.*
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 
@@ -401,8 +396,21 @@ class MusicRepositoryImpl @Inject constructor(
         return spotifyDataSource.getArtistDetails(artistId, getAccessToken()).toArtistDetails()
     }
 
+    override suspend fun getAlbumsOfArtist(artistId: String, limit: Int, offset: Int): Albums {
+        return spotifyDataSource.getAlbumsOfArtist(artistId, limit, offset, getAccessToken())
+            .toAlbums()
+    }
+
+    override suspend fun getTopTracksOfArtist(artistId: String): List<TrackDetails> {
+        return spotifyDataSource.getTopTracksOfArtist(artistId, getAccessToken()).toTrackDetails()
+    }
+
     override suspend fun getAlbumDetails(albumId: String): AlbumDetails {
         return spotifyDataSource.getAlbumDetails(albumId, getAccessToken()).toAlbumDetails()
+    }
+
+    override suspend fun getNewAlbumReleases(limit: Int, offset: Int): Albums? {
+        return spotifyDataSource.getNewAlbumReleases(limit, offset, getAccessToken())?.toAlbums()
     }
 
     override suspend fun insertFavorite(favorite: Favorite) {

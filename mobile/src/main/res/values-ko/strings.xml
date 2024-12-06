@@ -1,0 +1,14 @@
+<resources>
+    <!-- disconnect dialog -->
+    <string name="internet_error_title">인터넷 연결 오류</string>
+    <string name="internet_error_content">음악 정보 리스트를 가져올 수 없습니다.\n인터넷 연결을 확인 후 다시 시도해주세요.</string>
+    <string name="retry">재시도</string>
+
+    <!-- Home Tabs -->
+    <string name="home_feed">홈</string>
+    <string name="home_search">검색</string>
+    <string name="home_library">라이브러리</string>
+    <string name="home_premium">프리미엄</string>
+
+    <string name="show_all">모두 표시</string>
+</resources>

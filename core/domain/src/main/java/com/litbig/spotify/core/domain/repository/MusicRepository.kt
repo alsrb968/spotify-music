@@ -5,10 +5,7 @@ import com.litbig.spotify.core.domain.model.local.AlbumArt
 import com.litbig.spotify.core.domain.model.local.ArtistInfo
 import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
-import com.litbig.spotify.core.domain.model.remote.AlbumDetails
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.Search
-import com.litbig.spotify.core.domain.model.remote.TrackDetails
+import com.litbig.spotify.core.domain.model.remote.*
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
@@ -68,10 +65,12 @@ interface MusicRepository {
     suspend fun searchTrack(trackName: String, artistName: String): TrackDetails?
     suspend fun searchArtist(artistName: String): ArtistDetails?
     suspend fun searchAlbum(albumName: String): AlbumDetails?
-
     suspend fun getTrackDetails(trackId: String): TrackDetails
     suspend fun getArtistDetails(artistId: String): ArtistDetails
+    suspend fun getAlbumsOfArtist(artistId: String, limit: Int = 10, offset: Int = 0): Albums
+    suspend fun getTopTracksOfArtist(artistId: String): List<TrackDetails>
     suspend fun getAlbumDetails(albumId: String): AlbumDetails
+    suspend fun getNewAlbumReleases(limit: Int = 10, offset: Int = 0): Albums?
 
     suspend fun insertFavorite(favorite: Favorite)
     fun isFavorite(name: String, type: String): Flow<Boolean>

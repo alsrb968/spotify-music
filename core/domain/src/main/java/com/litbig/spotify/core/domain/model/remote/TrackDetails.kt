@@ -3,6 +3,7 @@ package com.litbig.spotify.core.domain.model.remote
 data class TrackDetails(
     val album: AlbumDetails,
     val artists: List<ArtistDetails>,
+    val availableMarkets: List<String>?,
     val discNumber: Int,
     val durationMs: Int,
     val explicit: Boolean,

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name" translatable="false">Spotify</string>
+
+    <!-- Disconnect Dialog -->
+    <string name="internet_error_title">Internet connection error.</string>
+    <string name="internet_error_content">The music information list could not be retrieved.\nPlease check your Internet connection and try again.</string>
+    <string name="retry">Retry</string>
+
+    <!-- Home Tabs -->
+    <string name="home_feed">Home</string>
+    <string name="home_search">Search</string>
+    <string name="home_library">Library</string>
+    <string name="home_premium">Premium</string>
+
+    <string name="show_all">Show All</string>
+</resources>

@@ -42,6 +42,18 @@ interface SpotifyDataSource {
         accessToken: String
     ): List<ArtistDetailsResponse>
 
+    suspend fun getAlbumsOfArtist(
+        artistId: String,
+        limit: Int = 10,
+        offset: Int = 0,
+        accessToken: String
+    ): AlbumsResponse
+
+    suspend fun getTopTracksOfArtist(
+        artistId: String,
+        accessToken: String
+    ): List<TrackDetailsResponse>
+
     suspend fun getAlbumDetails(
         albumId: String,
         accessToken: String
@@ -51,6 +63,12 @@ interface SpotifyDataSource {
         albumIds: String,
         accessToken: String
     ): List<AlbumDetailsResponse>
+
+    suspend fun getNewAlbumReleases(
+        limit: Int = 10,
+        offset: Int = 0,
+        accessToken: String
+    ): AlbumsResponse?
 }
 
 class SpotifyDataSourceImpl @Inject constructor(
@@ -113,6 +131,22 @@ class SpotifyDataSourceImpl @Inject constructor(
         return api.getSeveralArtistDetails(artistIds, accessToken)
     }
 
+    override suspend fun getAlbumsOfArtist(
+        artistId: String,
+        limit: Int,
+        offset: Int,
+        accessToken: String
+    ): AlbumsResponse {
+        return api.getAlbumsOfArtist(artistId, limit, offset, accessToken)
+    }
+
+    override suspend fun getTopTracksOfArtist(
+        artistId: String,
+        accessToken: String
+    ): List<TrackDetailsResponse> {
+        return api.getTopTracksOfArtist(artistId, accessToken).tracks
+    }
+
     override suspend fun getAlbumDetails(
         albumId: String,
         accessToken: String
@@ -125,5 +159,13 @@ class SpotifyDataSourceImpl @Inject constructor(
         accessToken: String
     ): List<AlbumDetailsResponse> {
         return api.getSeveralAlbumDetails(albumIds, accessToken)
+    }
+
+    override suspend fun getNewAlbumReleases(
+        limit: Int,
+        offset: Int,
+        accessToken: String
+    ): AlbumsResponse? {
+        return api.getNewAlbumReleases(limit, offset, accessToken).albums
     }
 }

@@ -74,6 +74,22 @@ object UseCaseModule {
 
     @Provides
     @Singleton
+    fun provideGetNewAlbumReleasesUseCase(
+        musicRepository: MusicRepository
+    ): GetNewAlbumReleasesUseCase = GetNewAlbumReleasesUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideGetArtistRelatedInfoUseCase(
+        musicRepository: MusicRepository
+    ): GetArtistRelatedInfoUseCase = GetArtistRelatedInfoUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
     fun provideGetFavoritesUseCase(
         musicRepository: MusicRepository
     ): GetFavoritesUseCase = GetFavoritesUseCase(
