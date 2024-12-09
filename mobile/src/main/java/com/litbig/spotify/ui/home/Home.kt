@@ -28,7 +28,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedContainer
-import com.litbig.spotify.ui.home.feed.FeedScreen
 import com.litbig.spotify.ui.home.search.SearchScreen
 import com.litbig.spotify.ui.rememberSpotifyAppState
 import com.litbig.spotify.ui.theme.SpotifyTheme

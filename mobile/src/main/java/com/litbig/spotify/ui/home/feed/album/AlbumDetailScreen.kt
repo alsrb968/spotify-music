@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +54,8 @@ fun AlbumDetailScreen(
     uiState: AlbumDetailUiState.Ready,
     navigateToBack: () -> Unit,
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -66,7 +69,7 @@ fun AlbumDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { /* todo */ }
+                        onClick = navigateToBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -75,34 +78,28 @@ fun AlbumDetailScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(
-                        onClick = { /* todo */ }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
         TrackList(
             modifier = Modifier.padding(padding),
-            uiState = uiState
+            uiState = uiState,
+            scrollBehavior = scrollBehavior
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackList(
     modifier: Modifier = Modifier,
     uiState: AlbumDetailUiState.Ready,
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         state = rememberLazyListState(),
     ) {
         item {
