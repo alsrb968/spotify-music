@@ -4,12 +4,15 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.TrackDetails
+import com.litbig.spotify.core.data.di.RepositoryModule.MockingPlayerRepository
+import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
+import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
+import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.home.feed.FeedSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -34,7 +37,10 @@ data class TrackInfo(
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getAlbumDetailsUseCase: GetAlbumDetailsUseCase
+    private val getAlbumDetailsUseCase: GetAlbumDetailsUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val isFavoriteUseCase: IsFavoriteUseCase,
+    @MockingPlayerRepository private val playerRepository: PlayerRepository
 ) : ViewModel() {
     private val albumId = Uri.decode(savedStateHandle.get<String>(FeedSection.ARG_ALBUM_ID))
 
@@ -62,4 +68,33 @@ class AlbumDetailViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = AlbumDetailUiState.Loading
     )
+
+
+    fun isFavoriteTrack(trackName: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteTrack(trackName)
+    }
+
+    fun isFavoriteAlbum(albumName: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteAlbum(albumName)
+    }
+
+    fun toggleFavoriteAlbum(albumName: String, imageUrl: String? = null) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase.toggleFavoriteAlbum(albumName, imageUrl)
+        }
+    }
+
+    fun play(trackId: String) {
+        Timber.w("play trackId: $trackId")
+        playerRepository.play(trackId)
+    }
+
+    fun play(trackIdList: List<String>) {
+        Timber.w("play trackIdList: $trackIdList")
+        playerRepository.play(trackIdList)
+    }
+
+    fun addPlaylist(trackIdList: List<String>) {
+        playerRepository.addPlayLists(trackIdList)
+    }
 }

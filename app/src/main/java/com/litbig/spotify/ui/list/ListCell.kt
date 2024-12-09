@@ -25,10 +25,10 @@ import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.component.shimmerPainter
 import com.litbig.spotify.core.design.extension.shimmer
+import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
-import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
 import kotlinx.coroutines.delay
 
 @Composable

@@ -35,13 +35,16 @@ android {
 
 dependencies {
     implementation(libs.jakewharton.timber)
-
+    implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.core.ktx)
 
     //----- Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.androidx.compose)
     debugImplementation(libs.bundles.androidx.compose.debug)
+
+    //----- Coil
+    implementation(libs.io.coil.compose)
 
     // ----- Test
     testImplementation(libs.junit)

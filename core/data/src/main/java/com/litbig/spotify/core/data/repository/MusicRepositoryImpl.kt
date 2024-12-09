@@ -18,7 +18,6 @@ import com.litbig.spotify.core.domain.model.remote.*
 import com.litbig.spotify.core.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 

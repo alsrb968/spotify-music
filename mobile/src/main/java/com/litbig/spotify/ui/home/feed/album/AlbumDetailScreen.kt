@@ -1,16 +1,21 @@
 package com.litbig.spotify.ui.home.feed.album
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -41,6 +46,7 @@ fun AlbumDetailScreen(
             AlbumDetailScreen(
                 modifier = modifier,
                 uiState = s,
+                onPlayTracks = viewModel::play,
                 navigateToBack = navigateToBack
             )
         }
@@ -52,6 +58,7 @@ fun AlbumDetailScreen(
 fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
     uiState: AlbumDetailUiState.Ready,
+    onPlayTracks: (List<String>) -> Unit,
     navigateToBack: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -85,7 +92,8 @@ fun AlbumDetailScreen(
         TrackList(
             modifier = Modifier.padding(padding),
             uiState = uiState,
-            scrollBehavior = scrollBehavior
+            scrollBehavior = scrollBehavior,
+            onPlayTracks = onPlayTracks
         )
     }
 }
@@ -96,6 +104,7 @@ fun TrackList(
     modifier: Modifier = Modifier,
     uiState: AlbumDetailUiState.Ready,
     scrollBehavior: TopAppBarScrollBehavior,
+    onPlayTracks: (List<String>) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -106,6 +115,11 @@ fun TrackList(
             AlbumInfoTitle(
                 artists = uiState.artistNames,
                 tracksTotalTime = uiState.totalTime,
+                onPlayTracks = {
+                    uiState.trackInfos?.map { it.id }?.let {
+                        onPlayTracks(it)
+                    }
+                }
             )
         }
 
@@ -129,8 +143,8 @@ fun AlbumInfoTitle(
     modifier: Modifier = Modifier,
     artists: String,
     tracksTotalTime: Long,
-
-    ) {
+    onPlayTracks: () -> Unit,
+) {
     Column(
         modifier = modifier
             .fillMaxWidth(),
@@ -178,7 +192,9 @@ fun AlbumInfoTitle(
         )
 
         Row(
-
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
                 onClick = { /* todo */ }
@@ -209,6 +225,25 @@ fun AlbumInfoTitle(
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            FloatingActionButton(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(CircleShape),
+                onClick = onPlayTracks,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(36.dp),
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
     }
 }
@@ -221,12 +256,12 @@ fun IconButtonWithText(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
-//            modifier = Modifier.size(24.dp),
-            onClick = onClick
+        Box(
+            modifier = Modifier.padding(8.dp),
         ) {
             icon()
         }
@@ -245,6 +280,7 @@ fun PreviewAlbumDetailScreen() {
     SpotifyTheme {
         AlbumDetailScreen(
             uiState = PreviewAlbumDetailUiState,
+            onPlayTracks = {},
             navigateToBack = {}
         )
     }

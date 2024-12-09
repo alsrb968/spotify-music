@@ -29,8 +29,8 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewMusicInfo
 import com.litbig.spotify.ui.tooling.PreviewMusicMetadataPagingData
-import com.litbig.spotify.util.ConvertExtensions.toHumanReadableDuration
-import com.litbig.spotify.util.extractDominantColorFromUrl
+import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
+import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 

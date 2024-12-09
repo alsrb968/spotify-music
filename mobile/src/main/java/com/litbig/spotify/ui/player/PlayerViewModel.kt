@@ -1,28 +1,30 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.litbig.spotify.ui.player
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.data.di.RepositoryModule.ExoPlayerRepository
+import com.litbig.spotify.core.data.di.RepositoryModule.MockingPlayerRepository
+import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.extension.combine
-import com.litbig.spotify.core.domain.model.local.MusicMetadata
-import com.litbig.spotify.core.domain.repository.MusicRepository
 import com.litbig.spotify.core.domain.repository.PlayerRepository
+import com.litbig.spotify.core.domain.usecase.GetTrackDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
-import com.litbig.spotify.core.design.extension.darkenColor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 sealed interface PlayerUiState {
     data object Idle : PlayerUiState
     data class Ready(
         val indexOfList: Int,
-        val nowPlaying: MusicMetadata,
-        val playList: List<MusicMetadata>,
+        val nowPlaying: TrackDetailsInfo,
+        val playList: List<TrackDetailsInfo>,
         val playingTime: Long,
         val isPlaying: Boolean,
         val isShuffle: Boolean,
@@ -32,31 +34,54 @@ sealed interface PlayerUiState {
     ) : PlayerUiState
 }
 
+data class TrackDetailsInfo(
+    val id: String,
+    val imageUrl: String?,
+    val title: String,
+    val artist: String,
+    val duration: Long,
+)
+
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    @ExoPlayerRepository private val playerRepository: PlayerRepository,
-    private val musicRepository: MusicRepository,
+    @MockingPlayerRepository private val playerRepository: PlayerRepository,
+    private val getTrackDetailsUseCase: GetTrackDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
 ) : ViewModel() {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val playList = playerRepository.mediaItems.flatMapLatest { items ->
         combine(items.map { item ->
-            musicRepository.getMetadataByAbsolutePath(item)
-        }) { metadataList ->
-            metadataList.toList()
+            getTrackDetailsUseCase(item)
+        }) { trackDetails ->
+            trackDetails.map { track ->
+                TrackDetailsInfo(
+                    id = track.id,
+                    imageUrl = track.album?.images?.firstOrNull()?.url,
+                    title = track.name,
+                    artist = track.artists.joinToString { it.name },
+                    duration = track.durationMs.toLong(),
+                )
+            }
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val nowPlaying = playerRepository.currentMediaItem.flatMapLatest { item ->
-        item?.let { musicRepository.getMetadataByAbsolutePath(it) } ?: flowOf(null)
+        item?.let { trackDetails ->
+            getTrackDetailsUseCase(trackDetails).map {
+                TrackDetailsInfo(
+                    id = it.id,
+                    imageUrl = it.album?.images?.firstOrNull()?.url,
+                    title = it.name,
+                    artist = it.artists.joinToString { artist -> artist.name },
+                    duration = it.durationMs.toLong(),
+                )
+            }
+        } ?: flowOf(null)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val isFavorite = nowPlaying.flatMapLatest { metadata ->
-        metadata?.let { isFavoriteUseCase.isFavoriteTrack(it.title) } ?: flowOf(false)
+        metadata?.let { isFavoriteUseCase.isFavoriteTrack(it.id) } ?: flowOf(false)
     }
 
     private val dominantColor = MutableStateFlow(Color.Transparent)
@@ -71,7 +96,7 @@ class PlayerViewModel @Inject constructor(
         isFavorite,
         dominantColor,
     ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode, isFavorite, color ->
-
+        Timber.i("nowPlaying: $nowPlaying, playingTime: $playingTime, isPlaying: $isPlaying, isShuffle: $isShuffle, repeatMode: $repeatMode, isFavorite: $isFavorite, color: $color")
         if (nowPlaying == null) {
             PlayerUiState.Idle
         } else {
@@ -100,8 +125,7 @@ class PlayerViewModel @Inject constructor(
         initialValue = PlayerUiState.Idle
     )
 
-
-    private var _nowPlaying: MusicMetadata? = null
+    private var _nowPlaying: TrackDetailsInfo? = null
     private var _isPlaying = false
     private var _isShuffle = false
     private var _repeatMode = 0
@@ -143,7 +167,7 @@ class PlayerViewModel @Inject constructor(
             _nowPlaying?.let {
                 toggleFavoriteUseCase.toggleFavoriteTrack(
                     trackName = it.title,
-                    imageUrl = it.albumArtUrl,
+                    imageUrl = it.imageUrl,
                 )
             }
         }
@@ -154,7 +178,7 @@ class PlayerViewModel @Inject constructor(
             playList.firstOrNull()?.getOrNull(index)?.let {
                 toggleFavoriteUseCase.toggleFavoriteTrack(
                     trackName = it.title,
-                    imageUrl = it.albumArtUrl,
+                    imageUrl = it.imageUrl,
                 )
             }
         }

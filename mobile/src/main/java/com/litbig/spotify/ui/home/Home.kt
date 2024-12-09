@@ -1,24 +1,28 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.litbig.spotify.ui.home
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -29,9 +33,12 @@ import com.litbig.spotify.R
 import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedContainer
 import com.litbig.spotify.ui.home.search.SearchScreen
+import com.litbig.spotify.ui.player.PlayerBottomSheet
+import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.rememberSpotifyAppState
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 sealed class HomeSection(
@@ -109,29 +116,33 @@ fun HomeContainer(
     val navBackStackEntry by appState.navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Scaffold(
-        modifier = modifier,
-        bottomBar = {
-            SpotifyBottomBar(
-                tabs = HomeSection.sections,
-                currentRoute = currentRoute ?: HomeSection.Feed.route,
-                navigateToRoute = appState::navigateToBottomBarRoute
-            )
-        }
-    ) { padding ->
-        NavHost(
-            modifier = Modifier
-                .padding(padding),
-            navController = appState.navController,
-            startDestination = HomeSection.Feed.route
-        ) {
-            addHomeGraph(
+    PlayerBottomSheet {
+
+        Scaffold(
+            modifier = modifier,
+            bottomBar = {
+                SpotifyBottomBar(
+                    tabs = HomeSection.sections,
+                    currentRoute = currentRoute ?: HomeSection.Feed.route,
+                    navigateToRoute = appState::navigateToBottomBarRoute
+                )
+            }
+        ) { padding ->
+            NavHost(
                 modifier = Modifier
-                    .consumeWindowInsets(padding),
-                onTrackSelected = onTrackSelected
-            )
+                    .padding(padding),
+                navController = appState.navController,
+                startDestination = HomeSection.Feed.route
+            ) {
+                addHomeGraph(
+                    modifier = Modifier
+                        .consumeWindowInsets(padding),
+                    onTrackSelected = onTrackSelected
+                )
+            }
         }
     }
+
 }
 
 @Composable
@@ -140,8 +151,8 @@ fun SpotifyBottomBar(
     currentRoute: String,
     navigateToRoute: (String) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.background,
-    contentColor: Color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+    color: Color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+    contentColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
     val routes = remember { tabs.map { it.route } }
     val currentSection = tabs.first { it.route == currentRoute }

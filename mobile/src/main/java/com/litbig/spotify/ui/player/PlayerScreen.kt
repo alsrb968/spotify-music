@@ -11,15 +11,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -29,14 +28,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
-import com.litbig.spotify.core.data.mapper.local.toLong
-import com.litbig.spotify.core.design.component.shimmerPainter
-import com.litbig.spotify.ui.theme.SpotifyTheme
-import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
-import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
+import com.litbig.spotify.ui.theme.SpotifyTheme
+import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
+import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -67,6 +64,7 @@ fun PlayerBottomSheet(
     }
 
     BottomSheetScaffold(
+        modifier = modifier,
         scaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = sheetState
         ),
@@ -74,12 +72,12 @@ fun PlayerBottomSheet(
         sheetPeekHeight = playerBarHeight,
         sheetDragHandle = null,
         sheetContainerColor = Color.Transparent,
-        sheetShape = RoundedCornerShape(
-            topStart = 8.dp,
-            topEnd = 8.dp,
-            bottomStart = 0.dp,
-            bottomEnd = 0.dp
-        ),
+//        sheetShape = RoundedCornerShape(
+//            topStart = 8.dp,
+//            topEnd = 8.dp,
+//            bottomStart = 0.dp,
+//            bottomEnd = 0.dp
+//        ),
         sheetContent = {
 
             Crossfade(targetState = sheetState.currentValue, label = "") {
@@ -125,8 +123,8 @@ fun PlayerScreen(
         is PlayerUiState.Ready -> {
 
             val context = LocalContext.current
-            LaunchedEffect(s.nowPlaying.albumArtUrl) {
-                val color = extractDominantColorFromUrl(context, s.nowPlaying.albumArtUrl)
+            LaunchedEffect(s.nowPlaying.imageUrl) {
+                val color = extractDominantColorFromUrl(context, s.nowPlaying.imageUrl)
                 viewModel.setDominantColor(color)
             }
 
@@ -158,125 +156,111 @@ fun PlayerScreen(
     actions: PlayerScreenActions,
     onCollapse: () -> Unit,
 ) {
-    Row(
-        modifier = modifier
+    Column(
+        modifier = Modifier
             .fillMaxSize()
-            .background(color = uiState.dominantColor)
+            .background(color = uiState.dominantColor),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Column(
+        ControlPanelTop(
+            modifier = Modifier,
+            onCollapse = onCollapse
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(
             modifier = Modifier
-                .width(400.dp)
-                .fillMaxHeight()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .size(230.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = RoundedCornerShape(5.dp),
         ) {
-            ControlPanelTop(
-                modifier = Modifier,
-                onCollapse = onCollapse
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Card(
+            AsyncImage(
                 modifier = Modifier
-                    .size(230.dp),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = RoundedCornerShape(5.dp),
-            ) {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    model = uiState.nowPlaying.albumArtUrl,
-                    contentDescription = "Album Art",
-                    contentScale = ContentScale.Crop,
-                    placeholder = shimmerPainter(),
-                    error = painterResource(id = R.drawable.baseline_image_not_supported_24),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(horizontal = 8.dp),
-            ) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .fillMaxWidth()
-                        .padding(end = 50.dp)
-                        .basicMarquee(),
-                    text = uiState.nowPlaying.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                )
-
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .padding(end = 50.dp)
-                        .basicMarquee(),
-                    text = uiState.nowPlaying.artist,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd),
-                    onClick = actions.onFavorite,
-                ) {
-                    Icon(
-                        imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-
-            ControlPanelProgress(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                uiState = uiState,
-                actions = actions
-            )
-
-            ControlPanelBottom(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                uiState = uiState,
-                actions = actions
+                    .fillMaxSize(),
+                model = uiState.nowPlaying.imageUrl,
+                contentDescription = "Album Art",
+                contentScale = ContentScale.Crop,
+                placeholder = rememberVectorPainter(image = Icons.Default.Album),
+                error = rememberVectorPainter(image = Icons.Default.Error),
             )
         }
 
-        LazyColumn(
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(horizontal = 8.dp),
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .padding(end = 50.dp)
+                    .basicMarquee(),
+                text = uiState.nowPlaying.title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+            )
+
+            Text(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .padding(end = 50.dp)
+                    .basicMarquee(),
+                text = uiState.nowPlaying.artist,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd),
+                onClick = actions.onFavorite,
+            ) {
+                Icon(
+                    imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        ControlPanelProgress(
             modifier = Modifier
                 .fillMaxWidth(),
-            state = rememberLazyListState(),
-        ) {
-            items(uiState.playList.size) { index ->
-                val metadata = uiState.playList[index]
-                val isFav = actions.isFavorite(metadata.title).collectAsState(initial = false).value
-                PlayerCell(
-                    isPlaying = index == uiState.indexOfList,
-                    imageUrl = metadata.albumArtUrl,
-                    title = metadata.title,
-                    artist = metadata.artist,
-                    isFavorite = isFav,
-                    totalTime = metadata.duration.toLong().toHumanReadableDuration(),
-                    onClick = { actions.onPlayIndex(index) },
-                    onFavorite = { actions.onFavoriteIndex(index) },
-                )
-            }
-        }
+            uiState = uiState,
+            actions = actions
+        )
+
+        ControlPanelBottom(
+            modifier = Modifier
+                .fillMaxWidth(),
+            uiState = uiState,
+            actions = actions
+        )
     }
 }
+
+data class PlayerScreenActions(
+    val isFavorite: (String) -> Flow<Boolean>,
+    val onFavorite: () -> Unit,
+    val onFavoriteIndex: (Int) -> Unit,
+    val onPlayOrPause: () -> Unit,
+    val onPlayIndex: (Int) -> Unit,
+    val onPrevious: () -> Unit,
+    val onNext: () -> Unit,
+    val onShuffle: () -> Unit,
+    val onRepeat: () -> Unit,
+    val onProgress: (Long) -> Unit,
+)
 
 @Composable
 fun ControlPanelTop(
@@ -333,9 +317,9 @@ fun ControlPanelProgress(
             .fillMaxWidth(),
     ) {
         Slider(
-            value = uiState.playingTime.toFloat() / uiState.nowPlaying.duration.toLong(),
+            value = uiState.playingTime.toFloat() / uiState.nowPlaying.duration,
             onValueChange = { value ->
-                actions.onProgress((value * uiState.nowPlaying.duration.toLong()).toLong())
+                actions.onProgress((value * uiState.nowPlaying.duration).toLong())
             },
             onValueChangeFinished = {
 
@@ -384,7 +368,7 @@ fun ControlPanelProgress(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 8.dp),
-            text = uiState.nowPlaying.duration.toLong().toHumanReadableDuration(),
+            text = uiState.nowPlaying.duration.toHumanReadableDuration(),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -482,8 +466,8 @@ fun PreviewPlayerScreen() {
                 .size(width = 1024.dp, height = 500.dp),
             uiState = PlayerUiState.Ready(
                 indexOfList = 0,
-                nowPlaying = PreviewMusicMetadata,
-                playList = PreviewMusicMetadataList,
+                nowPlaying = PreviewTrackDetailsInfo,
+                playList = PreviewTrackDetailsInfos,
                 playingTime = 159000,
                 isPlaying = true,
                 isShuffle = false,
@@ -507,16 +491,3 @@ fun PreviewPlayerScreen() {
         )
     }
 }
-
-data class PlayerScreenActions(
-    val isFavorite: (String) -> Flow<Boolean>,
-    val onFavorite: () -> Unit,
-    val onFavoriteIndex: (Int) -> Unit,
-    val onPlayOrPause: () -> Unit,
-    val onPlayIndex: (Int) -> Unit,
-    val onPrevious: () -> Unit,
-    val onNext: () -> Unit,
-    val onShuffle: () -> Unit,
-    val onRepeat: () -> Unit,
-    val onProgress: (Long) -> Unit,
-)

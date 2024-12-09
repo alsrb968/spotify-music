@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.litbig.spotify.core.data.di.RepositoryModule.ExoPlayerRepository
 import com.litbig.spotify.core.domain.model.MusicInfo
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.core.domain.repository.PlayerRepository
@@ -29,7 +30,7 @@ class ListViewModel @Inject constructor(
     getMetadataByArtistUseCase: GetMetadataByArtistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
-    private val playerRepository: PlayerRepository,
+    @ExoPlayerRepository private val playerRepository: PlayerRepository,
 ) : ViewModel() {
     private val decoded = Uri.decode(savedStateHandle.get<String>(Screen.ARG_MUSIC_INFO))
     val musicInfo = Json.decodeFromString<MusicInfo>(decoded)

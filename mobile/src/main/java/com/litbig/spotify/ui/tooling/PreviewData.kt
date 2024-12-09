@@ -4,6 +4,7 @@ import com.litbig.spotify.ui.home.feed.FeedAlbum
 import com.litbig.spotify.ui.home.feed.FeedCollection
 import com.litbig.spotify.ui.home.feed.album.AlbumDetailUiState
 import com.litbig.spotify.ui.home.feed.album.TrackInfo
+import com.litbig.spotify.ui.player.TrackDetailsInfo
 
 val PreviewFeedAlbum = FeedAlbum(
     id = "1",
@@ -32,3 +33,14 @@ val PreviewAlbumDetailUiState = AlbumDetailUiState.Ready(
         )
     },
 )
+
+val PreviewTrackDetailsInfo = TrackDetailsInfo(
+    id = "1",
+    imageUrl = null,
+    title = "Happier Than Ever",
+    artist = "Billie Eilish",
+    duration = 192000L,
+)
+
+val PreviewTrackDetailsInfos = List(10) { PreviewTrackDetailsInfo }
+

@@ -1,4 +1,4 @@
-package com.litbig.spotify.util
+package com.litbig.spotify.core.design.extension
 
 import android.content.Context
 import android.graphics.Bitmap

@@ -5,10 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,22 +14,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.litbig.spotify.R
-import com.litbig.spotify.core.data.mapper.local.toLong
-import com.litbig.spotify.core.design.component.shimmerPainter
+import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewMusicMetadata
-import com.litbig.spotify.ui.tooling.PreviewMusicMetadataList
-import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
+import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
+import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
 
 @Composable
 fun PlayerBar(
@@ -50,8 +44,8 @@ fun PlayerBar(
         is PlayerUiState.Ready -> {
 
             val context = LocalContext.current
-            LaunchedEffect(s.nowPlaying.albumArtUrl) {
-                val color = extractDominantColorFromUrl(context, s.nowPlaying.albumArtUrl)
+            LaunchedEffect(s.nowPlaying.imageUrl) {
+                val color = extractDominantColorFromUrl(context, s.nowPlaying.imageUrl)
                 viewModel.setDominantColor(color)
             }
 
@@ -108,11 +102,11 @@ fun PlayerBar(
                 ) {
                     AsyncImage(
                         modifier = Modifier.fillMaxSize(),
-                        model = uiState.nowPlaying.albumArtUrl,
+                        model = uiState.nowPlaying.imageUrl,
                         contentDescription = "Album Art",
                         contentScale = ContentScale.Crop,
-                        placeholder = shimmerPainter(),
-                        error = painterResource(id = R.drawable.baseline_image_not_supported_24),
+                        placeholder = rememberVectorPainter(image = Icons.Default.Album),
+                        error = rememberVectorPainter(image = Icons.Default.Error),
                     )
                 }
 
@@ -152,7 +146,7 @@ fun PlayerBar(
             )
 
             LinearProgressIndicator(
-                progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration.toLong() },
+                progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp)
@@ -217,8 +211,8 @@ fun PreviewPlayerBar() {
         PlayerBar(
             uiState = PlayerUiState.Ready(
                 indexOfList = 0,
-                nowPlaying = PreviewMusicMetadata,
-                playList = PreviewMusicMetadataList,
+                nowPlaying = PreviewTrackDetailsInfo,
+                playList = PreviewTrackDetailsInfos,
                 playingTime = 159000,
                 isPlaying = true,
                 isShuffle = false,

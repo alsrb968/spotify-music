@@ -18,7 +18,7 @@ import com.litbig.spotify.ui.home.category.Category
 import com.litbig.spotify.ui.home.category.MiniCategory
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.util.getRandomPastelColor
+import com.litbig.spotify.core.design.extension.getRandomPastelColor
 
 @Composable
 fun HomeScreen(
