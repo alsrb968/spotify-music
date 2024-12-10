@@ -16,7 +16,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 sealed interface PlayerUiState {
@@ -99,7 +98,6 @@ class PlayerViewModel @Inject constructor(
         isFavorite,
         dominantColor,
     ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode, isFavorite, color ->
-//        Timber.i("nowPlaying: $nowPlaying, playingTime: $playingTime, isPlaying: $isPlaying, isShuffle: $isShuffle, repeatMode: $repeatMode, isFavorite: $isFavorite, color: $color")
         if (nowPlaying == null) {
             PlayerUiState.Idle
         } else {
@@ -132,14 +130,6 @@ class PlayerViewModel @Inject constructor(
     private var _isPlaying = false
     private var _isShuffle = false
     private var _repeatMode = 0
-
-    init {
-        viewModelScope.launch {
-            _isShowPlayer.collectLatest {
-                Timber.i("isShowPlayer: $it")
-            }
-        }
-    }
 
     fun onPlayIndex(index: Int) {
         playerRepository.playIndex(index)

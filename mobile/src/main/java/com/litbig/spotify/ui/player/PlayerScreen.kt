@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -28,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
+import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -35,38 +37,34 @@ import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
 import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import timber.log.Timber
 
 @Composable
 fun PlayerBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
 ) {
-    Timber.d("")
-    val isShowPlayer by viewModel.isShowPlayer.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
-    if (isShowPlayer) {
-        Timber.d("isShowPlayer: $isShowPlayer")
-        ModalBottomSheet(
-            modifier = modifier,
-            onDismissRequest = {
+    ModalBottomSheet(
+        modifier = modifier,
+        onDismissRequest = {
+            viewModel.showPlayer(false)
+        },
+        sheetState = sheetState,
+        sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
+        dragHandle = null,
+        containerColor = Color.Transparent,
+        properties = ModalBottomSheetProperties(
+            shouldDismissOnBackPress = true,
+        ),
+    ) {
+        PlayerScreen(
+            onCollapse = {
                 viewModel.showPlayer(false)
-            },
-            sheetState = sheetState,
-            sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
-            dragHandle = null,
-            containerColor = Color.Transparent,
-            properties = ModalBottomSheetProperties(
-                shouldDismissOnBackPress = true,
-            ),
-        ) {
-            PlayerScreen(
-                onCollapse = { viewModel.showPlayer(false) }
-            )
-        }
+            }
+        )
     }
 }
 
@@ -119,96 +117,130 @@ fun PlayerScreen(
     actions: PlayerScreenActions,
     onCollapse: () -> Unit,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = uiState.dominantColor),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .gradientBackground(
+                ratio = 1f,
+                startColor = uiState.dominantColor,
+                endColor = MaterialTheme.colorScheme.background
+            ),
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
 
-        ControlPanelTop(
-            modifier = Modifier,
-            onCollapse = onCollapse
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Card(
+        Column(
             modifier = Modifier
-                .size(230.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            shape = RoundedCornerShape(5.dp),
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize(),
-                model = uiState.nowPlaying.imageUrl,
-                contentDescription = "Album Art",
-                contentScale = ContentScale.Crop,
-                placeholder = rememberVectorPainter(image = Icons.Default.Album),
-                error = rememberVectorPainter(image = Icons.Default.Error),
-            )
-        }
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .padding(horizontal = 8.dp),
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .padding(end = 50.dp)
-                    .basicMarquee(),
-                text = uiState.nowPlaying.title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
+            ControlPanelTop(
+                modifier = Modifier,
+                onCollapse = onCollapse
             )
 
-            Text(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .padding(end = 50.dp)
-                    .basicMarquee(),
-                text = uiState.nowPlaying.artist,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
+            Spacer(modifier = Modifier.height(110.dp))
 
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd),
-                onClick = actions.onFavorite,
-            ) {
-                Icon(
-                    imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorite",
-                    tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            Layout(
+                content = {
+                    Card(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxSize(),
+                        elevation = CardDefaults.cardElevation(8.dp),
+                        shape = RoundedCornerShape(8.dp),
+                    ) {
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            model = uiState.nowPlaying.imageUrl,
+                            contentDescription = "Album Art",
+                            contentScale = ContentScale.Crop,
+                            placeholder = rememberVectorPainter(image = Icons.Default.Album),
+                            error = rememberVectorPainter(image = Icons.Default.Error),
+                        )
+                    }
+                },
+                modifier = modifier
+            ) { measurables, constraints ->
+                // 가로와 세로 중 최소값을 기준으로 1:1 크기 계산
+                val size = constraints.maxWidth.coerceAtMost(constraints.maxHeight)
+                val imageConstraints = constraints.copy(
+                    minWidth = size,
+                    maxWidth = size,
+                    minHeight = size,
+                    maxHeight = size
                 )
+
+                // 이미지 측정
+                val placeable = measurables.first().measure(imageConstraints)
+
+                layout(size, size) {
+                    // 이미지 배치
+                    placeable.placeRelative(0, 0)
+                }
             }
+
+            Spacer(modifier = Modifier.height(120.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .padding(start = 4.dp),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .fillMaxWidth()
+                        .padding(end = 50.dp)
+                        .basicMarquee(),
+                    text = uiState.nowPlaying.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                )
+
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .padding(end = 50.dp)
+                        .basicMarquee(),
+                    text = uiState.nowPlaying.artist,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd),
+                    onClick = actions.onFavorite,
+                ) {
+                    Icon(
+                        imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            ControlPanelProgress(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                uiState = uiState,
+                actions = actions
+            )
+
+            ControlPanelBottom(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                uiState = uiState,
+                actions = actions
+            )
         }
-
-        ControlPanelProgress(
-            modifier = Modifier
-                .fillMaxWidth(),
-            uiState = uiState,
-            actions = actions
-        )
-
-        ControlPanelBottom(
-            modifier = Modifier
-                .fillMaxWidth(),
-            uiState = uiState,
-            actions = actions
-        )
     }
 }
 
@@ -236,6 +268,7 @@ fun ControlPanelTop(
     ) {
         IconButton(
             modifier = Modifier
+                .size(36.dp)
                 .align(Alignment.CenterStart),
             onClick = onCollapse
         ) {
@@ -254,7 +287,7 @@ fun ControlPanelTop(
         ) {
             Text(
                 text = "Now Playing",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
@@ -290,13 +323,14 @@ fun ControlPanelProgress(
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
                 activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
             ),
             thumb = {
                 Box(
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(8.dp)
                         .clip(CircleShape)
+                        .align(Alignment.Center)
                         .background(MaterialTheme.colorScheme.onSurface)
                 )
             },
@@ -304,14 +338,14 @@ fun ControlPanelProgress(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(4.dp)
+                        .height(2.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 )
                 Box(
                     Modifier
                         .fillMaxWidth(sliderState.value)
-                        .height(4.dp)
+                        .height(2.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.onSurface)
                 )
@@ -321,19 +355,19 @@ fun ControlPanelProgress(
         Text(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 8.dp),
+                .padding(start = 4.dp),
             text = uiState.playingTime.toHumanReadableDuration(),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Text(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 8.dp),
+                .padding(end = 4.dp),
             text = uiState.nowPlaying.duration.toHumanReadableDuration(),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
     }
@@ -425,8 +459,6 @@ fun ControlPanelBottom(
 fun PreviewPlayerScreen() {
     SpotifyTheme {
         PlayerScreen(
-            modifier = Modifier
-                .size(width = 1024.dp, height = 500.dp),
             uiState = PlayerUiState.Ready(
                 indexOfList = 0,
                 nowPlaying = PreviewTrackDetailsInfo,

@@ -35,6 +35,7 @@ fun PlayerBar(
 //    onExpand: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isShowPlayer by viewModel.isShowPlayer.collectAsStateWithLifecycle()
 
     when (val s = state) {
         is PlayerUiState.Idle -> {
@@ -57,12 +58,16 @@ fun PlayerBar(
                     onPlayOrPause = viewModel::onPlayOrPause,
                     onProgress = viewModel::onProgress,
                 ),
-                onExpand = { viewModel.showPlayer(true) },
+                onExpand = {
+                    viewModel.showPlayer(true)
+                },
             )
         }
     }
 
-    PlayerBottomSheet()
+    if (isShowPlayer) {
+        PlayerBottomSheet()
+    }
 }
 
 @Composable

@@ -35,7 +35,7 @@ class FeedViewModel @Inject constructor(
 
     val state: StateFlow<FeedUiState> = combine(
         getNewAlbumReleases(),
-        getArtistRelatedInfos("Aespa", "Madison Beer", "Sabrina Carpenter"),
+        getArtistRelatedInfos("ROSE", "Aespa", "Madison Beer", "Sabrina Carpenter"),
     ) { newAlbums, artistRelatedInfos ->
         FeedUiState(
             feedCollections = mutableListOf<FeedCollection>().apply {
