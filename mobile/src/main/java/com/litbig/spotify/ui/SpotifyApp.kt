@@ -12,8 +12,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.home.HomeContainer
-import com.litbig.spotify.ui.player.PlayerBottomSheet
-import com.litbig.spotify.ui.player.PlayerScreen
 import timber.log.Timber
 
 @Composable

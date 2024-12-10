@@ -8,7 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.data.di.RepositoryModule.MockingPlayerRepository
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.extension.combine
+import com.litbig.spotify.core.domain.model.remote.ArtistDetails
+import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import com.litbig.spotify.core.domain.repository.PlayerRepository
+import com.litbig.spotify.core.domain.usecase.GetArtistDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.GetTrackDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
@@ -45,6 +48,7 @@ data class TrackDetailsInfo(
 class PlayerViewModel @Inject constructor(
     @MockingPlayerRepository private val playerRepository: PlayerRepository,
     private val getTrackDetailsUseCase: GetTrackDetailsUseCase,
+    private val getArtistDetailsUseCase: GetArtistDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
 ) : ViewModel() {
@@ -87,6 +91,22 @@ class PlayerViewModel @Inject constructor(
     }
 
     private val dominantColor = MutableStateFlow(Color.Transparent)
+
+    val trackDetailInfo: Flow<TrackDetails?> = nowPlaying.flatMapLatest { trackDetails ->
+        trackDetails?.let {
+            getTrackDetailsUseCase(it.id)
+        } ?: flowOf(null)
+    }
+
+    val artistDetailInfo: Flow<ArtistDetails?> = nowPlaying.flatMapLatest { trackDetails ->
+        trackDetails?.let {
+            getTrackDetailsUseCase(it.id).map { track ->
+                track.artists.firstOrNull()?.id?.let { artistId ->
+                    getArtistDetailsUseCase(artistId)
+                }
+            }
+        } ?: flowOf(null)
+    }
 
     val state: StateFlow<PlayerUiState> = combine(
         nowPlaying,

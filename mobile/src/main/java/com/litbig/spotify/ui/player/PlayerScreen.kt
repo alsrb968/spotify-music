@@ -5,6 +5,8 @@ package com.litbig.spotify.ui.player
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +33,8 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
+import com.litbig.spotify.ui.player.cards.ArtistDetailsInfoCard
+import com.litbig.spotify.ui.player.cards.TrackDetailsInfoCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
@@ -117,6 +121,8 @@ fun PlayerScreen(
     actions: PlayerScreenActions,
     onCollapse: () -> Unit,
 ) {
+    val listState = rememberLazyListState()
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -127,30 +133,28 @@ fun PlayerScreen(
             ),
     ) {
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            state = listState,
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Spacer(modifier = Modifier.height(24.dp))
 
-            ControlPanelTop(
-                modifier = Modifier,
-                onCollapse = onCollapse
-            )
+                    ControlPanelTop(
+                        modifier = Modifier,
+                        onCollapse = onCollapse
+                    )
 
-            Spacer(modifier = Modifier.height(110.dp))
+                    Spacer(modifier = Modifier.height(100.dp))
 
-            Layout(
-                content = {
-                    Card(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxSize(),
-                        elevation = CardDefaults.cardElevation(8.dp),
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
+                    SquareCard {
                         AsyncImage(
                             modifier = Modifier
                                 .fillMaxSize(),
@@ -161,85 +165,115 @@ fun PlayerScreen(
                             error = rememberVectorPainter(image = Icons.Default.Error),
                         )
                     }
-                },
-                modifier = modifier
-            ) { measurables, constraints ->
-                // 가로와 세로 중 최소값을 기준으로 1:1 크기 계산
-                val size = constraints.maxWidth.coerceAtMost(constraints.maxHeight)
-                val imageConstraints = constraints.copy(
-                    minWidth = size,
-                    maxWidth = size,
-                    minHeight = size,
-                    maxHeight = size
-                )
 
-                // 이미지 측정
-                val placeable = measurables.first().measure(imageConstraints)
+                    Spacer(modifier = Modifier.height(100.dp))
 
-                layout(size, size) {
-                    // 이미지 배치
-                    placeable.placeRelative(0, 0)
-                }
-            }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .padding(start = 4.dp),
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .fillMaxWidth()
+                                .padding(end = 50.dp)
+                                .basicMarquee(),
+                            text = uiState.nowPlaying.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
 
-            Spacer(modifier = Modifier.height(120.dp))
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .fillMaxWidth()
+                                .padding(end = 50.dp)
+                                .basicMarquee(),
+                            text = uiState.nowPlaying.artist,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(start = 4.dp),
-            ) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .fillMaxWidth()
-                        .padding(end = 50.dp)
-                        .basicMarquee(),
-                    text = uiState.nowPlaying.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                )
+                        IconButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd),
+                            onClick = actions.onFavorite,
+                        ) {
+                            Icon(
+                                imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
 
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .padding(end = 50.dp)
-                        .basicMarquee(),
-                    text = uiState.nowPlaying.artist,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd),
-                    onClick = actions.onFavorite,
-                ) {
-                    Icon(
-                        imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    ControlPanelProgress(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        uiState = uiState,
+                        actions = actions
                     )
+
+                    ControlPanelBottom(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        uiState = uiState,
+                        actions = actions
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
                 }
+
             }
 
-            ControlPanelProgress(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                uiState = uiState,
-                actions = actions
-            )
+            item {
+                Spacer(modifier = Modifier.height(105.dp))
+                ArtistDetailsInfoCard()
 
-            ControlPanelBottom(
+                TrackDetailsInfoCard()
+            }
+        }
+    }
+}
+
+@Composable
+fun SquareCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Layout(
+        content = {
+            Card(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                uiState = uiState,
-                actions = actions
-            )
+                    .padding(10.dp)
+                    .fillMaxSize(),
+                elevation = CardDefaults.cardElevation(8.dp),
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                content()
+            }
+        },
+        modifier = modifier
+    ) { measurables, constraints ->
+        // 가로와 세로 중 최소값을 기준으로 1:1 크기 계산
+        val size = constraints.maxWidth.coerceAtMost(constraints.maxHeight)
+        val imageConstraints = constraints.copy(
+            minWidth = size,
+            maxWidth = size,
+            minHeight = size,
+            maxHeight = size
+        )
+
+        // 이미지 측정
+        val placeable = measurables.first().measure(imageConstraints)
+
+        layout(size, size) {
+            // 이미지 배치
+            placeable.placeRelative(0, 0)
         }
     }
 }
