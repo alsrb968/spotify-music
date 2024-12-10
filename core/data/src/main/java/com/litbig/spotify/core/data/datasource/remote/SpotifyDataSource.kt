@@ -159,9 +159,7 @@ class SpotifyDataSourceImpl @Inject constructor(
         albumId: String,
         accessToken: String
     ): AlbumDetailsResponse {
-        val ret = api.getAlbumDetails(albumId, accessToken)
-        Timber.w("getAlbumDetails albumId=$albumId, ret=$ret")
-        return ret
+        return api.getAlbumDetails(albumId, accessToken)
     }
 
     override suspend fun getSeveralAlbumDetails(

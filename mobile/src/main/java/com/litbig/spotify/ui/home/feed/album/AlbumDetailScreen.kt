@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.litbig.spotify.ui.home.feed.album
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,25 +11,35 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.component.shimmerPainter
 import com.litbig.spotify.ui.components.TrackItem
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewAlbumDetailUiState
+import timber.log.Timber
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -63,38 +76,26 @@ fun AlbumDetailScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            LargeTopAppBar(
-                title = {
-                    Text(
-                        text = uiState.albumName,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigateToBack
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+    ) {
+        TrackList(
+            modifier = Modifier,
+            uiState = uiState,
+            onPlayTracks = onPlayTracks,
+        )
+
+        IconButton(
+            onClick = navigateToBack,
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
-    ) { padding ->
-        TrackList(
-            modifier = Modifier.padding(padding),
-            uiState = uiState,
-            scrollBehavior = scrollBehavior,
-            onPlayTracks = onPlayTracks
-        )
     }
 }
 
@@ -103,14 +104,32 @@ fun AlbumDetailScreen(
 fun TrackList(
     modifier: Modifier = Modifier,
     uiState: AlbumDetailUiState.Ready,
-    scrollBehavior: TopAppBarScrollBehavior,
     onPlayTracks: (List<String>) -> Unit,
 ) {
     LazyColumn(
-        modifier = modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier,
         state = rememberLazyListState(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+//        collapsedFraction = scrollBehavior.state.collapsedFraction
+        item {
+            AsyncImage(
+                modifier = Modifier
+                    .padding(16.dp)
+//                    .scale(1f - collapsedFraction/4)
+//                    .graphicsLayer(
+//                        translationY = imageOffset.toFloat(),
+//                        alpha = imageAlpha
+//                    )
+                ,
+                model = uiState.imageUrl,
+                contentDescription = "Album Art",
+                contentScale = ContentScale.Crop,
+                placeholder = rememberVectorPainter(image = Icons.Default.Album),
+                error = rememberVectorPainter(image = Icons.Default.Error)
+            )
+        }
+
         item {
             AlbumInfoTitle(
                 artists = uiState.artistNames,
@@ -134,6 +153,10 @@ fun TrackList(
                     onMore = { /* todo */ }
                 )
             }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(200.dp))
         }
     }
 }
@@ -230,8 +253,8 @@ fun AlbumInfoTitle(
 
             FloatingActionButton(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .clip(CircleShape),
+                    .padding(8.dp),
+                shape = CircleShape,
                 onClick = onPlayTracks,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

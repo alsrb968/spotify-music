@@ -2,18 +2,17 @@
 
 package com.litbig.spotify.ui.player
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,74 +35,38 @@ import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
 import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun PlayerBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
-    content: @Composable () -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    val sheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
-        skipHiddenState = true
+    Timber.d("")
+    val isShowPlayer by viewModel.isShowPlayer.collectAsStateWithLifecycle()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
     )
-    val scope = rememberCoroutineScope()
-    var playerBarHeight by remember { mutableStateOf(0.dp) }
 
-    playerBarHeight = when (state) {
-        is PlayerUiState.Idle -> {
-            0.dp
+    if (isShowPlayer) {
+        Timber.d("isShowPlayer: $isShowPlayer")
+        ModalBottomSheet(
+            modifier = modifier,
+            onDismissRequest = {
+                viewModel.showPlayer(false)
+            },
+            sheetState = sheetState,
+            sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
+            dragHandle = null,
+            containerColor = Color.Transparent,
+            properties = ModalBottomSheetProperties(
+                shouldDismissOnBackPress = true,
+            ),
+        ) {
+            PlayerScreen(
+                onCollapse = { viewModel.showPlayer(false) }
+            )
         }
-
-        is PlayerUiState.Ready -> {
-            70.dp
-        }
-    }
-
-    BottomSheetScaffold(
-        modifier = modifier,
-        scaffoldState = rememberBottomSheetScaffoldState(
-            bottomSheetState = sheetState
-        ),
-        sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
-        sheetPeekHeight = playerBarHeight,
-        sheetDragHandle = null,
-        sheetContainerColor = Color.Transparent,
-//        sheetShape = RoundedCornerShape(
-//            topStart = 8.dp,
-//            topEnd = 8.dp,
-//            bottomStart = 0.dp,
-//            bottomEnd = 0.dp
-//        ),
-        sheetContent = {
-
-            Crossfade(targetState = sheetState.currentValue, label = "") {
-                when (it) {
-                    SheetValue.PartiallyExpanded -> {
-                        PlayerBar {
-                            scope.launch {
-                                sheetState.expand()
-                            }
-                        }
-                    }
-
-                    SheetValue.Expanded -> {
-                        PlayerScreen {
-                            scope.launch {
-                                sheetState.partialExpand()
-                            }
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
-        }
-    ) {
-        content()
     }
 }
 
@@ -157,7 +120,7 @@ fun PlayerScreen(
     onCollapse: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = uiState.dominantColor),
         horizontalAlignment = Alignment.CenterHorizontally

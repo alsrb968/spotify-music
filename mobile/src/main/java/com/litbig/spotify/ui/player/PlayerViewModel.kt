@@ -50,6 +50,9 @@ class PlayerViewModel @Inject constructor(
     private val isFavoriteUseCase: IsFavoriteUseCase,
 ) : ViewModel() {
 
+    private val _isShowPlayer: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isShowPlayer: StateFlow<Boolean> = _isShowPlayer
+
     private val playList = playerRepository.mediaItems.flatMapLatest { items ->
         combine(items.map { item ->
             getTrackDetailsUseCase(item)
@@ -96,7 +99,7 @@ class PlayerViewModel @Inject constructor(
         isFavorite,
         dominantColor,
     ) { nowPlaying, playList, playingTime, isPlaying, isShuffle, repeatMode, isFavorite, color ->
-        Timber.i("nowPlaying: $nowPlaying, playingTime: $playingTime, isPlaying: $isPlaying, isShuffle: $isShuffle, repeatMode: $repeatMode, isFavorite: $isFavorite, color: $color")
+//        Timber.i("nowPlaying: $nowPlaying, playingTime: $playingTime, isPlaying: $isPlaying, isShuffle: $isShuffle, repeatMode: $repeatMode, isFavorite: $isFavorite, color: $color")
         if (nowPlaying == null) {
             PlayerUiState.Idle
         } else {
@@ -129,6 +132,14 @@ class PlayerViewModel @Inject constructor(
     private var _isPlaying = false
     private var _isShuffle = false
     private var _repeatMode = 0
+
+    init {
+        viewModelScope.launch {
+            _isShowPlayer.collectLatest {
+                Timber.i("isShowPlayer: $it")
+            }
+        }
+    }
 
     fun onPlayIndex(index: Int) {
         playerRepository.playIndex(index)
@@ -190,5 +201,9 @@ class PlayerViewModel @Inject constructor(
 
     fun setDominantColor(color: Color) {
         dominantColor.value = color.darkenColor(0.5f)
+    }
+    
+    fun showPlayer(isShow: Boolean) {
+        _isShowPlayer.value = isShow
     }
 }

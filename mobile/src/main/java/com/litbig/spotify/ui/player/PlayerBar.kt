@@ -32,7 +32,7 @@ import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
 fun PlayerBar(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
-    onExpand: () -> Unit,
+//    onExpand: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -57,10 +57,12 @@ fun PlayerBar(
                     onPlayOrPause = viewModel::onPlayOrPause,
                     onProgress = viewModel::onProgress,
                 ),
-                onExpand = onExpand,
+                onExpand = { viewModel.showPlayer(true) },
             )
         }
     }
+
+    PlayerBottomSheet()
 }
 
 @Composable
@@ -73,16 +75,13 @@ fun PlayerBar(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(
-                horizontal = 8.dp,
-            )
-            .clip(RoundedCornerShape(6.dp))
-            .background(color = uiState.dominantColor)
+            .padding(bottom = 100.dp, start = 10.dp, end = 10.dp)
     ) {
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .align(Alignment.BottomCenter)
                 .clickable { onExpand() }
         ) {
             Row(
@@ -156,7 +155,6 @@ fun PlayerBar(
             )
         }
     }
-
 }
 
 @Composable

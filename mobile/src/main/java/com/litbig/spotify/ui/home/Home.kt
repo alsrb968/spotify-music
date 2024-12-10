@@ -30,9 +30,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedContainer
 import com.litbig.spotify.ui.home.search.SearchScreen
+import com.litbig.spotify.ui.player.PlayerBar
 import com.litbig.spotify.ui.player.PlayerBottomSheet
 import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.rememberSpotifyAppState
@@ -116,33 +118,31 @@ fun HomeContainer(
     val navBackStackEntry by appState.navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    PlayerBottomSheet {
-
-        Scaffold(
-            modifier = modifier,
-            bottomBar = {
-                SpotifyBottomBar(
-                    tabs = HomeSection.sections,
-                    currentRoute = currentRoute ?: HomeSection.Feed.route,
-                    navigateToRoute = appState::navigateToBottomBarRoute
-                )
-            }
-        ) { padding ->
-            NavHost(
-                modifier = Modifier
-                    .padding(padding),
-                navController = appState.navController,
-                startDestination = HomeSection.Feed.route
-            ) {
-                addHomeGraph(
-                    modifier = Modifier
-                        .consumeWindowInsets(padding),
-                    onTrackSelected = onTrackSelected
-                )
-            }
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            SpotifyBottomBar(
+                tabs = HomeSection.sections,
+                currentRoute = currentRoute ?: HomeSection.Feed.route,
+                navigateToRoute = appState::navigateToBottomBarRoute
+            )
         }
-    }
+    ) { padding ->
+        NavHost(
+            modifier = Modifier
+            ,
+            navController = appState.navController,
+            startDestination = HomeSection.Feed.route
+        ) {
+            addHomeGraph(
+                modifier = Modifier
+                    .consumeWindowInsets(padding),
+                onTrackSelected = onTrackSelected
+            )
+        }
 
+        PlayerBar()
+    }
 }
 
 @Composable
@@ -151,7 +151,7 @@ fun SpotifyBottomBar(
     currentRoute: String,
     navigateToRoute: (String) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+    color: Color = MaterialTheme.colorScheme.background.copy(alpha = 0.2f),
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
     val routes = remember { tabs.map { it.route } }
@@ -161,7 +161,12 @@ fun SpotifyBottomBar(
         visible = tabs.map { it.route }.contains(currentRoute)
     ) {
         NavigationBar(
-            modifier = modifier,
+            modifier = modifier
+                .gradientBackground(
+                    ratio = 0.7f,
+                    startColor = Color.Transparent,
+                    endColor = MaterialTheme.colorScheme.background
+                ),
             containerColor = color,
             contentColor = contentColor,
         ) {
