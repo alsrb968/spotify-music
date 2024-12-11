@@ -1,6 +1,7 @@
 package com.litbig.spotify.ui.home.feed.album
 
 import android.net.Uri
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +24,8 @@ sealed interface AlbumDetailUiState {
         val albumName: String,
         val artistNames: String,
         val totalTime: Long,
-        val trackInfos: List<TrackInfo>?
+        val trackInfos: List<TrackInfo>?,
+        val dominantColor: Color
     ) : AlbumDetailUiState
 }
 
@@ -44,31 +46,32 @@ class AlbumDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val albumId = Uri.decode(savedStateHandle.get<String>(FeedSection.ARG_ALBUM_ID))
 
-    val state: StateFlow<AlbumDetailUiState> = flow<AlbumDetailUiState> {
-        Timber.i("albumId: $albumId")
-        val albumDetails = getAlbumDetailsUseCase(albumId)
-        emit(
-            AlbumDetailUiState.Ready(
-                imageUrl = albumDetails.images.firstOrNull()?.url,
-                albumName = albumDetails.name,
-                artistNames = albumDetails.artists.joinToString { it.name },
-                totalTime = albumDetails.tracks?.items?.sumOf { it.durationMs }?.toLong() ?: 0L,
-                trackInfos = albumDetails.tracks?.items?.map {
-                    TrackInfo(
-                        id = it.id,
-                        imageUrl = albumDetails.images.firstOrNull()?.url,
-                        title = it.name,
-                        artist = it.artists.firstOrNull()?.name ?: ""
-                    )
-                }
-            )
+    private val dominantColor = MutableStateFlow(Color.Transparent)
+
+    val state: StateFlow<AlbumDetailUiState> = combine(
+        getAlbumDetailsUseCase(albumId),
+        dominantColor
+    ) { albumDetails, color ->
+        AlbumDetailUiState.Ready(
+            imageUrl = albumDetails.images.firstOrNull()?.url,
+            albumName = albumDetails.name,
+            artistNames = albumDetails.artists.joinToString { it.name },
+            totalTime = albumDetails.tracks?.items?.sumOf { it.durationMs }?.toLong() ?: 0L,
+            trackInfos = albumDetails.tracks?.items?.map {
+                TrackInfo(
+                    id = it.id,
+                    imageUrl = albumDetails.images.firstOrNull()?.url,
+                    title = it.name,
+                    artist = it.artists.firstOrNull()?.name ?: "",
+                )
+            },
+            dominantColor = color
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = AlbumDetailUiState.Loading
     )
-
 
     fun isFavoriteTrack(trackName: String): Flow<Boolean> {
         return isFavoriteUseCase.isFavoriteTrack(trackName)
@@ -96,5 +99,9 @@ class AlbumDetailViewModel @Inject constructor(
 
     fun addPlaylist(trackIdList: List<String>) {
         playerRepository.addPlayLists(trackIdList)
+    }
+
+    fun setDominantColor(color: Color) {
+        dominantColor.value = color
     }
 }

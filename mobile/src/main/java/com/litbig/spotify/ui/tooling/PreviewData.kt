@@ -1,5 +1,6 @@
 package com.litbig.spotify.ui.tooling
 
+import androidx.compose.ui.graphics.Color
 import com.litbig.spotify.ui.home.feed.FeedAlbum
 import com.litbig.spotify.ui.home.feed.FeedCollection
 import com.litbig.spotify.ui.home.feed.album.AlbumDetailUiState
@@ -32,6 +33,7 @@ val PreviewAlbumDetailUiState = AlbumDetailUiState.Ready(
             artist = "Billie Eilish",
         )
     },
+    dominantColor = Color.Transparent,
 )
 
 val PreviewTrackDetailsInfo = TrackDetailsInfo(
