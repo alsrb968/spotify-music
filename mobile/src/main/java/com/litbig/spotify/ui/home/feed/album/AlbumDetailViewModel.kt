@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.data.di.RepositoryModule.MockingPlayerRepository
+import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
@@ -102,6 +103,6 @@ class AlbumDetailViewModel @Inject constructor(
     }
 
     fun setDominantColor(color: Color) {
-        dominantColor.value = color
+        dominantColor.value = color.darkenColor(0.5f)
     }
 }

@@ -12,6 +12,17 @@ val SpotifyTypography = androidx.compose.material3.Typography(
         fontWeight = FontWeight.Bold,
         letterSpacing = -(0.06).em
     ),
+    displayMedium = TextStyle( // Chill Mix
+        fontFamily = SpotifyFonts,
+        fontSize = 80.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = -(0.06).em
+    ),
+    displaySmall = TextStyle( // Chill Mix
+        fontFamily = SpotifyFonts,
+        fontSize = 60.sp,
+        fontWeight = FontWeight.Bold,
+    ),
     headlineLarge = TextStyle( // Good evening
         fontFamily = SpotifyFonts,
         fontSize = 38.sp,

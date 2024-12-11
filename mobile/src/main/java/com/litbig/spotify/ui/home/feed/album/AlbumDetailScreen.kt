@@ -1,12 +1,9 @@
 @file:OptIn(
-    ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class
 )
 
 package com.litbig.spotify.ui.home.feed.album
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AddCircleOutline
@@ -28,13 +24,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -89,14 +87,16 @@ fun AlbumDetailScreen(
     navigateToBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val overlapHeightPx = with(LocalDensity.current) {
-        EXPANDED_TOP_BAR_HEIGHT.toPx() - COLLAPSED_TOP_BAR_HEIGHT.toPx()
-    }
-    val isCollapsed: Boolean by remember {
+    val scrollProgress by remember {
         derivedStateOf {
-            val isFirstItemHidden =
-                listState.firstVisibleItemScrollOffset > overlapHeightPx
-            isFirstItemHidden || listState.firstVisibleItemIndex > 0
+            val maxOffset = 400f // 희미해지기 시작하는 최대 오프셋 값
+            val firstVisibleItem = listState.firstVisibleItemIndex
+            val scrollOffset = listState.firstVisibleItemScrollOffset.toFloat()
+            if (firstVisibleItem == 0) {
+                1f - (scrollOffset / maxOffset).coerceIn(0f, 1f)
+            } else (
+                    0f
+                    )
         }
     }
 
@@ -106,10 +106,13 @@ fun AlbumDetailScreen(
         CollapsedTopBar(
             modifier = Modifier.zIndex(2f),
             albumName = uiState.albumName,
-            isCollapsed = isCollapsed
+            dominantColor = uiState.dominantColor,
+            progress = 1f - scrollProgress
         )
         ExpandedTopBar(
             imageUrl = uiState.imageUrl,
+            dominantColor = uiState.dominantColor,
+            scrollProgress = scrollProgress
         )
 
         IconButton(
@@ -145,7 +148,7 @@ fun AlbumDetailScreen(
                         .fillMaxWidth()
                         .height(COLLAPSED_TOP_BAR_HEIGHT)
                         .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
+                    contentAlignment = Alignment.BottomStart
                 ) {
                     Text(
                         text = uiState.albumName,
@@ -196,16 +199,18 @@ fun AlbumDetailScreen(
 }
 
 val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
-val EXPANDED_TOP_BAR_HEIGHT = 330.dp
+val EXPANDED_TOP_BAR_HEIGHT = 400.dp
 
 @Composable
 private fun ExpandedTopBar(
     modifier: Modifier = Modifier,
     imageUrl: String?,
+    dominantColor: Color = MaterialTheme.colorScheme.background,
+    scrollProgress: Float = 0f
 ) {
     Box(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.primary)
+            .background(dominantColor)
             .fillMaxWidth()
             .height(EXPANDED_TOP_BAR_HEIGHT - COLLAPSED_TOP_BAR_HEIGHT),
         contentAlignment = Alignment.BottomStart
@@ -213,10 +218,12 @@ private fun ExpandedTopBar(
         AsyncImage(
             modifier = Modifier
                 .fillMaxSize()
-            ,
+                .alpha(scrollProgress)
+                .scale(1.0f + scrollProgress * 0.1f),
             model = imageUrl,
             contentDescription = "Album Art",
             contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
             placeholder = rememberVectorPainter(image = Icons.Default.Album),
             error = rememberVectorPainter(image = Icons.Default.Error)
         )
@@ -237,32 +244,31 @@ fun PreviewExpandedTopBar() {
 private fun CollapsedTopBar(
     modifier: Modifier = Modifier,
     albumName: String,
-    isCollapsed: Boolean
+    dominantColor: Color = MaterialTheme.colorScheme.background,
+    progress: Float
 ) {
-    val color: Color by animateColorAsState(
-        if (isCollapsed) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.Transparent
-        },
-        label = ""
-    )
     Box(
         modifier = modifier
-            .background(color)
+            .background(dominantColor.copy(alpha = progress))
             .fillMaxWidth()
             .height(COLLAPSED_TOP_BAR_HEIGHT)
             .padding(16.dp),
         contentAlignment = Alignment.BottomStart
     ) {
-        AnimatedVisibility(visible = isCollapsed) {
-            Text(
-                modifier = Modifier.padding(start = 60.dp, bottom = 4.dp),
-                text = albumName,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        }
+        // 텍스트 애니메이션
+        Text(
+            modifier = Modifier
+                .padding(start = 60.dp, bottom = 4.dp)
+                .graphicsLayer {
+                    alpha = progress.coerceIn(0f, 1f)
+                    translationY = (1f - progress) * 20f // 위로 이동
+                },
+            text = albumName,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -273,11 +279,11 @@ fun PreviewCollapsedTopBar() {
         Column {
             CollapsedTopBar(
                 albumName = "Album Name",
-                isCollapsed = true
+                progress = 1f
             )
             CollapsedTopBar(
                 albumName = "Album Name",
-                isCollapsed = false
+                progress = 0f
             )
         }
     }
@@ -316,7 +322,6 @@ fun AlbumInfoTitle(
             IconButtonWithText(
                 icon = {
                     Icon(
-//                        modifier = Modifier.size(16.dp),
                         imageVector = Icons.Outlined.Info,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface
@@ -407,10 +412,11 @@ fun IconButtonWithText(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier,
         ) {
             icon()
         }
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             modifier = Modifier.padding(end = 8.dp),
             text = text,
