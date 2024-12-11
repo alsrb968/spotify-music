@@ -233,7 +233,9 @@ fun PlayerScreen(
             item {
                 Spacer(modifier = Modifier.height(105.dp))
                 ArtistDetailsInfoCard()
+            }
 
+            item {
                 TrackDetailsInfoCard()
             }
         }

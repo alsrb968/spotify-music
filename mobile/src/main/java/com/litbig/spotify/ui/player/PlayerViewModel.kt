@@ -65,7 +65,7 @@ class PlayerViewModel @Inject constructor(
                     id = track.id,
                     imageUrl = track.album?.images?.firstOrNull()?.url,
                     title = track.name,
-                    artist = track.artists.joinToString { it.name },
+                    artist = track.artists.firstOrNull()?.name ?: "",
                     duration = track.durationMs.toLong(),
                 )
             }
@@ -74,13 +74,13 @@ class PlayerViewModel @Inject constructor(
 
     private val nowPlaying = playerRepository.currentMediaItem.flatMapLatest { item ->
         item?.let { trackDetails ->
-            getTrackDetailsUseCase(trackDetails).map {
+            getTrackDetailsUseCase(trackDetails).map { track ->
                 TrackDetailsInfo(
-                    id = it.id,
-                    imageUrl = it.album?.images?.firstOrNull()?.url,
-                    title = it.name,
-                    artist = it.artists.joinToString { artist -> artist.name },
-                    duration = it.durationMs.toLong(),
+                    id = track.id,
+                    imageUrl = track.album?.images?.firstOrNull()?.url,
+                    title = track.name,
+                    artist = track.artists.firstOrNull()?.name ?: "",
+                    duration = track.durationMs.toLong(),
                 )
             }
         } ?: flowOf(null)

@@ -4,13 +4,13 @@ package com.litbig.spotify.ui.home
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
@@ -35,40 +35,37 @@ import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedContainer
 import com.litbig.spotify.ui.home.search.SearchScreen
 import com.litbig.spotify.ui.player.PlayerBar
-import com.litbig.spotify.ui.player.PlayerBottomSheet
-import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.rememberSpotifyAppState
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 sealed class HomeSection(
     @StringRes val title: Int,
-    val icon: ImageVector,
+    val icons: Pair<ImageVector, ImageVector>,
     val route: String
 ) {
     data object Feed : HomeSection(
         title = R.string.home_feed,
-        icon = Icons.Outlined.Home,
+        icons = Pair(Icons.Filled.Home, Icons.Outlined.Home),
         route = ROUTE_FEED
     )
 
     data object Search : HomeSection(
         title = R.string.home_search,
-        icon = Icons.Outlined.Search,
+        icons = Pair(Icons.Filled.Search, Icons.Outlined.Search),
         route = ROUTE_SEARCH
     )
 
     data object Library : HomeSection(
         title = R.string.home_library,
-        icon = Icons.Outlined.LibraryMusic,
+        icons = Pair(Icons.Filled.LibraryMusic, Icons.Outlined.LibraryMusic),
         route = ROUTE_LIBRARY
     )
 
     data object Premium : HomeSection(
         title = R.string.home_premium,
-        icon = Icons.Outlined.AcUnit,
+        icons = Pair(Icons.Filled.AcUnit, Icons.Outlined.AcUnit),
         route = ROUTE_PREMIUM
     )
 
@@ -141,7 +138,11 @@ fun HomeContainer(
             )
         }
 
-        PlayerBar()
+        PlayerBar(
+            modifier = Modifier
+                .padding(bottom = 85.dp)
+                .padding(horizontal = 10.dp)
+        )
     }
 }
 
@@ -151,7 +152,7 @@ fun SpotifyBottomBar(
     currentRoute: String,
     navigateToRoute: (String) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.background.copy(alpha = 0.2f),
+    color: Color = MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
     val routes = remember { tabs.map { it.route } }
@@ -162,6 +163,7 @@ fun SpotifyBottomBar(
     ) {
         NavigationBar(
             modifier = modifier
+                .height(85.dp)
                 .gradientBackground(
                     ratio = 0.7f,
                     startColor = Color.Transparent,
@@ -189,7 +191,7 @@ fun SpotifyBottomBar(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            imageVector = section.icon,
+                            imageVector = section.icons.let { if (selected) it.first else it.second },
                             tint = tint,
                             contentDescription = text
                         )
@@ -198,11 +200,16 @@ fun SpotifyBottomBar(
                         Text(
                             text = text,
                             color = tint,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.labelSmall,
                             maxLines = 1
                         )
                     },
                     selected = selected,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = tint,
+                        selectedTextColor = tint,
+                        indicatorColor = Color.Transparent
+                    ),
                     onClick = { navigateToRoute(section.route) },
                 )
             }

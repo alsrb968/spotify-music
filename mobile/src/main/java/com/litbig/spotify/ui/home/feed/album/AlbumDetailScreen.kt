@@ -198,7 +198,7 @@ fun AlbumDetailScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(200.dp))
+                Spacer(modifier = Modifier.height(150.dp))
             }
         }
     }
@@ -306,8 +306,8 @@ fun AlbumInfoTitle(
     ) {
         Text(
             text = artists,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -350,7 +350,7 @@ fun AlbumInfoTitle(
         Text(
             text = time,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Row(
@@ -364,7 +364,7 @@ fun AlbumInfoTitle(
                 Icon(
                     imageVector = Icons.Outlined.AddCircleOutline,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -374,7 +374,7 @@ fun AlbumInfoTitle(
                 Icon(
                     imageVector = Icons.Outlined.ArrowCircleDown,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -384,7 +384,7 @@ fun AlbumInfoTitle(
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -430,7 +430,7 @@ fun IconButtonWithText(
         Text(
             modifier = Modifier.padding(end = 8.dp),
             text = text,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
     }

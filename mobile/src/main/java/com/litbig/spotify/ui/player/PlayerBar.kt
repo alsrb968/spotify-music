@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,7 +83,6 @@ fun PlayerBar(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(bottom = 100.dp, start = 10.dp, end = 10.dp)
     ) {
 
         Box(
@@ -92,16 +94,16 @@ fun PlayerBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(70.dp)
+                    .height(60.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .background(color = uiState.dominantColor),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Box(
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(44.dp)
                         .clip(RoundedCornerShape(5.dp))
                 ) {
                     AsyncImage(
@@ -119,26 +121,25 @@ fun PlayerBar(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(38.dp)
+                        .height(34.dp)
                         .padding(end = 150.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = uiState.nowPlaying.title,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = uiState.nowPlaying.artist,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-
             }
 
             ControlBar(
@@ -153,10 +154,12 @@ fun PlayerBar(
                 progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp)
+                    .height(3.dp)
                     .padding(horizontal = 10.dp)
                     .align(Alignment.BottomCenter),
                 color = MaterialTheme.colorScheme.onSurface,
+                gapSize = 0.dp,
+                drawStopIndicator = {},
             )
         }
     }
@@ -174,11 +177,12 @@ fun ControlBar(
     ) {
 
         IconButton(
-            modifier = Modifier,
+            modifier = Modifier
+                .size(36.dp),
             onClick = actions.onFavorite,
         ) {
             Icon(
-                imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                imageVector = if (uiState.isFavorite) Icons.Filled.CheckCircle else Icons.Outlined.AddCircleOutline,
                 contentDescription = "Favorite",
                 tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
@@ -186,18 +190,17 @@ fun ControlBar(
 
         IconButton(
             modifier = Modifier
-                .size(48.dp),
+                .size(36.dp),
             onClick = actions.onPlayOrPause,
         ) {
             Icon(
                 modifier = Modifier
-                    .size(48.dp),
+                    .size(32.dp),
                 imageVector = if (uiState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = "Play/Pause",
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
-
     }
 }
 

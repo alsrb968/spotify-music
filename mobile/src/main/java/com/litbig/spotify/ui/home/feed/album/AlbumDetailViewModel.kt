@@ -65,7 +65,7 @@ class AlbumDetailViewModel @Inject constructor(
                     id = it.id,
                     imageUrl = albumDetails.images.firstOrNull()?.url,
                     title = it.name,
-                    artist = it.artists.firstOrNull()?.name ?: "",
+                    artist = it.artists.joinToString { artist -> artist.name },
                 )
             },
             dominantColor = color,

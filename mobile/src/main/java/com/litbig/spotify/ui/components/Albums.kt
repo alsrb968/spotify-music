@@ -23,6 +23,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.ui.home.feed.FeedAlbum
 import com.litbig.spotify.ui.home.feed.FeedCollection
+import com.litbig.spotify.ui.player.SquareCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewFeedCollection
@@ -100,14 +101,15 @@ fun AlbumItem(
     text: String,
     onClick: () -> Unit
 ) {
+    val size = 180.dp
     Column(
         modifier = modifier
-            .width(154.dp)
+            .width(size)
             .clickableScaled { onClick() },
     ) {
         Box(
             modifier = Modifier
-                .size(154.dp)
+                .size(size)
                 .clip(RoundedCornerShape(16.dp)),
         ) {
             AsyncImage(
@@ -130,7 +132,7 @@ fun AlbumItem(
             ,
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )

@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -19,6 +20,7 @@ import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.ImageInfo
 import com.litbig.spotify.ui.player.PlayerViewModel
 import com.litbig.spotify.ui.player.SquareCard
+import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 
 @Composable
@@ -59,6 +61,7 @@ fun ArtistDetailsInfoCard(
                     model = artistDetails?.images?.firstOrNull()?.url,
                     contentDescription = "Artist Image",
                     contentScale = ContentScale.FillWidth,
+                    alignment = Alignment.TopCenter,
                     placeholder = rememberVectorPainter(image = Icons.Default.Album),
                     error = rememberVectorPainter(image = Icons.Default.Error),
                 )
@@ -67,7 +70,7 @@ fun ArtistDetailsInfoCard(
                     modifier = Modifier
                         .padding(16.dp),
                     text = "아티스트 상세정보",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             }
 
@@ -79,7 +82,7 @@ fun ArtistDetailsInfoCard(
             ) {
                 Text(
                     text = artistDetails?.name ?: "아티스트 이름",
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.titleLarge
                 )
 
                 val follower = artistDetails?.followers?.total ?: 0
@@ -92,8 +95,8 @@ fun ArtistDetailsInfoCard(
 
                 Text(
                     text = formattedFollower,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -103,20 +106,19 @@ fun ArtistDetailsInfoCard(
 
                 Text(
                     text = formattedPopularity,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 val genres = artistDetails?.genres?.joinToString(", ") ?: ""
 
                 Text(
                     text = genres,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-
-
             }
         }
     }
@@ -125,29 +127,31 @@ fun ArtistDetailsInfoCard(
 @DevicePreviews
 @Composable
 fun PreviewArtistDetailInfo() {
-    ArtistDetailsInfoCard(
-        artistDetails = ArtistDetails(
-            externalUrls = com.litbig.spotify.core.domain.model.remote.ExternalUrls(
-                spotify = "https://open.spotify.com/artist/1uNFoZAHBGtllmzznpCI3s"
-            ),
-            followers = com.litbig.spotify.core.domain.model.remote.Followers(
-                href = null,
-                total = 1000000
-            ),
-            genres = listOf("Pop", "Hip-Hop"),
-            href = "https://api.spotify.com/v1/artists/1uNFoZAHBGtllmzznpCI3s",
-            id = "1uNFoZAHBGtllmzznpCI3s",
-            images = listOf(
-                ImageInfo(
-                    height = 640,
-                    url = "https://i.scdn",
-                    width = 640,
-                )
-            ),
-            name = "Justin Bieber",
-            popularity = 100,
-            type = "artist",
-            uri = "spotify:artist:1uNFoZAHBGtllmzznpCI3s"
+    SpotifyTheme {
+        ArtistDetailsInfoCard(
+            artistDetails = ArtistDetails(
+                externalUrls = com.litbig.spotify.core.domain.model.remote.ExternalUrls(
+                    spotify = "https://open.spotify.com/artist/1uNFoZAHBGtllmzznpCI3s"
+                ),
+                followers = com.litbig.spotify.core.domain.model.remote.Followers(
+                    href = null,
+                    total = 1000000
+                ),
+                genres = listOf("Pop", "Hip-Hop"),
+                href = "https://api.spotify.com/v1/artists/1uNFoZAHBGtllmzznpCI3s",
+                id = "1uNFoZAHBGtllmzznpCI3s",
+                images = listOf(
+                    ImageInfo(
+                        height = 640,
+                        url = "https://i.scdn",
+                        width = 640,
+                    )
+                ),
+                name = "Justin Bieber",
+                popularity = 100,
+                type = "artist",
+                uri = "spotify:artist:1uNFoZAHBGtllmzznpCI3s"
+            )
         )
-    )
+    }
 }

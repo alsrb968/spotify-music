@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,18 +39,18 @@ fun TrackItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(72.dp)
+            .height(64.dp)
+            .padding(horizontal = 16.dp)
             .clickableScaled { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
         Box(
             modifier = Modifier
-                .padding(horizontal = 10.dp)
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(48.dp)
                     .padding(),
                 model = imageUrl,
                 contentDescription = "List Thumbnail",
@@ -58,6 +59,8 @@ fun TrackItem(
                 error = rememberVectorPainter(image = Icons.Default.Error),
             )
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
 
         TitleAndContent(
             title = title,
@@ -81,7 +84,7 @@ fun TrackItem(
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
                 contentDescription = "More",
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -96,7 +99,7 @@ fun TitleAndContent(
 ) {
     Column(
         modifier = modifier
-            .size(width = 227.dp, height = 50.dp),
+            .width(227.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
@@ -108,15 +111,17 @@ fun TitleAndContent(
                 )
             else Modifier,
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
+        Spacer(modifier = Modifier.height(2.dp))
+
         Text(
             text = content,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
