@@ -34,6 +34,7 @@ val PreviewAlbumDetailUiState = AlbumDetailUiState.Ready(
         )
     },
     dominantColor = Color.Transparent,
+    playingTrackId = null,
 )
 
 val PreviewTrackDetailsInfo = TrackDetailsInfo(

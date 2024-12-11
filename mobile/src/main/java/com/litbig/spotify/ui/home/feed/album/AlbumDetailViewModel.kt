@@ -26,7 +26,8 @@ sealed interface AlbumDetailUiState {
         val artistNames: String,
         val totalTime: Long,
         val trackInfos: List<TrackInfo>?,
-        val dominantColor: Color
+        val dominantColor: Color,
+        val playingTrackId: String?,
     ) : AlbumDetailUiState
 }
 
@@ -51,8 +52,9 @@ class AlbumDetailViewModel @Inject constructor(
 
     val state: StateFlow<AlbumDetailUiState> = combine(
         getAlbumDetailsUseCase(albumId),
-        dominantColor
-    ) { albumDetails, color ->
+        dominantColor,
+        playerRepository.currentMediaItem,
+    ) { albumDetails, color, currentItem ->
         AlbumDetailUiState.Ready(
             imageUrl = albumDetails.images.firstOrNull()?.url,
             albumName = albumDetails.name,
@@ -66,7 +68,8 @@ class AlbumDetailViewModel @Inject constructor(
                     artist = it.artists.firstOrNull()?.name ?: "",
                 )
             },
-            dominantColor = color
+            dominantColor = color,
+            playingTrackId = currentItem
         )
     }.stateIn(
         scope = viewModelScope,

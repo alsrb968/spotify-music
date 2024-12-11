@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.components.TrackItem
@@ -47,6 +48,9 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewAlbumDetailUiState
 import kotlin.time.Duration.Companion.milliseconds
+
+val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
+val EXPANDED_TOP_BAR_HEIGHT = 400.dp
 
 @Composable
 fun AlbumDetailScreen(
@@ -89,19 +93,18 @@ fun AlbumDetailScreen(
     val listState = rememberLazyListState()
     val scrollProgress by remember {
         derivedStateOf {
-            val maxOffset = 400f // 희미해지기 시작하는 최대 오프셋 값
+            val maxOffset = 600f // 희미해지기 시작하는 최대 오프셋 값
             val firstVisibleItem = listState.firstVisibleItemIndex
             val scrollOffset = listState.firstVisibleItemScrollOffset.toFloat()
             if (firstVisibleItem == 0) {
                 1f - (scrollOffset / maxOffset).coerceIn(0f, 1f)
-            } else (
-                    0f
-                    )
+            } else 0f
         }
     }
 
     Box(
         modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
     ) {
         CollapsedTopBar(
             modifier = Modifier.zIndex(2f),
@@ -154,6 +157,8 @@ fun AlbumDetailScreen(
                         text = uiState.albumName,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.headlineLarge,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -181,8 +186,9 @@ fun AlbumDetailScreen(
                     val track = it[index]
                     TrackItem(
                         modifier = Modifier
-                            .background(color = MaterialTheme.colorScheme.background),
+                            .background(MaterialTheme.colorScheme.background),
                         imageUrl = track.imageUrl,
+                        isPlaying = uiState.playingTrackId == track.id,
                         title = track.title,
                         artist = track.artist,
                         onClick = { /* todo */ },
@@ -197,9 +203,6 @@ fun AlbumDetailScreen(
         }
     }
 }
-
-val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
-val EXPANDED_TOP_BAR_HEIGHT = 400.dp
 
 @Composable
 private fun ExpandedTopBar(
@@ -303,7 +306,11 @@ fun AlbumInfoTitle(
     ) {
         Text(
             text = artists,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row {
             IconButtonWithText(
@@ -332,6 +339,8 @@ fun AlbumInfoTitle(
             )
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         val duration = tracksTotalTime.milliseconds
         val time = if (duration.inWholeHours > 0) {
             "%s시간 %s분".format(duration.inWholeHours, duration.inWholeMinutes % 60)
@@ -339,7 +348,9 @@ fun AlbumInfoTitle(
             "%s분".format(duration.inWholeMinutes)
         }
         Text(
-            text = time
+            text = time,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Row(
@@ -380,8 +391,7 @@ fun AlbumInfoTitle(
             Spacer(modifier = Modifier.weight(1f))
 
             FloatingActionButton(
-                modifier = Modifier
-                    .padding(8.dp),
+                modifier = Modifier,
                 shape = CircleShape,
                 onClick = onPlayTracks,
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -408,7 +418,7 @@ fun IconButtonWithText(
 ) {
     Row(
         modifier = modifier
-            .clickable { onClick() },
+            .clickableScaled { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(

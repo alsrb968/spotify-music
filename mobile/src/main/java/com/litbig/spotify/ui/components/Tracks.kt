@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 
@@ -38,7 +39,7 @@ fun TrackItem(
         modifier = modifier
             .fillMaxWidth()
             .height(72.dp)
-            .clickable { onClick() },
+            .clickableScaled { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
