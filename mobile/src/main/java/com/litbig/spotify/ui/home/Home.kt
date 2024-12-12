@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedScreen
-import com.litbig.spotify.ui.home.feed.album.AlbumDetailScreen
+import com.litbig.spotify.ui.home.album.AlbumDetailScreen
 import com.litbig.spotify.ui.rememberSpotifyAppState
 
 sealed class HomeSection(val route: String) {

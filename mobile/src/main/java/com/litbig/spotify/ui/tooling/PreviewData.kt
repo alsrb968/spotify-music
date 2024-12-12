@@ -6,8 +6,8 @@ import com.litbig.spotify.core.domain.model.remote.ExternalUrls
 import com.litbig.spotify.core.domain.model.remote.Followers
 import com.litbig.spotify.ui.home.feed.FeedAlbum
 import com.litbig.spotify.ui.home.feed.FeedCollection
-import com.litbig.spotify.ui.home.feed.album.AlbumDetailUiState
-import com.litbig.spotify.ui.home.feed.album.TrackInfo
+import com.litbig.spotify.ui.home.album.AlbumDetailUiState
+import com.litbig.spotify.ui.home.album.TrackInfo
 import com.litbig.spotify.ui.player.TrackDetailsInfo
 
 val PreviewFeedAlbum = FeedAlbum(

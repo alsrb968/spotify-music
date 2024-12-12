@@ -2,11 +2,10 @@
     ExperimentalFoundationApi::class
 )
 
-package com.litbig.spotify.ui.home.feed.album
+package com.litbig.spotify.ui.home.album
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -61,8 +60,8 @@ fun AlbumDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     when (val s = state) {
-        AlbumDetailUiState.Loading -> {
-            Loading(modifier = modifier)
+        is AlbumDetailUiState.Loading -> {
+            Loading(modifier = modifier.fillMaxWidth())
         }
 
         is AlbumDetailUiState.Ready -> {

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.ui.components.AlbumCollection
+import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewFeedCollections
@@ -33,12 +34,20 @@ fun FeedScreen(
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    FeedScreen(
-        modifier = modifier,
-        feedCollections = state.feedCollections,
-        onTrackSelected = onTrackSelected,
-        onAlbumSelected = onAlbumSelected
-    )
+    when (val s = state) {
+        is FeedUiState.Loading -> {
+            Loading(modifier = modifier.fillMaxSize())
+        }
+
+        is FeedUiState.Ready -> {
+            FeedScreen(
+                modifier = modifier,
+                feedCollections = s.feedCollections,
+                onTrackSelected = onTrackSelected,
+                onAlbumSelected = onAlbumSelected
+            )
+        }
+    }
 }
 
 @Composable

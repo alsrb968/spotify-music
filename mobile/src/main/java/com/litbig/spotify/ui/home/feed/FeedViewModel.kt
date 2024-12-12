@@ -21,9 +21,12 @@ data class FeedCollection(
     val feeds: List<FeedAlbum>,
 )
 
-data class FeedUiState(
-    val feedCollections: List<FeedCollection>
-)
+sealed interface FeedUiState {
+    data object Loading : FeedUiState
+    data class Ready(
+        val feedCollections: List<FeedCollection>,
+    ) : FeedUiState
+}
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -37,7 +40,7 @@ class FeedViewModel @Inject constructor(
         getNewAlbumReleases(),
         getArtistRelatedInfos("ROSE", "Aespa", "Madison Beer", "Sabrina Carpenter"),
     ) { newAlbums, artistRelatedInfos ->
-        FeedUiState(
+        FeedUiState.Ready(
             feedCollections = mutableListOf<FeedCollection>().apply {
                 addAll(newAlbums)
                 addAll(artistRelatedInfos)
@@ -46,7 +49,7 @@ class FeedViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = FeedUiState(emptyList())
+        initialValue = FeedUiState.Loading
     )
 
     init {
