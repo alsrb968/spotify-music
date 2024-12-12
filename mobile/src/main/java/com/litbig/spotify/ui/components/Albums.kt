@@ -1,8 +1,8 @@
 package com.litbig.spotify.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -21,9 +22,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
-import com.litbig.spotify.ui.home.feed.FeedAlbum
+import com.litbig.spotify.ui.home.feed.FeedItem
 import com.litbig.spotify.ui.home.feed.FeedCollection
-import com.litbig.spotify.ui.player.SquareCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewFeedCollection
@@ -75,7 +75,7 @@ fun AlbumCollection(
 @Composable
 fun Albums(
     modifier: Modifier = Modifier,
-    feeds: List<FeedAlbum>,
+    feeds: List<FeedItem>,
     onClick: (String) -> Unit
 ) {
     LazyRow(
@@ -86,6 +86,7 @@ fun Albums(
         items(feeds.size) { index ->
             val feed = feeds[index]
             AlbumItem(
+                shape = if (feed.type == "artist") CircleShape else RoundedCornerShape(16.dp),
                 imageUrl = feed.imageUrl,
                 text = feed.name,
                 onClick = { onClick(feed.id) }
@@ -97,6 +98,7 @@ fun Albums(
 @Composable
 fun AlbumItem(
     modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(16.dp),
     imageUrl: String?,
     text: String,
     onClick: () -> Unit
@@ -110,7 +112,7 @@ fun AlbumItem(
         Box(
             modifier = Modifier
                 .size(size)
-                .clip(RoundedCornerShape(16.dp)),
+                .clip(shape),
         ) {
             AsyncImage(
                 modifier = Modifier

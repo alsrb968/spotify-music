@@ -4,21 +4,22 @@ import androidx.compose.ui.graphics.Color
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.ExternalUrls
 import com.litbig.spotify.core.domain.model.remote.Followers
-import com.litbig.spotify.ui.home.feed.FeedAlbum
+import com.litbig.spotify.ui.home.feed.FeedItem
 import com.litbig.spotify.ui.home.feed.FeedCollection
 import com.litbig.spotify.ui.home.album.AlbumDetailUiState
 import com.litbig.spotify.ui.home.album.TrackInfo
 import com.litbig.spotify.ui.player.TrackDetailsInfo
 
-val PreviewFeedAlbum = FeedAlbum(
+val PreviewFeedItem = FeedItem(
     id = "1",
     imageUrl = null,
     name = "Happier Than Ever (2021) by Billie Eilish with 16 tracks",
+    type = "album",
 )
 
 val PreviewFeedCollection = FeedCollection(
     title = "Billie Eilish's Albums",
-    feeds = List(10) { PreviewFeedAlbum },
+    feeds = List(10) { PreviewFeedItem },
 )
 
 val PreviewFeedCollections = List(10) { PreviewFeedCollection }

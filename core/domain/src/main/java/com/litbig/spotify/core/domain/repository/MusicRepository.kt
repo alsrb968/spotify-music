@@ -66,10 +66,13 @@ interface MusicRepository {
     suspend fun searchArtist(artistName: String): ArtistDetails?
     suspend fun searchAlbum(albumName: String): AlbumDetails?
     suspend fun getTrackDetails(trackId: String): TrackDetails
+    suspend fun getSeveralTrackDetails(vararg trackIds: String): List<TrackDetails>
     suspend fun getArtistDetails(artistId: String): ArtistDetails
+    suspend fun getSeveralArtistDetails(vararg artistIds: String): List<ArtistDetails>
     suspend fun getAlbumsOfArtist(artistId: String, limit: Int = 10, offset: Int = 0): Albums
     suspend fun getTopTracksOfArtist(artistId: String): List<TrackDetails>
     suspend fun getAlbumDetails(albumId: String): AlbumDetails
+    suspend fun getSeveralAlbumDetails(vararg albumIds: String): List<AlbumDetails>
     suspend fun getNewAlbumReleases(limit: Int = 10, offset: Int = 0): Albums?
 
     suspend fun insertFavorite(favorite: Favorite)

@@ -2,23 +2,25 @@ package com.litbig.spotify.ui.home.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.domain.usecase.GetArtistRelatedInfoUseCase
+import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsListOfArtistsUseCase
 import com.litbig.spotify.core.domain.usecase.GetNewAlbumReleasesUseCase
+import com.litbig.spotify.core.domain.usecase.SearchArtistUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-data class FeedAlbum(
+data class FeedItem(
     val id: String,
     val imageUrl: String?,
     val name: String,
+    val type: String,
 )
 
 data class FeedCollection(
     val title: String,
-    val feeds: List<FeedAlbum>,
+    val feeds: List<FeedItem>,
 )
 
 sealed interface FeedUiState {
@@ -31,19 +33,22 @@ sealed interface FeedUiState {
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val getNewAlbumReleasesUseCase: GetNewAlbumReleasesUseCase,
-    private val getArtistRelatedInfoUseCase: GetArtistRelatedInfoUseCase,
+    private val getAlbumDetailsListOfArtistsUseCase: GetAlbumDetailsListOfArtistsUseCase,
+    private val searchArtistUseCase: SearchArtistUseCase,
 ) : ViewModel() {
 
     private val collections = MutableStateFlow(mutableListOf<FeedCollection>())
 
     val state: StateFlow<FeedUiState> = combine(
         getNewAlbumReleases(),
-        getArtistRelatedInfos("ROSE", "Aespa", "Madison Beer", "Sabrina Carpenter"),
-    ) { newAlbums, artistRelatedInfos ->
+        getArtistFeeds("NewJeans", "QWER", "IVE", "KISS OF LIFE", "ITZY"),
+        getAlbumFeedsOfArtists("ROSE", "Aespa", "Madison Beer", "Sabrina Carpenter"),
+    ) { newAlbumFeed, artistsFeed, albumFeeds ->
         FeedUiState.Ready(
             feedCollections = mutableListOf<FeedCollection>().apply {
-                addAll(newAlbums)
-                addAll(artistRelatedInfos)
+                addAll(newAlbumFeed)
+                addAll(artistsFeed)
+                addAll(albumFeeds)
             }
         )
     }.stateIn(
@@ -66,10 +71,11 @@ class FeedViewModel @Inject constructor(
         return flow {
             getNewAlbumReleasesUseCase()?.let { newAlbums ->
                 val feeds = newAlbums.items.map { album ->
-                    FeedAlbum(
+                    FeedItem(
                         id = album.id,
                         imageUrl = album.images.firstOrNull()?.url,
                         name = album.name,
+                        type = "album",
                     )
                 }
                 val feedCollection = FeedCollection(
@@ -81,47 +87,41 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    private fun getArtistRelatedInfos(vararg artistNames: String): Flow<List<FeedCollection>> {
+    private fun getAlbumFeedsOfArtists(vararg artistNames: String): Flow<List<FeedCollection>> {
         return flow {
-            val list = mutableListOf<FeedCollection>()
-            artistNames.forEach { artistName ->
-                getArtistRelatedInfoUseCase(artistName)?.let {
-                    Timber.i("artistName: $artistName")
-                    val (albums, topTracks) = it
-                    val albumFeeds = albums.map { album ->
-                        FeedAlbum(
-                            id = album.id,
-                            imageUrl = album.images.firstOrNull()?.url,
-                            name = album.name,
-                        )
-                    }
-                    val albumFeedCollection = FeedCollection(
-                        title = "${artistName}'s Albums",
-                        feeds = albumFeeds,
-                    )
-
-
-                    val trackFeeds = topTracks.map { track ->
-                        FeedAlbum(
-                            id = track.id,
-                            imageUrl = track.album?.images?.firstOrNull()?.url,
-                            name = track.name,
-                        )
-                    }
-                    val trackFeedCollection = FeedCollection(
-                        title = "${artistName}'s Top Tracks",
-                        feeds = trackFeeds,
-                    )
-
-                    list.addAll(
-                        listOf(
-                            albumFeedCollection,
-                            trackFeedCollection
-                        )
+            getAlbumDetailsListOfArtistsUseCase(*artistNames).mapIndexed { index, albumDetailsList ->
+                val artistName = artistNames[index]
+                Timber.i("artistName: $artistName")
+                val albumFeeds = albumDetailsList.map { album ->
+                    FeedItem(
+                        id = album.id,
+                        imageUrl = album.images.firstOrNull()?.url,
+                        name = album.name,
+                        type = "album",
                     )
                 }
+                FeedCollection(
+                    title = "${artistName}'s Albums",
+                    feeds = albumFeeds,
+                )
+            }.let {
+                emit(it)
             }
-            emit(list)
+        }
+    }
+
+    private fun getArtistFeeds(vararg artistNames: String): Flow<List<FeedCollection>> {
+        return flow {
+            searchArtistUseCase(*artistNames).map { artist ->
+                FeedItem(
+                    id = artist.id,
+                    imageUrl = artist.images?.firstOrNull()?.url,
+                    name = artist.name,
+                    type = "artist",
+                )
+            }.let { feeds ->
+                emit(listOf(FeedCollection(title = "Artists", feeds = feeds)))
+            }
         }
     }
 }

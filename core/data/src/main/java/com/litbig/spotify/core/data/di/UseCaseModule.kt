@@ -82,14 +82,6 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideGetArtistRelatedInfoUseCase(
-        musicRepository: MusicRepository
-    ): GetArtistRelatedInfoUseCase = GetArtistRelatedInfoUseCase(
-        musicRepository
-    )
-
-    @Provides
-    @Singleton
     fun provideGetArtistDetailsUseCase(
         musicRepository: MusicRepository
     ): GetArtistDetailsUseCase = GetArtistDetailsUseCase(
@@ -158,5 +150,22 @@ object UseCaseModule {
         storageRepository: StorageRepository
     ): GetStorageHashUseCase = GetStorageHashUseCase(
         storageRepository
+    )
+
+
+    @Provides
+    @Singleton
+    fun provideGetAlbumDetailsListOfArtistsUseCase(
+        musicRepository: MusicRepository
+    ): GetAlbumDetailsListOfArtistsUseCase = GetAlbumDetailsListOfArtistsUseCase(
+        musicRepository
+    )
+
+    @Provides
+    @Singleton
+    fun provideGetTopTrackDetailsListOfArtistsUseCase(
+        musicRepository: MusicRepository
+    ): GetTopTrackDetailsListOfArtistsUseCase = GetTopTrackDetailsListOfArtistsUseCase(
+        musicRepository
     )
 }
