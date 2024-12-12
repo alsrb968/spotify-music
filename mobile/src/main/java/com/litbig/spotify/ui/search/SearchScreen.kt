@@ -1,4 +1,4 @@
-package com.litbig.spotify.ui.home.search
+package com.litbig.spotify.ui.search
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

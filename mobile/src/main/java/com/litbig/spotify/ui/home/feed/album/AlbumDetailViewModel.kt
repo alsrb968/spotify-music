@@ -11,7 +11,7 @@ import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
-import com.litbig.spotify.ui.home.feed.FeedSection
+import com.litbig.spotify.ui.home.HomeSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -46,7 +46,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val isFavoriteUseCase: IsFavoriteUseCase,
     @MockingPlayerRepository private val playerRepository: PlayerRepository
 ) : ViewModel() {
-    private val albumId = Uri.decode(savedStateHandle.get<String>(FeedSection.ARG_ALBUM_ID))
+    private val albumId = Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_ALBUM_ID))
 
     private val dominantColor = MutableStateFlow(Color.Transparent)
 
