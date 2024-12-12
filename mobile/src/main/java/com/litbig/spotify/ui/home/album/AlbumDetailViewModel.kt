@@ -18,25 +18,31 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+data class TrackUiModel(
+    val id: String,
+    val imageUrl: String?,
+    val name: String,
+    val artists: String,
+    val duration: Long,
+)
+
+data class AlbumUiModel(
+    val id: String,
+    val imageUrl: String?,
+    val name: String,
+    val artists: String,
+    val totalTime: Long,
+    val dominantColor: Color,
+)
+
 sealed interface AlbumDetailUiState {
     data object Loading : AlbumDetailUiState
     data class Ready(
-        val imageUrl: String?,
-        val albumName: String,
-        val artistNames: String,
-        val totalTime: Long,
-        val trackInfos: List<TrackInfo>?,
-        val dominantColor: Color,
+        val album: AlbumUiModel,
+        val tracks: List<TrackUiModel>?,
         val playingTrackId: String?,
     ) : AlbumDetailUiState
 }
-
-data class TrackInfo(
-    val id: String,
-    val imageUrl: String?,
-    val title: String,
-    val artist: String,
-)
 
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
@@ -55,20 +61,25 @@ class AlbumDetailViewModel @Inject constructor(
         dominantColor,
         playerRepository.currentMediaItem,
     ) { albumDetails, color, currentItem ->
+        val imageUrl = albumDetails.images.firstOrNull()?.url
         AlbumDetailUiState.Ready(
-            imageUrl = albumDetails.images.firstOrNull()?.url,
-            albumName = albumDetails.name,
-            artistNames = albumDetails.artists.joinToString { it.name },
-            totalTime = albumDetails.tracks?.items?.sumOf { it.durationMs }?.toLong() ?: 0L,
-            trackInfos = albumDetails.tracks?.items?.map {
-                TrackInfo(
-                    id = it.id,
-                    imageUrl = albumDetails.images.firstOrNull()?.url,
-                    title = it.name,
-                    artist = it.artists.joinToString { artist -> artist.name },
+            album = AlbumUiModel(
+                id = albumDetails.id,
+                imageUrl = imageUrl,
+                name = albumDetails.name,
+                artists = albumDetails.artists.joinToString { it.name },
+                totalTime = albumDetails.tracks?.items?.sumOf { it.durationMs }?.toLong() ?: 0L,
+                dominantColor = color,
+            ),
+            tracks = albumDetails.tracks?.items?.map { track ->
+                TrackUiModel(
+                    id = track.id,
+                    imageUrl = imageUrl,
+                    name = track.name,
+                    artists = track.artists.joinToString { it.name },
+                    duration = track.durationMs.toLong(),
                 )
             },
-            dominantColor = color,
             playingTrackId = currentItem
         )
     }.stateIn(

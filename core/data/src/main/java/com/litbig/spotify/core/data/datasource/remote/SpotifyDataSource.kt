@@ -92,7 +92,7 @@ class SpotifyDataSourceImpl @Inject constructor(
         offset: Int,
         accessToken: String
     ): SearchResponse {
-        Timber.w("search query=$query, type=$type")
+//        Timber.w("search query=$query, type=$type")
         return api.search(
             query = query,
             type = type,

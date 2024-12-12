@@ -33,12 +33,12 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
+import com.litbig.spotify.ui.home.album.TrackUiModel
 import com.litbig.spotify.ui.player.cards.ArtistDetailsInfoCard
 import com.litbig.spotify.ui.player.cards.TrackDetailsInfoCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
-import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
+import com.litbig.spotify.ui.tooling.PreviewTrackUiModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -95,7 +95,13 @@ fun PlayerScreen(
 
             PlayerScreen(
                 modifier = modifier,
-                uiState = s,
+                nowPlaying = s.nowPlaying,
+                playingTime = s.playingTime,
+                isPlaying = s.isPlaying,
+                isShuffle = s.isShuffle,
+                repeatMode = s.repeatMode,
+                isFavorite = s.isFavorite,
+                dominantColor = s.dominantColor,
                 actions = PlayerScreenActions(
                     isFavorite = viewModel::isFavoriteTrack,
                     onFavorite = viewModel::onFavorite,
@@ -117,7 +123,13 @@ fun PlayerScreen(
 @Composable
 fun PlayerScreen(
     modifier: Modifier = Modifier,
-    uiState: PlayerUiState.Ready,
+    nowPlaying: TrackUiModel,
+    playingTime: Long,
+    isPlaying: Boolean,
+    isShuffle: Boolean,
+    repeatMode: Int,
+    isFavorite: Boolean,
+    dominantColor: Color,
     actions: PlayerScreenActions,
     onCollapse: () -> Unit,
 ) {
@@ -128,7 +140,7 @@ fun PlayerScreen(
             .fillMaxSize()
             .gradientBackground(
                 ratio = 1f,
-                startColor = uiState.dominantColor,
+                startColor = dominantColor,
                 endColor = MaterialTheme.colorScheme.background
             ),
     ) {
@@ -158,7 +170,7 @@ fun PlayerScreen(
                         AsyncImage(
                             modifier = Modifier
                                 .fillMaxSize(),
-                            model = uiState.nowPlaying.imageUrl,
+                            model = nowPlaying.imageUrl,
                             contentDescription = "Album Art",
                             contentScale = ContentScale.Crop,
                             placeholder = rememberVectorPainter(image = Icons.Default.Album),
@@ -180,7 +192,7 @@ fun PlayerScreen(
                                 .fillMaxWidth()
                                 .padding(end = 50.dp)
                                 .basicMarquee(),
-                            text = uiState.nowPlaying.title,
+                            text = nowPlaying.name,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
@@ -192,7 +204,7 @@ fun PlayerScreen(
                                 .fillMaxWidth()
                                 .padding(end = 50.dp)
                                 .basicMarquee(),
-                            text = uiState.nowPlaying.artist,
+                            text = nowPlaying.artists,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
@@ -204,9 +216,9 @@ fun PlayerScreen(
                             onClick = actions.onFavorite,
                         ) {
                             Icon(
-                                imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Favorite",
-                                tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -214,14 +226,17 @@ fun PlayerScreen(
                     ControlPanelProgress(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        uiState = uiState,
+                        nowPlaying = nowPlaying,
+                        playingTime = playingTime,
                         actions = actions
                     )
 
                     ControlPanelBottom(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        uiState = uiState,
+                        isPlaying = isPlaying,
+                        isShuffle = isShuffle,
+                        repeatMode = repeatMode,
                         actions = actions
                     )
 
@@ -341,7 +356,8 @@ fun ControlPanelTop(
 @Composable
 fun ControlPanelProgress(
     modifier: Modifier = Modifier,
-    uiState: PlayerUiState.Ready,
+    nowPlaying: TrackUiModel,
+    playingTime: Long,
     actions: PlayerScreenActions,
 ) {
     Box(
@@ -349,9 +365,9 @@ fun ControlPanelProgress(
             .fillMaxWidth(),
     ) {
         Slider(
-            value = uiState.playingTime.toFloat() / uiState.nowPlaying.duration,
+            value = playingTime.toFloat() / nowPlaying.duration,
             onValueChange = { value ->
-                actions.onProgress((value * uiState.nowPlaying.duration).toLong())
+                actions.onProgress((value * nowPlaying.duration).toLong())
             },
             onValueChangeFinished = {
 
@@ -392,7 +408,7 @@ fun ControlPanelProgress(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 4.dp),
-            text = uiState.playingTime.toHumanReadableDuration(),
+            text = playingTime.toHumanReadableDuration(),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -401,7 +417,7 @@ fun ControlPanelProgress(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 4.dp),
-            text = uiState.nowPlaying.duration.toHumanReadableDuration(),
+            text = nowPlaying.duration.toHumanReadableDuration(),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -412,7 +428,9 @@ fun ControlPanelProgress(
 @Composable
 fun ControlPanelBottom(
     modifier: Modifier = Modifier,
-    uiState: PlayerUiState.Ready,
+    isPlaying: Boolean,
+    isShuffle: Boolean,
+    repeatMode: Int,
     actions: PlayerScreenActions,
 ) {
     Row(
@@ -427,7 +445,7 @@ fun ControlPanelBottom(
             Icon(
                 painter = painterResource(
                     id =
-                    if (uiState.isShuffle) R.drawable.property_1_shuffle_on
+                    if (isShuffle) R.drawable.property_1_shuffle_on
                     else R.drawable.property_1_shuffle_off
                 ),
                 contentDescription = "Shuffle",
@@ -453,7 +471,7 @@ fun ControlPanelBottom(
                 modifier = Modifier.size(56.dp),
                 painter = painterResource(
                     id =
-                    if (uiState.isPlaying) R.drawable.property_1_pause
+                    if (isPlaying) R.drawable.property_1_pause
                     else R.drawable.property_1_play
                 ),
                 contentDescription = "Play",
@@ -477,7 +495,7 @@ fun ControlPanelBottom(
             Icon(
                 painter = painterResource(
                     id =
-                    when (uiState.repeatMode) {
+                    when (repeatMode) {
                         0 -> R.drawable.property_1_replay_off
                         1 -> R.drawable.property_1_replay_one
                         else -> R.drawable.property_1_replay_all
@@ -492,20 +510,16 @@ fun ControlPanelBottom(
 
 @DevicePreviews
 @Composable
-fun PreviewPlayerScreen() {
+fun PlayerScreenPreview() {
     SpotifyTheme {
         PlayerScreen(
-            uiState = PlayerUiState.Ready(
-                indexOfList = 0,
-                nowPlaying = PreviewTrackDetailsInfo,
-                playList = PreviewTrackDetailsInfos,
-                playingTime = 159000,
-                isPlaying = true,
-                isShuffle = false,
-                repeatMode = 0,
-                isFavorite = false,
-                dominantColor = Color.DarkGray
-            ),
+            nowPlaying = PreviewTrackUiModel,
+            playingTime = 159000,
+            isPlaying = true,
+            isShuffle = false,
+            repeatMode = 0,
+            isFavorite = false,
+            dominantColor = Color.DarkGray,
             actions = PlayerScreenActions(
                 isFavorite = { flowOf(false) },
                 onFavorite = {},

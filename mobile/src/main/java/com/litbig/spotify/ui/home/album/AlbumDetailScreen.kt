@@ -45,11 +45,12 @@ import com.litbig.spotify.ui.components.TrackItem
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewAlbumDetailUiState
+import com.litbig.spotify.ui.tooling.PreviewAlbumUiModel
+import com.litbig.spotify.ui.tooling.PreviewTrackUiModels
 import kotlin.time.Duration.Companion.milliseconds
 
-val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
-val EXPANDED_TOP_BAR_HEIGHT = 400.dp
+private val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
+private val EXPANDED_TOP_BAR_HEIGHT = 400.dp
 
 @Composable
 fun AlbumDetailScreen(
@@ -68,13 +69,15 @@ fun AlbumDetailScreen(
 
             val context = LocalContext.current
             LaunchedEffect(Unit) {
-                val dominantColor = extractDominantColorFromUrl(context, s.imageUrl)
+                val dominantColor = extractDominantColorFromUrl(context, s.album.imageUrl)
                 viewModel.setDominantColor(dominantColor)
             }
 
             AlbumDetailScreen(
                 modifier = modifier,
-                uiState = s,
+                album = s.album,
+                tracks = s.tracks,
+                playingTrackId = s.playingTrackId,
                 onPlayTracks = viewModel::play,
                 navigateToBack = navigateToBack
             )
@@ -85,7 +88,9 @@ fun AlbumDetailScreen(
 @Composable
 fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: AlbumDetailUiState.Ready,
+    album: AlbumUiModel,
+    tracks: List<TrackUiModel>?,
+    playingTrackId: String?,
     onPlayTracks: (List<String>) -> Unit,
     navigateToBack: () -> Unit,
 ) {
@@ -107,13 +112,13 @@ fun AlbumDetailScreen(
     ) {
         CollapsedTopBar(
             modifier = Modifier.zIndex(2f),
-            albumName = uiState.albumName,
-            dominantColor = uiState.dominantColor,
+            albumName = album.name,
+            dominantColor = album.dominantColor,
             progress = 1f - scrollProgress
         )
         ExpandedTopBar(
-            imageUrl = uiState.imageUrl,
-            dominantColor = uiState.dominantColor,
+            imageUrl = album.imageUrl,
+            dominantColor = album.dominantColor,
             scrollProgress = scrollProgress
         )
 
@@ -153,7 +158,7 @@ fun AlbumDetailScreen(
                     contentAlignment = Alignment.BottomStart
                 ) {
                     Text(
-                        text = uiState.albumName,
+                        text = album.name,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.headlineLarge,
                         maxLines = 2,
@@ -167,29 +172,29 @@ fun AlbumDetailScreen(
                     modifier = Modifier
                         .gradientBackground(
                             ratio = 1f,
-                            startColor = uiState.dominantColor,
+                            startColor = album.dominantColor,
                             endColor = MaterialTheme.colorScheme.background
                         ),
-                    artists = uiState.artistNames,
-                    tracksTotalTime = uiState.totalTime,
+                    artists = album.artists,
+                    tracksTotalTime = album.totalTime,
                     onPlayTracks = {
-                        uiState.trackInfos?.map { it.id }?.let {
+                        tracks?.map { it.id }?.let {
                             onPlayTracks(it)
                         }
                     }
                 )
             }
 
-            uiState.trackInfos?.let {
+            tracks?.let {
                 items(it.size) { index ->
                     val track = it[index]
                     TrackItem(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.background),
                         imageUrl = track.imageUrl,
-                        isPlaying = uiState.playingTrackId == track.id,
-                        title = track.title,
-                        artist = track.artist,
+                        isPlaying = playingTrackId == track.id,
+                        title = track.name,
+                        artist = track.artists,
                         onClick = { /* todo */ },
                         onMore = { /* todo */ }
                     )
@@ -234,10 +239,10 @@ private fun ExpandedTopBar(
 
 @DevicePreviews
 @Composable
-fun PreviewExpandedTopBar() {
+fun ExpandedTopBarPreview() {
     SpotifyTheme {
         ExpandedTopBar(
-            imageUrl = "https://i.s",
+            imageUrl = null,
         )
     }
 }
@@ -276,7 +281,7 @@ private fun CollapsedTopBar(
 
 @DevicePreviews
 @Composable
-fun PreviewCollapsedTopBar() {
+fun CollapsedTopBarPreview() {
     SpotifyTheme {
         Column {
             CollapsedTopBar(
@@ -437,10 +442,12 @@ fun IconButtonWithText(
 
 @DevicePreviews
 @Composable
-fun PreviewAlbumDetailScreen() {
+fun AlbumDetailScreenPreview() {
     SpotifyTheme {
         AlbumDetailScreen(
-            uiState = PreviewAlbumDetailUiState,
+            album = PreviewAlbumUiModel,
+            tracks = PreviewTrackUiModels,
+            playingTrackId = null,
             onPlayTracks = {},
             navigateToBack = {}
         )

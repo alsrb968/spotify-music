@@ -1,6 +1,7 @@
 package com.litbig.spotify.ui.player
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -26,10 +26,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
+import com.litbig.spotify.ui.home.album.TrackUiModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
-import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfo
-import com.litbig.spotify.ui.tooling.PreviewTrackDetailsInfos
+import com.litbig.spotify.ui.tooling.*
+
+val PLAYER_BAR_HEIGHT = 60.dp
 
 @Composable
 fun PlayerBar(
@@ -55,7 +56,11 @@ fun PlayerBar(
 
             PlayerBar(
                 modifier = modifier,
-                uiState = s,
+                nowPlaying = s.nowPlaying,
+                playingTime = s.playingTime,
+                isPlaying = s.isPlaying,
+                isFavorite = s.isFavorite,
+                dominantColor = s.dominantColor,
                 actions = PlayerBarActions(
                     onFavorite = viewModel::onFavorite,
                     onPlayOrPause = viewModel::onPlayOrPause,
@@ -76,7 +81,11 @@ fun PlayerBar(
 @Composable
 fun PlayerBar(
     modifier: Modifier = Modifier,
-    uiState: PlayerUiState.Ready,
+    nowPlaying: TrackUiModel,
+    playingTime: Long,
+    isPlaying: Boolean,
+    isFavorite: Boolean,
+    dominantColor: Color,
     actions: PlayerBarActions,
     onExpand: () -> Unit,
 ) {
@@ -94,9 +103,9 @@ fun PlayerBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
+                    .height(PLAYER_BAR_HEIGHT)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(color = uiState.dominantColor),
+                    .background(color = dominantColor),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Spacer(modifier = Modifier.width(8.dp))
@@ -108,7 +117,7 @@ fun PlayerBar(
                 ) {
                     AsyncImage(
                         modifier = Modifier.fillMaxSize(),
-                        model = uiState.nowPlaying.imageUrl,
+                        model = nowPlaying.imageUrl,
                         contentDescription = "Album Art",
                         contentScale = ContentScale.Crop,
                         placeholder = rememberVectorPainter(image = Icons.Default.Album),
@@ -116,42 +125,48 @@ fun PlayerBar(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(18.dp))
-
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .weight(1f)
                         .height(34.dp)
-                        .padding(end = 150.dp),
+                        .padding(horizontal = 10.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = uiState.nowPlaying.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .basicMarquee(),
+                        text = nowPlaying.name,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = uiState.nowPlaying.artist,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .basicMarquee(),
+                        text = nowPlaying.artists,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+
+                ControlBar(
+                    modifier = Modifier
+                        .padding(end = 16.dp),
+                    isFavorite = isFavorite,
+                    isPlaying = isPlaying,
+                    actions = actions,
+                )
             }
 
-            ControlBar(
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .align(Alignment.CenterEnd),
-                uiState = uiState,
-                actions = actions,
-            )
+
 
             LinearProgressIndicator(
-                progress = { uiState.playingTime.toFloat() / uiState.nowPlaying.duration },
+                progress = { playingTime.toFloat() / nowPlaying.duration },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(3.dp)
@@ -168,7 +183,8 @@ fun PlayerBar(
 @Composable
 fun ControlBar(
     modifier: Modifier = Modifier,
-    uiState: PlayerUiState.Ready,
+    isFavorite: Boolean,
+    isPlaying: Boolean,
     actions: PlayerBarActions,
 ) {
     Row(
@@ -182,9 +198,9 @@ fun ControlBar(
             onClick = actions.onFavorite,
         ) {
             Icon(
-                imageVector = if (uiState.isFavorite) Icons.Filled.CheckCircle else Icons.Outlined.AddCircleOutline,
+                imageVector = if (isFavorite) Icons.Filled.CheckCircle else Icons.Outlined.AddCircleOutline,
                 contentDescription = "Favorite",
-                tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -196,7 +212,7 @@ fun ControlBar(
             Icon(
                 modifier = Modifier
                     .size(32.dp),
-                imageVector = if (uiState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = "Play/Pause",
                 tint = MaterialTheme.colorScheme.onSurface
             )
@@ -212,20 +228,14 @@ data class PlayerBarActions(
 
 @DevicePreviews
 @Composable
-fun PreviewPlayerBar() {
+fun PlayerBarPreview() {
     SpotifyTheme {
         PlayerBar(
-            uiState = PlayerUiState.Ready(
-                indexOfList = 0,
-                nowPlaying = PreviewTrackDetailsInfo,
-                playList = PreviewTrackDetailsInfos,
-                playingTime = 159000,
-                isPlaying = true,
-                isShuffle = false,
-                repeatMode = 0,
-                isFavorite = false,
-                dominantColor = Color.Gray
-            ),
+            nowPlaying = PreviewTrackUiModel,
+            playingTime = 159000,
+            isPlaying = true,
+            isFavorite = false,
+            dominantColor = Color.Transparent,
             actions = PlayerBarActions(
                 onFavorite = {},
                 onPlayOrPause = {},

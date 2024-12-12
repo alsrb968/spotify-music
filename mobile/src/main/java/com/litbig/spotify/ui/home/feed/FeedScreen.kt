@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.litbig.spotify.ui.home.feed
 
 import androidx.compose.foundation.layout.*
@@ -14,21 +12,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.litbig.spotify.ui.components.AlbumCollection
+import com.litbig.spotify.ui.BOTTOM_BAR_HEIGHT
+import com.litbig.spotify.ui.components.FeedCollection
+import com.litbig.spotify.ui.player.PLAYER_BAR_HEIGHT
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewFeedCollections
+import com.litbig.spotify.ui.tooling.PreviewFeedCollectionUiModels
 import timber.log.Timber
 
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = hiltViewModel(),
-    onTrackSelected: (String) -> Unit,
     onAlbumSelected: (String) -> Unit,
 ) {
 
@@ -43,7 +43,6 @@ fun FeedScreen(
             FeedScreen(
                 modifier = modifier,
                 feedCollections = s.feedCollections,
-                onTrackSelected = onTrackSelected,
                 onAlbumSelected = onAlbumSelected
             )
         }
@@ -53,16 +52,18 @@ fun FeedScreen(
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
-    feedCollections: List<FeedCollection>,
-    onTrackSelected: (String) -> Unit,
+    feedCollections: List<FeedCollectionUiModel>,
     onAlbumSelected: (String) -> Unit
 ) {
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Scaffold(
         modifier = modifier
-            .padding(top = statusBarHeight),
+            .padding(
+                top = statusBarHeight,
+                bottom = navigationBarHeight,
+            ),
         topBar = {
             MultipleFilterChipExample()
         },
@@ -73,19 +74,15 @@ fun FeedScreen(
         ) {
             items(feedCollections.size) { index ->
                 val feedCollection = feedCollections[index]
-                AlbumCollection(
+                FeedCollection(
                     feedCollection = feedCollection,
-                    onTrack = onTrackSelected,
                     onAlbum = onAlbumSelected,
-                    onMore = {
-                        Timber.i("onMore")
-                    }
+                    onMore = { Timber.i("onMore") }
                 )
             }
-
-            item {
-                Spacer(modifier = Modifier.height(100.dp))
-            }
+//            item {
+//                Spacer(modifier = Modifier.height(BOTTOM_BAR_HEIGHT))
+//            }
         }
     }
 }
@@ -136,11 +133,10 @@ fun MultipleFilterChipExample() {
 
 @DevicePreviews
 @Composable
-fun PreviewFeedScreen() {
+fun FeedScreenPreview() {
     SpotifyTheme {
         FeedScreen(
-            feedCollections = PreviewFeedCollections,
-            onTrackSelected = {},
+            feedCollections = PreviewFeedCollectionUiModels,
             onAlbumSelected = {}
         )
     }

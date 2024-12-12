@@ -15,6 +15,7 @@ import com.litbig.spotify.core.domain.usecase.GetArtistDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.GetTrackDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
+import com.litbig.spotify.ui.home.album.TrackUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -25,8 +26,8 @@ sealed interface PlayerUiState {
     data object Idle : PlayerUiState
     data class Ready(
         val indexOfList: Int,
-        val nowPlaying: TrackDetailsInfo,
-        val playList: List<TrackDetailsInfo>,
+        val nowPlaying: TrackUiModel,
+        val playList: List<TrackUiModel>,
         val playingTime: Long,
         val isPlaying: Boolean,
         val isShuffle: Boolean,
@@ -35,14 +36,6 @@ sealed interface PlayerUiState {
         val dominantColor: Color,
     ) : PlayerUiState
 }
-
-data class TrackDetailsInfo(
-    val id: String,
-    val imageUrl: String?,
-    val title: String,
-    val artist: String,
-    val duration: Long,
-)
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
@@ -61,11 +54,11 @@ class PlayerViewModel @Inject constructor(
             getTrackDetailsUseCase(item)
         }) { trackDetails ->
             trackDetails.map { track ->
-                TrackDetailsInfo(
+                TrackUiModel(
                     id = track.id,
                     imageUrl = track.album?.images?.firstOrNull()?.url,
-                    title = track.name,
-                    artist = track.artists.firstOrNull()?.name ?: "",
+                    name = track.name,
+                    artists = track.artists.joinToString { it.name },
                     duration = track.durationMs.toLong(),
                 )
             }
@@ -75,11 +68,11 @@ class PlayerViewModel @Inject constructor(
     private val nowPlaying = playerRepository.currentMediaItem.flatMapLatest { item ->
         item?.let { trackDetails ->
             getTrackDetailsUseCase(trackDetails).map { track ->
-                TrackDetailsInfo(
+                TrackUiModel(
                     id = track.id,
                     imageUrl = track.album?.images?.firstOrNull()?.url,
-                    title = track.name,
-                    artist = track.artists.firstOrNull()?.name ?: "",
+                    name = track.name,
+                    artists = track.artists.joinToString { it.name },
                     duration = track.durationMs.toLong(),
                 )
             }
@@ -146,7 +139,7 @@ class PlayerViewModel @Inject constructor(
         initialValue = PlayerUiState.Idle
     )
 
-    private var _nowPlaying: TrackDetailsInfo? = null
+    private var _nowPlaying: TrackUiModel? = null
     private var _isPlaying = false
     private var _isShuffle = false
     private var _repeatMode = 0
@@ -187,7 +180,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             _nowPlaying?.let {
                 toggleFavoriteUseCase.toggleFavoriteTrack(
-                    trackName = it.title,
+                    trackName = it.name,
                     imageUrl = it.imageUrl,
                 )
             }
@@ -198,7 +191,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             playList.firstOrNull()?.getOrNull(index)?.let {
                 toggleFavoriteUseCase.toggleFavoriteTrack(
-                    trackName = it.title,
+                    trackName = it.name,
                     imageUrl = it.imageUrl,
                 )
             }

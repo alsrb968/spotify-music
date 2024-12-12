@@ -28,6 +28,8 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import java.util.Locale
 
+val BOTTOM_BAR_HEIGHT = 85.dp
+
 @Composable
 fun SpotifyApp(
     modifier: Modifier = Modifier,
@@ -41,6 +43,8 @@ fun SpotifyApp(
             modifier = modifier,
             bottomBar = {
                 SpotifyBottomBar(
+                    modifier = Modifier
+                        .height(BOTTOM_BAR_HEIGHT),
                     tabs = Screen.screens,
                     currentRoute = currentRoute ?: Screen.Home.route,
                     navigateToRoute = appState::navigateToBottomBarRoute
@@ -57,7 +61,6 @@ fun SpotifyApp(
                 composable(Screen.Home.route) { backStackEntry ->
                     HomeContainer(
                         modifier = modifier,
-                        onTrackSelected = { _, _ -> }
                     )
                 }
 
@@ -79,7 +82,7 @@ fun SpotifyApp(
 
             PlayerBar(
                 modifier = Modifier
-                    .padding(bottom = 85.dp)
+                    .padding(bottom = BOTTOM_BAR_HEIGHT)
                     .padding(horizontal = 10.dp)
             )
         }
@@ -87,7 +90,6 @@ fun SpotifyApp(
         OfflineDialog { appState.refreshOnline() }
     }
 }
-
 
 @Composable
 fun SpotifyBottomBar(
@@ -106,7 +108,6 @@ fun SpotifyBottomBar(
     ) {
         NavigationBar(
             modifier = modifier
-                .height(85.dp)
                 .gradientBackground(
                     ratio = 0.7f,
                     startColor = Color.Transparent,
@@ -163,7 +164,7 @@ fun SpotifyBottomBar(
 
 @DevicePreviews
 @Composable
-fun PreviewSpotifyBottomBar() {
+fun SpotifyBottomBarPreview() {
     SpotifyTheme {
         SpotifyBottomBar(
             tabs = Screen.screens,
@@ -189,7 +190,7 @@ fun OfflineDialog(onRetry: () -> Unit) {
 
 @DevicePreviews
 @Composable
-fun PreviewOfflineDialog() {
+fun OfflineDialogPreview() {
     SpotifyTheme {
         OfflineDialog { }
     }

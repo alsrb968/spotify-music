@@ -8,6 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -18,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.ImageInfo
+import com.litbig.spotify.ui.components.FollowButton
 import com.litbig.spotify.ui.player.PlayerViewModel
 import com.litbig.spotify.ui.player.SquareCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
@@ -32,14 +35,16 @@ fun ArtistDetailsInfoCard(
 
     ArtistDetailsInfoCard(
         modifier = modifier,
-        artistDetails = artistDetails
+        artistDetails = artistDetails,
+        onFollow = {}
     )
 }
 
 @Composable
 fun ArtistDetailsInfoCard(
     modifier: Modifier = Modifier,
-    artistDetails: ArtistDetails?
+    artistDetails: ArtistDetails?,
+    onFollow: () -> Unit,
 ) {
     SquareCard(
         modifier = modifier,
@@ -80,24 +85,48 @@ fun ArtistDetailsInfoCard(
                     .weight(1f)
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                Text(
-                    text = artistDetails?.name ?: "아티스트 이름",
-                    style = MaterialTheme.typography.titleLarge
-                )
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = artistDetails?.name ?: "아티스트 이름",
+                            style = MaterialTheme.typography.titleLarge
+                        )
 
-                val follower = artistDetails?.followers?.total ?: 0
-                val formattedFollower = "월별 청취자 " +
-                    if (follower > 10000) {
-                    "%.1f만명".format(follower / 10000f)
-                } else {
-                    "${follower}명"
+                        val follower = artistDetails?.followers?.total ?: 0
+                        val formattedFollower = "월별 청취자 " +
+                                when (follower) {
+                                    in 100_000_001..Int.MAX_VALUE ->
+                                        "%.1f억명".format(follower / 100_000_000f)
+
+                                    in 10_001..100_000_000 ->
+                                        "%.1f만명".format(follower / 10_000f)
+
+                                    else ->
+                                        "${follower}명"
+                                }
+
+                        Text(
+                            text = formattedFollower,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    val isFollowed = remember { mutableStateOf(false) }
+
+                    FollowButton(
+                        isFollowed = isFollowed.value,
+                        onClick = {
+                            isFollowed.value = !isFollowed.value
+                        }
+                    )
                 }
-
-                Text(
-                    text = formattedFollower,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -126,7 +155,7 @@ fun ArtistDetailsInfoCard(
 
 @DevicePreviews
 @Composable
-fun PreviewArtistDetailInfo() {
+fun ArtistDetailInfoPreview() {
     SpotifyTheme {
         ArtistDetailsInfoCard(
             artistDetails = ArtistDetails(
@@ -151,7 +180,8 @@ fun PreviewArtistDetailInfo() {
                 popularity = 100,
                 type = "artist",
                 uri = "spotify:artist:1uNFoZAHBGtllmzznpCI3s"
-            )
+            ),
+            onFollow = {}
         )
     }
 }

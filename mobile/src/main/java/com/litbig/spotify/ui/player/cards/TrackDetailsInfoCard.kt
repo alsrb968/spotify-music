@@ -1,24 +1,22 @@
 package com.litbig.spotify.ui.player.cards
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.TrackDetails
+import com.litbig.spotify.ui.components.FollowButton
 import com.litbig.spotify.ui.player.PlayerViewModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
@@ -118,36 +116,16 @@ fun RoleInfo(
             )
         }
 
-        val borderColor =
-            if (isFollowed) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-
-        Box(
-            modifier = Modifier
-                .background(
-                    color = Color.Transparent,
-                    shape = CircleShape
-                )
-                .border(
-                    width = 1.dp,
-                    color = borderColor,
-                    shape = CircleShape
-                )
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-                .clickableScaled { onClick() },
-
-            ) {
-            Text(
-                text = if (isFollowed) "팔로잉" else "팔로우하기",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
+        FollowButton(
+            isFollowed = isFollowed,
+            onClick = onClick
+        )
     }
 }
 
 @DevicePreviews
 @Composable
-fun PreviewRoleInfo() {
+fun RoleInfoPreview() {
     SpotifyTheme {
         RoleInfo(
             artist = "아티스트 이름",
@@ -160,7 +138,7 @@ fun PreviewRoleInfo() {
 
 @DevicePreviews
 @Composable
-fun PreviewTrackDetailsInfoCard() {
+fun TrackDetailsInfoCardPreview() {
     SpotifyTheme {
         TrackDetailsInfoCard(
             artistDetailsList = PreviewArtistDetailsList.take(3)

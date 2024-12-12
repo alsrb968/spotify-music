@@ -22,19 +22,18 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
-import com.litbig.spotify.ui.home.feed.FeedItem
-import com.litbig.spotify.ui.home.feed.FeedCollection
+import com.litbig.spotify.ui.home.feed.FeedCollectionUiModel
+import com.litbig.spotify.ui.home.feed.FeedUiModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewFeedCollection
+import com.litbig.spotify.ui.tooling.PreviewFeedCollectionUiModel
 
 @Composable
-fun AlbumCollection(
+fun FeedCollection(
     modifier: Modifier = Modifier,
-    feedCollection: FeedCollection,
-    onTrack: (String) -> Unit,
+    feedCollection: FeedCollectionUiModel,
     onAlbum: (String) -> Unit,
-    onMore:() -> Unit
+    onMore: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -64,43 +63,30 @@ fun AlbumCollection(
             )
         }
 
-        Albums(
-            modifier = Modifier.fillMaxWidth(),
-            feeds = feedCollection.feeds,
-            onClick = onAlbum
-        )
-    }
-}
-
-@Composable
-fun Albums(
-    modifier: Modifier = Modifier,
-    feeds: List<FeedItem>,
-    onClick: (String) -> Unit
-) {
-    LazyRow(
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(feeds.size) { index ->
-            val feed = feeds[index]
-            AlbumItem(
-                shape = if (feed.type == "artist") CircleShape else RoundedCornerShape(16.dp),
-                imageUrl = feed.imageUrl,
-                text = feed.name,
-                onClick = { onClick(feed.id) }
-            )
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            val feeds = feedCollection.feeds
+            items(feeds.size) { index ->
+                val feed = feeds[index]
+                FeedItem(
+                    shape = if (feed.type == "artist") CircleShape else RoundedCornerShape(16.dp),
+                    feed = feed,
+                    onClick = { onAlbum(feed.id) }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun AlbumItem(
+fun FeedItem(
     modifier: Modifier = Modifier,
+    feed: FeedUiModel,
     shape: Shape = RoundedCornerShape(16.dp),
-    imageUrl: String?,
-    text: String,
     onClick: () -> Unit
 ) {
     val size = 180.dp
@@ -117,8 +103,8 @@ fun AlbumItem(
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize(),
-                model = imageUrl,
-                contentDescription = "Album Image",
+                model = feed.imageUrl,
+                contentDescription = feed.name,
                 contentScale = ContentScale.Crop,
                 placeholder = rememberVectorPainter(image = Icons.Default.Album),
                 error = rememberVectorPainter(image = Icons.Default.Error),
@@ -130,9 +116,8 @@ fun AlbumItem(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
-            ,
-            text = text,
+                .height(40.dp),
+            text = feed.name,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
@@ -143,11 +128,10 @@ fun AlbumItem(
 
 @DevicePreviews
 @Composable
-fun AlbumCollectionPreview() {
+fun FeedCollectionPreview() {
     SpotifyTheme {
-        AlbumCollection(
-            feedCollection = PreviewFeedCollection,
-            onTrack = {},
+        FeedCollection(
+            feedCollection = PreviewFeedCollectionUiModel,
             onAlbum = {},
             onMore = {}
         )
