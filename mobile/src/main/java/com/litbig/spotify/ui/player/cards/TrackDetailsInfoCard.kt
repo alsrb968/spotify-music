@@ -15,30 +15,37 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.core.design.extension.clickableScaled
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.ui.components.FollowButton
+import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.player.PlayerViewModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewArtistDetailsList
 
 @Composable
 fun TrackDetailsInfoCard(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel()
 ) {
-    val trackDetails by viewModel.trackDetailInfo.collectAsStateWithLifecycle(null)
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    TrackDetailsInfoCard(
-        modifier = modifier,
-        artistDetailsList = trackDetails?.artists ?: emptyList()
-    )
+    when (val s = state) {
+        is PlayerUiState.Idle -> {
+
+        }
+
+        is PlayerUiState.Ready -> {
+            TrackDetailsInfoCard(
+                modifier = modifier,
+                artistNameList = s.artistNames
+            )
+        }
+    }
 }
 
 @Composable
 fun TrackDetailsInfoCard(
     modifier: Modifier = Modifier,
-    artistDetailsList: List<ArtistDetails>,
+    artistNameList: List<String>,
 ) {
     Card(
         modifier = modifier
@@ -71,10 +78,10 @@ fun TrackDetailsInfoCard(
 
             val isFollowed = remember { mutableStateOf(false) }
 
-            artistDetailsList.forEach { artist ->
+            artistNameList.forEach { artistName ->
                 Column {
                     RoleInfo(
-                        artist = artist.name,
+                        artist = artistName,
                         role = "메인 아티스트",
                         isFollowed = isFollowed.value,
                         onClick = {
@@ -141,7 +148,7 @@ fun RoleInfoPreview() {
 fun TrackDetailsInfoCardPreview() {
     SpotifyTheme {
         TrackDetailsInfoCard(
-            artistDetailsList = PreviewArtistDetailsList.take(3)
+            artistNameList = List(3) { "Billie Eilish" }
         )
     }
 }

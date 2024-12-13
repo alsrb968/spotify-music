@@ -1,15 +1,11 @@
 package com.litbig.spotify.ui.theme
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material3.*
-import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.litbig.spotify.core.design.extension.ClickAnimationConfig
 import com.litbig.spotify.core.design.extension.LocalClickAnimationConfig
 import com.litbig.spotify.core.design.theme.*

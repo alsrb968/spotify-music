@@ -114,7 +114,7 @@ class SpotifyDataSourceImpl @Inject constructor(
         trackIds: String,
         accessToken: String
     ): List<TrackDetailsResponse> {
-        return api.getSeveralTrackDetails(trackIds, accessToken)
+        return api.getSeveralTrackDetails(trackIds, accessToken).tracks
     }
 
     override suspend fun getArtistDetails(
@@ -128,7 +128,7 @@ class SpotifyDataSourceImpl @Inject constructor(
         artistIds: String,
         accessToken: String
     ): List<ArtistDetailsResponse> {
-        return api.getSeveralArtistDetails(artistIds, accessToken)
+        return api.getSeveralArtistDetails(artistIds, accessToken).artists
     }
 
     override suspend fun getAlbumsOfArtist(
@@ -166,7 +166,7 @@ class SpotifyDataSourceImpl @Inject constructor(
         albumIds: String,
         accessToken: String
     ): List<AlbumDetailsResponse> {
-        return api.getSeveralAlbumDetails(albumIds, accessToken)
+        return api.getSeveralAlbumDetails(albumIds, accessToken).albums
     }
 
     override suspend fun getNewAlbumReleases(

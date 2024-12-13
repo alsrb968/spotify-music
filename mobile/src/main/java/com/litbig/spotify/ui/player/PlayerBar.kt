@@ -26,7 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
-import com.litbig.spotify.ui.home.album.TrackUiModel
+import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.*
 

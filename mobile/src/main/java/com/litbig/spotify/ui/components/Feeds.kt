@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
-import com.litbig.spotify.ui.home.feed.FeedCollectionUiModel
-import com.litbig.spotify.ui.home.feed.FeedUiModel
+import com.litbig.spotify.ui.models.FeedCollectionUiModel
+import com.litbig.spotify.ui.models.FeedUiModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewFeedCollectionUiModel

@@ -98,9 +98,9 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideGetTrackDetailsUseCase(
+    fun provideGetSeveralTrackDetailsUseCase(
         musicRepository: MusicRepository
-    ): GetTrackDetailsUseCase = GetTrackDetailsUseCase(
+    ): GetSeveralTrackDetailsUseCase = GetSeveralTrackDetailsUseCase(
         musicRepository
     )
 

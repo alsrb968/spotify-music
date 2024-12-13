@@ -12,13 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.litbig.spotify.ui.BOTTOM_BAR_HEIGHT
 import com.litbig.spotify.ui.components.FeedCollection
-import com.litbig.spotify.ui.player.PLAYER_BAR_HEIGHT
+import com.litbig.spotify.ui.models.FeedCollectionUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews

@@ -42,6 +42,8 @@ import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.components.TrackItem
+import com.litbig.spotify.ui.models.AlbumUiModel
+import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews

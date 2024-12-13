@@ -12,28 +12,13 @@ import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.home.HomeSection
+import com.litbig.spotify.ui.models.AlbumUiModel
+import com.litbig.spotify.ui.models.TrackUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
-
-data class TrackUiModel(
-    val id: String,
-    val imageUrl: String?,
-    val name: String,
-    val artists: String,
-    val duration: Long,
-)
-
-data class AlbumUiModel(
-    val id: String,
-    val imageUrl: String?,
-    val name: String,
-    val artists: String,
-    val totalTime: Long,
-    val dominantColor: Color,
-)
 
 sealed interface AlbumDetailUiState {
     data object Loading : AlbumDetailUiState
@@ -63,22 +48,9 @@ class AlbumDetailViewModel @Inject constructor(
     ) { albumDetails, color, currentItem ->
         val imageUrl = albumDetails.images.firstOrNull()?.url
         AlbumDetailUiState.Ready(
-            album = AlbumUiModel(
-                id = albumDetails.id,
-                imageUrl = imageUrl,
-                name = albumDetails.name,
-                artists = albumDetails.artists.joinToString { it.name },
-                totalTime = albumDetails.tracks?.items?.sumOf { it.durationMs }?.toLong() ?: 0L,
-                dominantColor = color,
-            ),
-            tracks = albumDetails.tracks?.items?.map { track ->
-                TrackUiModel(
-                    id = track.id,
-                    imageUrl = imageUrl,
-                    name = track.name,
-                    artists = track.artists.joinToString { it.name },
-                    duration = track.durationMs.toLong(),
-                )
+            album = AlbumUiModel.from(albumDetails).copy(dominantColor = color),
+            tracks = albumDetails.tracks?.items?.map {
+                TrackUiModel.from(it).copy(imageUrl = imageUrl)
             },
             playingTrackId = currentItem
         )

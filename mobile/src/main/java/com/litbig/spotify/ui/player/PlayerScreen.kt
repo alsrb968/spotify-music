@@ -33,7 +33,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
-import com.litbig.spotify.ui.home.album.TrackUiModel
+import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.player.cards.ArtistDetailsInfoCard
 import com.litbig.spotify.ui.player.cards.TrackDetailsInfoCard
 import com.litbig.spotify.ui.theme.SpotifyTheme

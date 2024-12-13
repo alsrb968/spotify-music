@@ -391,18 +391,16 @@ class MusicRepositoryImpl @Inject constructor(
         return spotifyDataSource.getTrackDetails(trackId, getAccessToken()).toTrackDetails()
     }
 
-    override suspend fun getSeveralTrackDetails(vararg trackIds: String): List<TrackDetails> {
-        val ids = trackIds.joinToString(",")
-        return spotifyDataSource.getSeveralTrackDetails(ids, getAccessToken()).toTrackDetails()
+    override suspend fun getSeveralTrackDetails(trackIds: String): List<TrackDetails> {
+        return spotifyDataSource.getSeveralTrackDetails(trackIds, getAccessToken()).toTrackDetails()
     }
 
     override suspend fun getArtistDetails(artistId: String): ArtistDetails {
         return spotifyDataSource.getArtistDetails(artistId, getAccessToken()).toArtistDetails()
     }
 
-    override suspend fun getSeveralArtistDetails(vararg artistIds: String): List<ArtistDetails> {
-        val ids = artistIds.joinToString(",")
-        return spotifyDataSource.getSeveralArtistDetails(ids, getAccessToken()).toArtistDetails()
+    override suspend fun getSeveralArtistDetails(artistIds: String): List<ArtistDetails> {
+        return spotifyDataSource.getSeveralArtistDetails(artistIds, getAccessToken()).toArtistDetails()
     }
 
     override suspend fun getAlbumsOfArtist(artistId: String, limit: Int, offset: Int): Albums {
@@ -418,9 +416,8 @@ class MusicRepositoryImpl @Inject constructor(
         return spotifyDataSource.getAlbumDetails(albumId, getAccessToken()).toAlbumDetails()
     }
 
-    override suspend fun getSeveralAlbumDetails(vararg albumIds: String): List<AlbumDetails> {
-        val ids = albumIds.joinToString(",")
-        return spotifyDataSource.getSeveralAlbumDetails(ids, getAccessToken()).toAlbumDetails()
+    override suspend fun getSeveralAlbumDetails(albumIds: String): List<AlbumDetails> {
+        return spotifyDataSource.getSeveralAlbumDetails(albumIds, getAccessToken()).toAlbumDetails()
     }
 
     override suspend fun getNewAlbumReleases(limit: Int, offset: Int): Albums? {

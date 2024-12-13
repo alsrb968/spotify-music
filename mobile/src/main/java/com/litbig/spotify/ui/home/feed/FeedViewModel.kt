@@ -2,59 +2,14 @@ package com.litbig.spotify.ui.home.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.domain.model.remote.AlbumDetails
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsListOfArtistsUseCase
 import com.litbig.spotify.core.domain.usecase.GetNewAlbumReleasesUseCase
 import com.litbig.spotify.core.domain.usecase.SearchArtistUseCase
+import com.litbig.spotify.ui.models.FeedCollectionUiModel
+import com.litbig.spotify.ui.models.FeedUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
-
-data class FeedUiModel(
-    val id: String,
-    val imageUrl: String?,
-    val name: String,
-    val type: String,
-) {
-    companion object {
-        @JvmStatic
-        fun from(album: AlbumDetails): FeedUiModel {
-            return FeedUiModel(
-                id = album.id,
-                imageUrl = album.images.firstOrNull()?.url,
-                name = album.name,
-                type = "album",
-            )
-        }
-
-        @JvmStatic
-        fun from(artist: ArtistDetails): FeedUiModel {
-            return FeedUiModel(
-                id = artist.id,
-                imageUrl = artist.images?.firstOrNull()?.url,
-                name = artist.name,
-                type = "artist",
-            )
-        }
-
-        @JvmStatic
-        fun from(track: TrackDetails): FeedUiModel {
-            return FeedUiModel(
-                id = track.id,
-                imageUrl = track.album?.images?.firstOrNull()?.url,
-                name = track.name,
-                type = "track",
-            )
-        }
-    }
-}
-
-data class FeedCollectionUiModel(
-    val title: String,
-    val feeds: List<FeedUiModel>,
-)
 
 sealed interface FeedUiState {
     data object Loading : FeedUiState

@@ -27,7 +27,7 @@ interface SpotifyApi {
     suspend fun getSeveralTrackDetails(
         @Query("ids") trackIds: String,
         @Header("Authorization") accessToken: String
-    ): List<TrackDetailsResponse>
+    ): TracksContainerResponse
 
     @GET("v1/artists/{id}")
     suspend fun getArtistDetails(
@@ -39,7 +39,7 @@ interface SpotifyApi {
     suspend fun getSeveralArtistDetails(
         @Query("ids") artistIds: String,
         @Header("Authorization") accessToken: String
-    ): List<ArtistDetailsResponse>
+    ): ArtistsContainerResponse
 
     @GET("v1/artists/{id}/albums")
     suspend fun getAlbumsOfArtist(
@@ -56,7 +56,7 @@ interface SpotifyApi {
         @Path("id") artistId: String,
         @Query("market") market: String = "KR",
         @Header("Authorization") accessToken: String
-    ): TopTracksResponse
+    ): TracksContainerResponse
 
     @GET("v1/albums/{id}")
     suspend fun getAlbumDetails(
@@ -68,7 +68,7 @@ interface SpotifyApi {
     suspend fun getSeveralAlbumDetails(
         @Query("ids") albumIds: String,
         @Header("Authorization") accessToken: String
-    ): List<AlbumDetailsResponse>
+    ): AlbumsContainerResponse
 
     @GET("v1/browse/new-releases")
     suspend fun getNewAlbumReleases(

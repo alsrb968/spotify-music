@@ -1,13 +1,7 @@
 package com.litbig.spotify.ui.tooling
 
 import androidx.compose.ui.graphics.Color
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.ExternalUrls
-import com.litbig.spotify.core.domain.model.remote.Followers
-import com.litbig.spotify.ui.home.album.AlbumUiModel
-import com.litbig.spotify.ui.home.album.TrackUiModel
-import com.litbig.spotify.ui.home.feed.FeedCollectionUiModel
-import com.litbig.spotify.ui.home.feed.FeedUiModel
+import com.litbig.spotify.ui.models.*
 
 val PreviewFeedUiModel = FeedUiModel(
     id = "1",
@@ -43,18 +37,11 @@ val PreviewAlbumUiModel = AlbumUiModel(
     dominantColor = Color.Transparent,
 )
 
-
-val PreviewArtistDetails = ArtistDetails(
-    externalUrls = ExternalUrls(spotify = "https://open.spotify.com/artist/4GNC7GD6oZMSxPGyXy4MNB"),
-    followers = Followers(href = null, total = 1000000),
-    genres = listOf("pop", "rock"),
-    href = "https://api.spotify.com/v1/artists/4GNC7GD6oZMSxPGyXy4MNB",
-    id = "4GNC7GD6oZMSxPGyXy4MNB",
-    images = listOf(),
+val PreviewArtistUiModel = ArtistUiModel(
+    id = "1",
+    imageUrl = null,
     name = "Billie Eilish",
+    follower = 1000000,
     popularity = 100,
-    type = "artist",
-    uri = "spotify:artist:4GNC7GD6oZMSxPGyXy4MNB",
+    genres = "Pop, Indie",
 )
-
-val PreviewArtistDetailsList = List(10) { PreviewArtistDetails }

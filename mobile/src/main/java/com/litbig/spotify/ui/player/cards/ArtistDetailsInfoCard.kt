@@ -18,32 +18,41 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.model.remote.ImageInfo
 import com.litbig.spotify.ui.components.FollowButton
+import com.litbig.spotify.ui.models.ArtistUiModel
+import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.player.PlayerViewModel
 import com.litbig.spotify.ui.player.SquareCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewArtistUiModel
 
 @Composable
 fun ArtistDetailsInfoCard(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel()
 ) {
-    val artistDetails by viewModel.artistDetailInfo.collectAsStateWithLifecycle(null)
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ArtistDetailsInfoCard(
-        modifier = modifier,
-        artistDetails = artistDetails,
-        onFollow = {}
-    )
+    when (val s = state) {
+        is PlayerUiState.Idle -> {
+
+        }
+
+        is PlayerUiState.Ready -> {
+            ArtistDetailsInfoCard(
+                modifier = modifier,
+                artist = s.artist,
+                onFollow = {}
+            )
+        }
+    }
 }
 
 @Composable
 fun ArtistDetailsInfoCard(
     modifier: Modifier = Modifier,
-    artistDetails: ArtistDetails?,
+    artist: ArtistUiModel,
     onFollow: () -> Unit,
 ) {
     SquareCard(
@@ -63,7 +72,7 @@ fun ArtistDetailsInfoCard(
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxSize(),
-                    model = artistDetails?.images?.firstOrNull()?.url,
+                    model = artist.imageUrl,
                     contentDescription = "Artist Image",
                     contentScale = ContentScale.FillWidth,
                     alignment = Alignment.TopCenter,
@@ -94,17 +103,17 @@ fun ArtistDetailsInfoCard(
                             .weight(1f)
                     ) {
                         Text(
-                            text = artistDetails?.name ?: "아티스트 이름",
+                            text = artist.name,
                             style = MaterialTheme.typography.titleLarge
                         )
 
-                        val follower = artistDetails?.followers?.total ?: 0
+                        val follower = artist.follower
                         val formattedFollower = "월별 청취자 " +
-                                when (follower) {
-                                    in 100_000_001..Int.MAX_VALUE ->
+                                when {
+                                    follower >= 100_000_000 ->
                                         "%.1f억명".format(follower / 100_000_000f)
 
-                                    in 10_001..100_000_000 ->
+                                    follower >= 10_000 ->
                                         "%.1f만명".format(follower / 10_000f)
 
                                     else ->
@@ -130,8 +139,7 @@ fun ArtistDetailsInfoCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val popularity = artistDetails?.popularity ?: 0
-                val formattedPopularity = "인기도 $popularity"
+                val formattedPopularity = "인기도 ${artist.popularity}"
 
                 Text(
                     text = formattedPopularity,
@@ -141,10 +149,8 @@ fun ArtistDetailsInfoCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val genres = artistDetails?.genres?.joinToString(", ") ?: ""
-
                 Text(
-                    text = genres,
+                    text = artist.genres,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -158,29 +164,7 @@ fun ArtistDetailsInfoCard(
 fun ArtistDetailInfoPreview() {
     SpotifyTheme {
         ArtistDetailsInfoCard(
-            artistDetails = ArtistDetails(
-                externalUrls = com.litbig.spotify.core.domain.model.remote.ExternalUrls(
-                    spotify = "https://open.spotify.com/artist/1uNFoZAHBGtllmzznpCI3s"
-                ),
-                followers = com.litbig.spotify.core.domain.model.remote.Followers(
-                    href = null,
-                    total = 1000000
-                ),
-                genres = listOf("Pop", "Hip-Hop"),
-                href = "https://api.spotify.com/v1/artists/1uNFoZAHBGtllmzznpCI3s",
-                id = "1uNFoZAHBGtllmzznpCI3s",
-                images = listOf(
-                    ImageInfo(
-                        height = 640,
-                        url = "https://i.scdn",
-                        width = 640,
-                    )
-                ),
-                name = "Justin Bieber",
-                popularity = 100,
-                type = "artist",
-                uri = "spotify:artist:1uNFoZAHBGtllmzznpCI3s"
-            ),
+            artist = PreviewArtistUiModel,
             onFollow = {}
         )
     }
