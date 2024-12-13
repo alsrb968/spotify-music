@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 import javax.inject.Inject
 
-class MockPlayerRepository @Inject constructor(
+class FakePlayerRepositoryImpl @Inject constructor(
 
 ) : PlayerRepository {
 

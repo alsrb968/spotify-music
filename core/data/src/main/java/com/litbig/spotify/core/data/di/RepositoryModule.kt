@@ -4,7 +4,7 @@ import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.PlayerDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
-import com.litbig.spotify.core.data.repository.MockPlayerRepository
+import com.litbig.spotify.core.data.repository.FakePlayerRepositoryImpl
 import com.litbig.spotify.core.data.repository.MusicRepositoryImpl
 import com.litbig.spotify.core.data.repository.PlayerRepositoryImpl
 import com.litbig.spotify.core.data.repository.StorageHashRepositoryImpl
@@ -47,7 +47,7 @@ object RepositoryModule {
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
-    annotation class MockingPlayerRepository
+    annotation class FakePlayerRepository
 
     @Provides
     @Singleton
@@ -60,6 +60,6 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    @MockingPlayerRepository
-    fun provideMockPlayerRepository() : PlayerRepository = MockPlayerRepository()
+    @FakePlayerRepository
+    fun provideFakePlayerRepository() : PlayerRepository = FakePlayerRepositoryImpl()
 }

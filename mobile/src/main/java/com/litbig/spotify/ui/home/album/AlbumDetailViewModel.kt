@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.data.di.RepositoryModule.MockingPlayerRepository
+import com.litbig.spotify.core.data.di.RepositoryModule.FakePlayerRepository
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
@@ -35,7 +35,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val getAlbumDetailsUseCase: GetAlbumDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
-    @MockingPlayerRepository private val playerRepository: PlayerRepository
+    @FakePlayerRepository private val playerRepository: PlayerRepository
 ) : ViewModel() {
     private val albumId = Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_ALBUM_ID))
 

@@ -4,7 +4,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.litbig.spotify.core.data.BuildConfig
 import com.litbig.spotify.core.data.datasource.local.MediaRetrieverDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
@@ -26,23 +25,6 @@ class MusicRepositoryImpl @Inject constructor(
     private val mediaDataSource: MediaRetrieverDataSource,
     private val spotifyDataSource: SpotifyDataSource,
 ) : MusicRepository {
-
-    private var cachedAccessToken: String? = null
-    private var tokenExpirationTime: Long = 0
-
-    private suspend fun getAccessToken(): String {
-        val currentTime = System.currentTimeMillis()
-        if (cachedAccessToken == null || currentTime >= tokenExpirationTime) {
-            val response = spotifyDataSource.getAccessToken(
-                clientId = BuildConfig.SPOTIFY_ID,
-                clientSecret = BuildConfig.SPOTIFY_SECRET,
-                grantType = "client_credentials"
-            )
-            cachedAccessToken = "Bearer ${response.accessToken}"
-            tokenExpirationTime = currentTime + response.expiresIn * 1000
-        }
-        return cachedAccessToken ?: throw IllegalStateException("Access token is null")
-    }
 
     override suspend fun insertMetadata(metadata: MusicMetadata) {
         roomDataSource.insertMetadata(metadata.toMusicMetadataEntity())
@@ -352,15 +334,19 @@ class MusicRepositoryImpl @Inject constructor(
         limit: Int,
         offset: Int
     ): Search {
-        return spotifyDataSource.search(query, type, market, limit, offset, getAccessToken())
-            .toSearch()
+        return spotifyDataSource.search(
+            query = query,
+            type = type,
+            market = market,
+            limit = limit,
+            offset = offset
+        ).toSearch()
     }
 
     override suspend fun searchTrack(trackName: String, artistName: String): TrackDetails? {
         return spotifyDataSource.search(
             query = "$trackName artist:$artistName",
             type = "track",
-            accessToken = getAccessToken()
         ).let { search ->
             search.tracks?.items?.firstOrNull()?.toTrackDetails()
         }
@@ -371,7 +357,6 @@ class MusicRepositoryImpl @Inject constructor(
             query = artistName,
             type = "artist",
             limit = 1,
-            accessToken = getAccessToken()
         ).let { search ->
             search.artists?.items?.firstOrNull()?.toArtistDetails()
         }
@@ -381,47 +366,45 @@ class MusicRepositoryImpl @Inject constructor(
         return spotifyDataSource.search(
             query = albumName,
             type = "album",
-            accessToken = getAccessToken()
         ).let { search ->
             search.albums?.items?.firstOrNull()?.toAlbumDetails()
         }
     }
 
     override suspend fun getTrackDetails(trackId: String): TrackDetails {
-        return spotifyDataSource.getTrackDetails(trackId, getAccessToken()).toTrackDetails()
+        return spotifyDataSource.getTrackDetails(trackId).toTrackDetails()
     }
 
     override suspend fun getSeveralTrackDetails(trackIds: String): List<TrackDetails> {
-        return spotifyDataSource.getSeveralTrackDetails(trackIds, getAccessToken()).toTrackDetails()
+        return spotifyDataSource.getSeveralTrackDetails(trackIds).toTrackDetails()
     }
 
     override suspend fun getArtistDetails(artistId: String): ArtistDetails {
-        return spotifyDataSource.getArtistDetails(artistId, getAccessToken()).toArtistDetails()
+        return spotifyDataSource.getArtistDetails(artistId).toArtistDetails()
     }
 
     override suspend fun getSeveralArtistDetails(artistIds: String): List<ArtistDetails> {
-        return spotifyDataSource.getSeveralArtistDetails(artistIds, getAccessToken()).toArtistDetails()
+        return spotifyDataSource.getSeveralArtistDetails(artistIds).toArtistDetails()
     }
 
     override suspend fun getAlbumsOfArtist(artistId: String, limit: Int, offset: Int): Albums {
-        return spotifyDataSource.getAlbumsOfArtist(artistId, limit, offset, getAccessToken())
-            .toAlbums()
+        return spotifyDataSource.getAlbumsOfArtist(artistId, limit, offset).toAlbums()
     }
 
     override suspend fun getTopTracksOfArtist(artistId: String): List<TrackDetails> {
-        return spotifyDataSource.getTopTracksOfArtist(artistId, getAccessToken()).toTrackDetails()
+        return spotifyDataSource.getTopTracksOfArtist(artistId).toTrackDetails()
     }
 
     override suspend fun getAlbumDetails(albumId: String): AlbumDetails {
-        return spotifyDataSource.getAlbumDetails(albumId, getAccessToken()).toAlbumDetails()
+        return spotifyDataSource.getAlbumDetails(albumId).toAlbumDetails()
     }
 
     override suspend fun getSeveralAlbumDetails(albumIds: String): List<AlbumDetails> {
-        return spotifyDataSource.getSeveralAlbumDetails(albumIds, getAccessToken()).toAlbumDetails()
+        return spotifyDataSource.getSeveralAlbumDetails(albumIds).toAlbumDetails()
     }
 
     override suspend fun getNewAlbumReleases(limit: Int, offset: Int): Albums? {
-        return spotifyDataSource.getNewAlbumReleases(limit, offset, getAccessToken())?.toAlbums()
+        return spotifyDataSource.getNewAlbumReleases(limit, offset)?.toAlbums()
     }
 
     override suspend fun insertFavorite(favorite: Favorite) {

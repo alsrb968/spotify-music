@@ -1,73 +1,59 @@
 package com.litbig.spotify.core.data.datasource.remote
 
+import com.litbig.spotify.core.data.BuildConfig
 import com.litbig.spotify.core.data.api.SpotifyApi
 import com.litbig.spotify.core.data.api.SpotifyAuthApi
 import com.litbig.spotify.core.data.model.remote.*
-import timber.log.Timber
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 interface SpotifyDataSource {
-    suspend fun getAccessToken(
-        clientId: String,
-        clientSecret: String,
-        grantType: String
-    ): AccessTokenResponse
-
     suspend fun search(
         query: String,
         type: String,
         market: String = "KR",
         limit: Int = 10,
         offset: Int = 0,
-        accessToken: String
     ): SearchResponse
 
     suspend fun getTrackDetails(
         trackId: String,
-        accessToken: String
     ): TrackDetailsResponse
 
     suspend fun getSeveralTrackDetails(
         trackIds: String,
-        accessToken: String
     ): List<TrackDetailsResponse>
 
     suspend fun getArtistDetails(
         artistId: String,
-        accessToken: String
     ): ArtistDetailsResponse
 
     suspend fun getSeveralArtistDetails(
         artistIds: String,
-        accessToken: String
     ): List<ArtistDetailsResponse>
 
     suspend fun getAlbumsOfArtist(
         artistId: String,
         limit: Int = 10,
         offset: Int = 0,
-        accessToken: String
     ): AlbumsResponse
 
     suspend fun getTopTracksOfArtist(
         artistId: String,
-        accessToken: String
     ): List<TrackDetailsResponse>
 
     suspend fun getAlbumDetails(
         albumId: String,
-        accessToken: String
     ): AlbumDetailsResponse
 
     suspend fun getSeveralAlbumDetails(
         albumIds: String,
-        accessToken: String
     ): List<AlbumDetailsResponse>
 
     suspend fun getNewAlbumReleases(
         limit: Int = 10,
         offset: Int = 0,
-        accessToken: String
     ): AlbumsResponse?
 }
 
@@ -76,12 +62,35 @@ class SpotifyDataSourceImpl @Inject constructor(
     private val api: SpotifyApi,
 ) : SpotifyDataSource {
 
-    override suspend fun getAccessToken(
-        clientId: String,
-        clientSecret: String,
-        grantType: String
-    ): AccessTokenResponse {
-        return authApi.getAccessToken(clientId, clientSecret, grantType)
+    private var cachedAccessToken: String? = null
+    private var tokenExpirationTime: Long = 0
+    private val tokenMutex = Mutex()
+
+    private suspend fun getAccessToken(
+        clientId: String = BuildConfig.SPOTIFY_ID,
+        clientSecret: String = BuildConfig.SPOTIFY_SECRET,
+        grantType: String = "client_credentials"
+    ): String {
+        // 토큰 갱신 필요 여부 확인
+        val currentTime = System.currentTimeMillis()
+        if (cachedAccessToken != null && currentTime < tokenExpirationTime) {
+            return cachedAccessToken ?: throw IllegalStateException("AccessToken is null")
+        }
+
+        // 토큰 생성 동기화 처리
+        return tokenMutex.withLock {
+            // 다른 코루틴이 먼저 토큰을 가져왔는지 재확인
+            if (cachedAccessToken != null && currentTime < tokenExpirationTime) {
+                return cachedAccessToken ?: throw IllegalStateException("AccessToken is null")
+            }
+
+            // 토큰 새로 요청
+            val response = authApi.getAccessToken(clientId, clientSecret, grantType)
+            cachedAccessToken = "${response.tokenType} ${response.accessToken}"
+            tokenExpirationTime = currentTime + response.expiresIn * 1000
+
+            cachedAccessToken ?: throw IllegalStateException("AccessToken is null")
+        }
     }
 
     override suspend fun search(
@@ -90,7 +99,6 @@ class SpotifyDataSourceImpl @Inject constructor(
         market: String,
         limit: Int,
         offset: Int,
-        accessToken: String
     ): SearchResponse {
 //        Timber.w("search query=$query, type=$type")
         return api.search(
@@ -99,81 +107,72 @@ class SpotifyDataSourceImpl @Inject constructor(
 //            market,
 //            limit,
 //            offset,
-            accessToken = accessToken
+            accessToken = getAccessToken()
         )
     }
 
     override suspend fun getTrackDetails(
         trackId: String,
-        accessToken: String
     ): TrackDetailsResponse {
-        return api.getTrackDetails(trackId, accessToken)
+        return api.getTrackDetails(trackId, getAccessToken())
     }
 
     override suspend fun getSeveralTrackDetails(
         trackIds: String,
-        accessToken: String
     ): List<TrackDetailsResponse> {
-        return api.getSeveralTrackDetails(trackIds, accessToken).tracks
+        return api.getSeveralTrackDetails(trackIds, getAccessToken()).tracks
     }
 
     override suspend fun getArtistDetails(
         artistId: String,
-        accessToken: String
     ): ArtistDetailsResponse {
-        return api.getArtistDetails(artistId, accessToken)
+        return api.getArtistDetails(artistId, getAccessToken())
     }
 
     override suspend fun getSeveralArtistDetails(
         artistIds: String,
-        accessToken: String
     ): List<ArtistDetailsResponse> {
-        return api.getSeveralArtistDetails(artistIds, accessToken).artists
+        return api.getSeveralArtistDetails(artistIds, getAccessToken()).artists
     }
 
     override suspend fun getAlbumsOfArtist(
         artistId: String,
         limit: Int,
         offset: Int,
-        accessToken: String
     ): AlbumsResponse {
         return api.getAlbumsOfArtist(
             artistId = artistId,
             limit = limit,
             offset = offset,
-            accessToken = accessToken
+            accessToken = getAccessToken()
         )
     }
 
     override suspend fun getTopTracksOfArtist(
         artistId: String,
-        accessToken: String
     ): List<TrackDetailsResponse> {
         return api.getTopTracksOfArtist(
             artistId = artistId,
-            accessToken = accessToken
+            accessToken = getAccessToken()
         ).tracks
     }
 
     override suspend fun getAlbumDetails(
         albumId: String,
-        accessToken: String
     ): AlbumDetailsResponse {
-        return api.getAlbumDetails(albumId, accessToken)
+        return api.getAlbumDetails(albumId, getAccessToken())
     }
 
     override suspend fun getSeveralAlbumDetails(
         albumIds: String,
-        accessToken: String
     ): List<AlbumDetailsResponse> {
-        return api.getSeveralAlbumDetails(albumIds, accessToken).albums
+        return api.getSeveralAlbumDetails(albumIds, getAccessToken()).albums
     }
 
     override suspend fun getNewAlbumReleases(
         limit: Int,
         offset: Int,
-        accessToken: String
     ): AlbumsResponse? {
-        return api.getNewAlbumReleases(limit, offset, accessToken).albums
+        return api.getNewAlbumReleases(limit, offset, getAccessToken()).albums
     }
 }

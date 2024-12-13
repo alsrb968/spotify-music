@@ -1,9 +1,11 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.litbig.spotify.ui.player
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.data.di.RepositoryModule.MockingPlayerRepository
+import com.litbig.spotify.core.data.di.RepositoryModule.FakePlayerRepository
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.extension.combine
 import com.litbig.spotify.core.domain.repository.PlayerRepository
@@ -14,6 +16,7 @@ import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,7 +40,7 @@ sealed interface PlayerUiState {
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    @MockingPlayerRepository private val playerRepository: PlayerRepository,
+    @FakePlayerRepository private val playerRepository: PlayerRepository,
     private val getSeveralTrackDetailsUseCase: GetSeveralTrackDetailsUseCase,
     private val getArtistDetailsUseCase: GetArtistDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
@@ -47,6 +50,22 @@ class PlayerViewModel @Inject constructor(
     private val _isShowPlayer: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isShowPlayer: StateFlow<Boolean> = _isShowPlayer
 
+    private val trackList: Flow<List<TrackUiModel>> = playerRepository.mediaItems.flatMapLatest { items ->
+        flow {
+            emit(getSeveralTrackDetailsUseCase(items.joinToString(",")))
+        }.map { trackList ->
+            trackList.map {
+                TrackUiModel(
+                    id = it.id,
+                    imageUrl = it.album?.images?.firstOrNull()?.url,
+                    name = it.name,
+                    artists = it.artists.joinToString { artist -> artist.name },
+                    duration = it.durationMs.toLong(),
+                )
+            }
+        }
+
+    }
     private val dominantColor = MutableStateFlow(Color.Transparent)
 
     val state: StateFlow<PlayerUiState> = combine(
