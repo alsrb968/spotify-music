@@ -1,7 +1,7 @@
 # Spotify Compose Demo App
 - USB 스토리지 기반 뮤직 플레이어 앱
 
-## 기능
+# 기능
 - Jetpack Compose로 UI 구성
 - Clean Architecture
 - MVI 패턴
@@ -13,7 +13,16 @@
 - ExoPlayer 라이브러리로 음악 재생
 - BottomSheetScaffold로 플레이어 화면 구성
 
-## 화면 캡처
+# 화면 캡처
+
+## mobile
+
+<img src="pic/Screenshot_20241216_100212.png" width="200" height="450">
+<img src="pic/Screenshot_20241216_100410.png" width="200" height="450">
+<img src="pic/Screenshot_20241216_100424.png" width="200" height="450">
+<img src="pic/Screenshot_20241216_100440.png" width="200" height="450">
+
+## ivi
 
 ### 메인 화면 (Home)
 - Favorite 카테고리
