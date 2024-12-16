@@ -17,10 +17,7 @@
 
 ## mobile
 
-<img src="pic/Screenshot_20241216_100212.png" width="200" height="450">
-<img src="pic/Screenshot_20241216_100410.png" width="200" height="450">
-<img src="pic/Screenshot_20241216_100424.png" width="200" height="450">
-<img src="pic/Screenshot_20241216_100440.png" width="200" height="450">
+![screenshot1](pic/screenshot1.png)
 
 ## ivi
 
