@@ -28,6 +28,7 @@ sealed class HomeSection(val route: String) {
 @Composable
 fun HomeContainer(
     modifier: Modifier = Modifier,
+    onShowSnackBar: (String) -> Unit,
 ) {
     val appState = rememberSpotifyAppState()
 
@@ -40,7 +41,8 @@ fun HomeContainer(
             onAlbumSelected = { albumId, from ->
                 appState.navigateToAlbum(albumId, from)
             },
-            navigateToBack = appState::navigateBack
+            navigateToBack = appState::navigateBack,
+            onShowSnackBar = onShowSnackBar
         )
     }
 }
@@ -48,21 +50,24 @@ fun HomeContainer(
 fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
     onAlbumSelected: (String, NavBackStackEntry) -> Unit,
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
+    onShowSnackBar: (String) -> Unit,
 ) {
     composable(HomeSection.Feed.route) { from ->
         FeedScreen(
             modifier = modifier,
             onAlbumSelected = { albumId ->
                 onAlbumSelected(albumId, from)
-            }
+            },
+            onShowSnackBar = onShowSnackBar
         )
     }
 
     composable(HomeSection.Album.route) { from ->
         AlbumDetailScreen(
             modifier = modifier,
-            navigateToBack = navigateToBack
+            navigateToBack = navigateToBack,
+            onShowSnackBar = onShowSnackBar
         )
     }
 }

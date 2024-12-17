@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -26,6 +27,7 @@ import com.litbig.spotify.ui.search.SearchScreen
 import com.litbig.spotify.ui.player.PlayerBar
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 val BOTTOM_BAR_HEIGHT = 85.dp
@@ -36,8 +38,10 @@ fun SpotifyApp(
     appState: SpotifyAppState = rememberSpotifyAppState()
 ) {
     if (appState.isOnline) {
+        val coroutineScope = rememberCoroutineScope()
         val navBackStackEntry by appState.navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
+        val snackbarHostState = remember { SnackbarHostState() }
 
         Scaffold(
             modifier = modifier,
@@ -49,6 +53,9 @@ fun SpotifyApp(
                     currentRoute = currentRoute ?: Screen.Home.route,
                     navigateToRoute = appState::navigateToBottomBarRoute
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
             }
         ) { padding ->
             NavHost(
@@ -61,6 +68,11 @@ fun SpotifyApp(
                 composable(Screen.Home.route) { backStackEntry ->
                     HomeContainer(
                         modifier = modifier,
+                        onShowSnackBar = { message ->
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        }
                     )
                 }
 
@@ -83,7 +95,12 @@ fun SpotifyApp(
             PlayerBar(
                 modifier = Modifier
                     .padding(bottom = BOTTOM_BAR_HEIGHT)
-                    .padding(horizontal = 10.dp)
+                    .padding(horizontal = 10.dp),
+                onShowSnackBar = { message ->
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(message)
+                    }
+                }
             )
         }
     } else {

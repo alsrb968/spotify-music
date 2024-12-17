@@ -29,6 +29,7 @@ import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.*
+import kotlinx.coroutines.flow.collectLatest
 
 val PLAYER_BAR_HEIGHT = 60.dp
 
@@ -36,13 +37,22 @@ val PLAYER_BAR_HEIGHT = 60.dp
 fun PlayerBar(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
+    onShowSnackBar: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isShowPlayer by viewModel.isShowPlayer.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is PlayerUiEffect.ShowToast -> onShowSnackBar(effect.message)
+            }
+        }
+    }
+
     when (val s = state) {
         is PlayerUiState.Idle -> {
-            // Do nothing
+
         }
 
         is PlayerUiState.Ready -> {
@@ -50,7 +60,7 @@ fun PlayerBar(
             val context = LocalContext.current
             LaunchedEffect(s.nowPlaying.imageUrl) {
                 val color = extractDominantColorFromUrl(context, s.nowPlaying.imageUrl)
-                viewModel.setDominantColor(color)
+                viewModel.sendIntent(PlayerUiIntent.SetDominantColor(color))
             }
 
             PlayerBar(
@@ -61,19 +71,27 @@ fun PlayerBar(
                 isFavorite = s.isFavorite,
                 dominantColor = s.dominantColor,
                 actions = PlayerBarActions(
-                    onFavorite = viewModel::onFavorite,
-                    onPlayOrPause = viewModel::onPlayOrPause,
-                    onProgress = viewModel::onProgress,
+                    onFavorite = {
+                        viewModel.sendIntent(PlayerUiIntent.Favorite)
+                    },
+                    onPlayOrPause = {
+                        viewModel.sendIntent(PlayerUiIntent.PlayOrPause)
+                    },
+                    onProgress = { position ->
+                        viewModel.sendIntent(PlayerUiIntent.Progress(position))
+                    },
                 ),
                 onExpand = {
-                    viewModel.showPlayer(true)
+                    viewModel.sendIntent(PlayerUiIntent.ShowPlayer(true))
                 },
             )
         }
     }
 
     if (isShowPlayer) {
-        PlayerBottomSheet()
+        PlayerBottomSheet(
+            onShowSnackBar = onShowSnackBar,
+        )
     }
 }
 

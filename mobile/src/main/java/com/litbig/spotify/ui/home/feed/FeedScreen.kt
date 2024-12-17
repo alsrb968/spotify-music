@@ -5,10 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +18,7 @@ import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewFeedCollectionUiModels
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 @Composable
@@ -28,9 +26,20 @@ fun FeedScreen(
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = hiltViewModel(),
     onAlbumSelected: (String) -> Unit,
+    onShowSnackBar: (String) -> Unit,
 ) {
-
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is FeedUiEffect.NavigateToAlbumDetail -> onAlbumSelected(effect.albumId)
+                is FeedUiEffect.NavigateToArtistDetail -> Timber.i("NavigateToArtistDetail")
+                is FeedUiEffect.ShowMore -> Timber.i("ShowMore")
+                is FeedUiEffect.ShowToast -> onShowSnackBar(effect.message)
+            }
+        }
+    }
 
     when (val s = state) {
         is FeedUiState.Loading -> {
@@ -41,7 +50,15 @@ fun FeedScreen(
             FeedScreen(
                 modifier = modifier,
                 feedCollections = s.feedCollections,
-                onAlbumSelected = onAlbumSelected
+                onAlbum = { albumId ->
+                    viewModel.sendIntent(FeedUiIntent.SelectAlbum(albumId))
+                },
+                onArtist = { artistId ->
+                    viewModel.sendIntent(FeedUiIntent.SelectArtist(artistId))
+                },
+                onMore = {
+                    viewModel.sendIntent(FeedUiIntent.ShowMore(it))
+                }
             )
         }
     }
@@ -51,7 +68,9 @@ fun FeedScreen(
 fun FeedScreen(
     modifier: Modifier = Modifier,
     feedCollections: List<FeedCollectionUiModel>,
-    onAlbumSelected: (String) -> Unit
+    onAlbum: (String) -> Unit,
+    onArtist: (String) -> Unit,
+    onMore: (FeedCollectionUiModel) -> Unit,
 ) {
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -74,13 +93,13 @@ fun FeedScreen(
                 val feedCollection = feedCollections[index]
                 FeedCollection(
                     feedCollection = feedCollection,
-                    onAlbum = onAlbumSelected,
-                    onMore = { Timber.i("onMore") }
+                    onAlbum = onAlbum,
+                    onArtist = onArtist,
+                    onMore = {
+                        onMore(feedCollection)
+                    }
                 )
             }
-//            item {
-//                Spacer(modifier = Modifier.height(BOTTOM_BAR_HEIGHT))
-//            }
         }
     }
 }
@@ -135,7 +154,9 @@ fun FeedScreenPreview() {
     SpotifyTheme {
         FeedScreen(
             feedCollections = PreviewFeedCollectionUiModels,
-            onAlbumSelected = {}
+            onAlbum = {},
+            onArtist = {},
+            onMore = {},
         )
     }
 }

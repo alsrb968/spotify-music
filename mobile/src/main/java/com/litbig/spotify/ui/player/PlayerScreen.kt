@@ -41,6 +41,7 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewTrackUiModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
@@ -48,6 +49,7 @@ import kotlinx.coroutines.launch
 fun PlayerBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
+    onShowSnackBar: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -57,7 +59,7 @@ fun PlayerBottomSheet(
     ModalBottomSheet(
         modifier = modifier,
         onDismissRequest = {
-            viewModel.showPlayer(false)
+            viewModel.sendIntent(PlayerUiIntent.ShowPlayer(false))
         },
         sheetState = sheetState,
         sheetMaxWidth = LocalConfiguration.current.screenWidthDp.dp,
@@ -71,9 +73,10 @@ fun PlayerBottomSheet(
             onCollapse = {
                 coroutineScope.launch {
                     sheetState.hide()
-                    viewModel.showPlayer(false)
+                    viewModel.sendIntent(PlayerUiIntent.ShowPlayer(false))
                 }
-            }
+            },
+            onShowSnackBar = onShowSnackBar
         )
     }
 }
@@ -83,8 +86,17 @@ fun PlayerScreen(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
     onCollapse: () -> Unit,
+    onShowSnackBar: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is PlayerUiEffect.ShowToast -> onShowSnackBar(effect.message)
+            }
+        }
+    }
 
     when (val s = state) {
         is PlayerUiState.Idle -> {
@@ -96,7 +108,7 @@ fun PlayerScreen(
             val context = LocalContext.current
             LaunchedEffect(s.nowPlaying.imageUrl) {
                 val color = extractDominantColorFromUrl(context, s.nowPlaying.imageUrl)
-                viewModel.setDominantColor(color)
+                viewModel.sendIntent(PlayerUiIntent.SetDominantColor(color))
             }
 
             PlayerScreen(
@@ -109,16 +121,34 @@ fun PlayerScreen(
                 isFavorite = s.isFavorite,
                 dominantColor = s.dominantColor,
                 actions = PlayerScreenActions(
-                    isFavorite = viewModel::isFavoriteTrack,
-                    onFavorite = viewModel::onFavorite,
-                    onFavoriteIndex = viewModel::onFavoriteIndex,
-                    onPlayOrPause = viewModel::onPlayOrPause,
-                    onPlayIndex = viewModel::onPlayIndex,
-                    onPrevious = viewModel::onPrevious,
-                    onNext = viewModel::onNext,
-                    onShuffle = viewModel::onShuffle,
-                    onRepeat = viewModel::onRepeat,
-                    onProgress = viewModel::onProgress
+                    isFavorite = { flowOf(false)/*viewModel::isFavoriteTrack*/ },
+                    onFavorite = {
+                        viewModel.sendIntent(PlayerUiIntent.Favorite)
+                    },
+                    onFavoriteIndex = { index ->
+                        viewModel.sendIntent(PlayerUiIntent.FavoriteIndex(index))
+                    },
+                    onPlayOrPause = {
+                        viewModel.sendIntent(PlayerUiIntent.PlayOrPause)
+                    },
+                    onPlayIndex = { index ->
+                        viewModel.sendIntent(PlayerUiIntent.PlayIndex(index))
+                    },
+                    onPrevious = {
+                        viewModel.sendIntent(PlayerUiIntent.Previous)
+                    },
+                    onNext = {
+                        viewModel.sendIntent(PlayerUiIntent.Next)
+                    },
+                    onShuffle = {
+                        viewModel.sendIntent(PlayerUiIntent.Shuffle)
+                    },
+                    onRepeat = {
+                        viewModel.sendIntent(PlayerUiIntent.Repeat)
+                    },
+                    onProgress = { position ->
+                        viewModel.sendIntent(PlayerUiIntent.Progress(position))
+                    },
                 ),
                 onCollapse = onCollapse,
             )

@@ -33,6 +33,7 @@ fun FeedCollection(
     modifier: Modifier = Modifier,
     feedCollection: FeedCollectionUiModel,
     onAlbum: (String) -> Unit,
+    onArtist: (String) -> Unit,
     onMore: () -> Unit
 ) {
     Column(
@@ -75,7 +76,10 @@ fun FeedCollection(
                 FeedItem(
                     shape = if (feed.type == "artist") CircleShape else RoundedCornerShape(16.dp),
                     feed = feed,
-                    onClick = { onAlbum(feed.id) }
+                    onClick = {
+                        if (feed.type == "artist") onArtist(feed.id)
+                        else onAlbum(feed.id)
+                    }
                 )
             }
         }
@@ -133,6 +137,7 @@ fun FeedCollectionPreview() {
         FeedCollection(
             feedCollection = PreviewFeedCollectionUiModel,
             onAlbum = {},
+            onArtist = {},
             onMore = {}
         )
     }

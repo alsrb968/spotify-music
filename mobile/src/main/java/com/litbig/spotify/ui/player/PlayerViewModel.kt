@@ -36,6 +36,24 @@ sealed interface PlayerUiState {
     ) : PlayerUiState
 }
 
+sealed interface PlayerUiIntent {
+    data class PlayIndex(val index: Int) : PlayerUiIntent
+    object PlayOrPause : PlayerUiIntent
+    object Next : PlayerUiIntent
+    object Previous : PlayerUiIntent
+    data class Progress(val position: Long) : PlayerUiIntent
+    object Shuffle : PlayerUiIntent
+    object Repeat : PlayerUiIntent
+    object Favorite : PlayerUiIntent
+    data class FavoriteIndex(val index: Int) : PlayerUiIntent
+    data class SetDominantColor(val color: Color) : PlayerUiIntent
+    data class ShowPlayer(val isShow: Boolean) : PlayerUiIntent
+}
+
+sealed interface PlayerUiEffect {
+    data class ShowToast(val message: String) : PlayerUiEffect
+}
+
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     @FakePlayerRepository private val playerRepository: PlayerRepository,
@@ -122,17 +140,52 @@ class PlayerViewModel @Inject constructor(
         initialValue = PlayerUiState.Idle
     )
 
+    private val _intent = MutableSharedFlow<PlayerUiIntent>(extraBufferCapacity = 1)
+
+    private val _effect = MutableSharedFlow<PlayerUiEffect>(extraBufferCapacity = 1)
+    val effect: SharedFlow<PlayerUiEffect> = _effect
+
     private var _nowPlaying: TrackUiModel? = null
     private var _playList: List<TrackUiModel> = emptyList()
     private var _isPlaying = false
     private var _isShuffle = false
     private var _repeatMode = 0
 
-    fun onPlayIndex(index: Int) {
+    init {
+        handleIntents()
+    }
+
+    private fun handleIntents() {
+        viewModelScope.launch {
+            _intent.collectLatest { intent ->
+                when (intent) {
+                    is PlayerUiIntent.PlayIndex -> onPlayIndex(intent.index)
+                    is PlayerUiIntent.PlayOrPause -> onPlayOrPause()
+                    is PlayerUiIntent.Next -> onNext()
+                    is PlayerUiIntent.Previous -> onPrevious()
+                    is PlayerUiIntent.Progress -> onProgress(intent.position)
+                    is PlayerUiIntent.Shuffle -> onShuffle()
+                    is PlayerUiIntent.Repeat -> onRepeat()
+                    is PlayerUiIntent.Favorite -> onFavorite()
+                    is PlayerUiIntent.FavoriteIndex -> onFavoriteIndex(intent.index)
+                    is PlayerUiIntent.SetDominantColor -> setDominantColor(intent.color)
+                    is PlayerUiIntent.ShowPlayer -> showPlayer(intent.isShow)
+                }
+            }
+        }
+    }
+
+    fun sendIntent(intent: PlayerUiIntent) {
+        viewModelScope.launch {
+            _intent.emit(intent)
+        }
+    }
+
+    private fun onPlayIndex(index: Int) {
         playerRepository.playIndex(index)
     }
 
-    fun onPlayOrPause() {
+    private fun onPlayOrPause() {
         if (_isPlaying) {
             playerRepository.pause()
         } else {
@@ -140,27 +193,27 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun onNext() {
+    private fun onNext() {
         playerRepository.next()
     }
 
-    fun onPrevious() {
+    private fun onPrevious() {
         playerRepository.previous()
     }
 
-    fun onProgress(position: Long) {
+    private fun onProgress(position: Long) {
         playerRepository.seekTo(position)
     }
 
-    fun onShuffle() {
+    private fun onShuffle() {
         playerRepository.setShuffle(!_isShuffle)
     }
 
-    fun onRepeat() {
+    private fun onRepeat() {
         playerRepository.setRepeat((_repeatMode + 1) % 3)
     }
 
-    fun onFavorite() {
+    private fun onFavorite() {
         viewModelScope.launch {
             _nowPlaying?.let {
                 toggleFavoriteUseCase.toggleFavoriteTrack(
@@ -171,7 +224,7 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun onFavoriteIndex(index: Int) {
+    private fun onFavoriteIndex(index: Int) {
         viewModelScope.launch {
             _playList[index].let {
                 toggleFavoriteUseCase.toggleFavoriteTrack(
@@ -182,15 +235,15 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun isFavoriteTrack(trackName: String): Flow<Boolean> {
+    private fun isFavoriteTrack(trackName: String): Flow<Boolean> {
         return isFavoriteUseCase.isFavoriteTrack(trackName)
     }
 
-    fun setDominantColor(color: Color) {
+    private fun setDominantColor(color: Color) {
         dominantColor.value = color.darkenColor(0.5f)
     }
 
-    fun showPlayer(isShow: Boolean) {
+    private fun showPlayer(isShow: Boolean) {
         _isShowPlayer.value = isShow
     }
 }

@@ -29,6 +29,20 @@ sealed interface AlbumDetailUiState {
     ) : AlbumDetailUiState
 }
 
+sealed interface AlbumDetailUiIntent {
+    data class PlayTrack(val trackId: String) : AlbumDetailUiIntent
+    data class PlayTracks(val trackIds: List<String>) : AlbumDetailUiIntent
+    data class AddTrack(val trackId: String) : AlbumDetailUiIntent
+    data class AddTracks(val trackIds: List<String>) : AlbumDetailUiIntent
+    data class ToggleFavoriteAlbum(val albumId: String) : AlbumDetailUiIntent
+    data class ToggleFavoriteTrack(val trackId: String) : AlbumDetailUiIntent
+    data class SetDominantColor(val color: Color) : AlbumDetailUiIntent
+}
+
+sealed interface AlbumDetailUiEffect {
+    data class ShowToast(val message: String) : AlbumDetailUiEffect
+}
+
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -60,35 +74,84 @@ class AlbumDetailViewModel @Inject constructor(
         initialValue = AlbumDetailUiState.Loading
     )
 
-    fun isFavoriteTrack(trackName: String): Flow<Boolean> {
-        return isFavoriteUseCase.isFavoriteTrack(trackName)
+    private val _intent = MutableSharedFlow<AlbumDetailUiIntent>(extraBufferCapacity = 1)
+
+    private val _effect = MutableSharedFlow<AlbumDetailUiEffect>(extraBufferCapacity = 1)
+    val effect: SharedFlow<AlbumDetailUiEffect> = _effect
+
+    init {
+        handleIntents()
     }
 
-    fun isFavoriteAlbum(albumName: String): Flow<Boolean> {
-        return isFavoriteUseCase.isFavoriteAlbum(albumName)
-    }
-
-    fun toggleFavoriteAlbum(albumName: String, imageUrl: String? = null) {
+    private fun handleIntents() {
         viewModelScope.launch {
-            toggleFavoriteUseCase.toggleFavoriteAlbum(albumName, imageUrl)
+            _intent.collectLatest { intent ->
+                when (intent) {
+                    is AlbumDetailUiIntent.PlayTrack -> playTrack(intent.trackId)
+                    is AlbumDetailUiIntent.PlayTracks -> playTracks(intent.trackIds)
+                    is AlbumDetailUiIntent.AddTrack -> addPlaylist(intent.trackId)
+                    is AlbumDetailUiIntent.AddTracks -> addPlaylists(intent.trackIds)
+                    is AlbumDetailUiIntent.ToggleFavoriteAlbum -> toggleFavoriteAlbum(intent.albumId)
+                    is AlbumDetailUiIntent.ToggleFavoriteTrack -> toggleFavoriteTrack(intent.trackId)
+                    is AlbumDetailUiIntent.SetDominantColor -> setDominantColor(intent.color)
+                }
+            }
         }
     }
 
-    fun play(trackId: String) {
+    fun sendIntent(intent: AlbumDetailUiIntent) {
+        viewModelScope.launch {
+            _intent.emit(intent)
+        }
+    }
+
+    fun isFavoriteTrack(trackId: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteTrack(trackId)
+    }
+
+    fun isFavoriteAlbum(albumId: String): Flow<Boolean> {
+        return isFavoriteUseCase.isFavoriteAlbum(albumId)
+    }
+
+    private fun playTrack(trackId: String) {
         Timber.w("play trackId: $trackId")
         playerRepository.play(trackId)
     }
 
-    fun play(trackIdList: List<String>) {
+    private fun playTracks(trackIdList: List<String>) {
         Timber.w("play trackIdList: $trackIdList")
         playerRepository.play(trackIdList)
     }
 
-    fun addPlaylist(trackIdList: List<String>) {
+    private fun addPlaylist(trackId: String) {
+        playerRepository.addPlayList(trackId)
+    }
+
+    private fun addPlaylists(trackIdList: List<String>) {
         playerRepository.addPlayLists(trackIdList)
     }
 
-    fun setDominantColor(color: Color) {
+    private fun toggleFavoriteAlbum(albumId: String) {
+        viewModelScope.launch {
+            if (toggleFavoriteUseCase.toggleFavoriteAlbum(albumId, null)) {
+                _effect.emit(AlbumDetailUiEffect.ShowToast("Added to favorite"))
+            } else {
+                _effect.emit(AlbumDetailUiEffect.ShowToast("Removed from favorite"))
+            }
+        }
+    }
+
+    private fun toggleFavoriteTrack(trackId: String) {
+        viewModelScope.launch {
+            if (toggleFavoriteUseCase.toggleFavoriteTrack(trackId, null)) {
+                _effect.emit(AlbumDetailUiEffect.ShowToast("Added to favorite"))
+            } else {
+                _effect.emit(AlbumDetailUiEffect.ShowToast("Removed from favorite"))
+            }
+        }
+    }
+
+    private fun setDominantColor(color: Color) {
         dominantColor.value = color.darkenColor(0.5f)
     }
 }

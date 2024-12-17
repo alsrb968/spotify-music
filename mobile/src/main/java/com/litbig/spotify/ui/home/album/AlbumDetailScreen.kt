@@ -49,6 +49,7 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewAlbumUiModel
 import com.litbig.spotify.ui.tooling.PreviewTrackUiModels
+import kotlinx.coroutines.flow.collectLatest
 import kotlin.time.Duration.Companion.milliseconds
 
 private val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
@@ -59,8 +60,17 @@ fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
     navigateToBack: () -> Unit,
+    onShowSnackBar: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is AlbumDetailUiEffect.ShowToast -> onShowSnackBar(effect.message)
+            }
+        }
+    }
 
     when (val s = state) {
         is AlbumDetailUiState.Loading -> {
@@ -72,7 +82,7 @@ fun AlbumDetailScreen(
             val context = LocalContext.current
             LaunchedEffect(Unit) {
                 val dominantColor = extractDominantColorFromUrl(context, s.album.imageUrl)
-                viewModel.setDominantColor(dominantColor)
+                viewModel.sendIntent(AlbumDetailUiIntent.SetDominantColor(dominantColor))
             }
 
             AlbumDetailScreen(
@@ -80,7 +90,24 @@ fun AlbumDetailScreen(
                 album = s.album,
                 tracks = s.tracks,
                 playingTrackId = s.playingTrackId,
-                onPlayTracks = viewModel::play,
+                onPlayTrack = { trackId ->
+                    viewModel.sendIntent(AlbumDetailUiIntent.PlayTrack(trackId))
+                },
+                onPlayTracks = { trackIds ->
+                    viewModel.sendIntent(AlbumDetailUiIntent.PlayTracks(trackIds))
+                },
+                onAddTrack = { trackId ->
+                    viewModel.sendIntent(AlbumDetailUiIntent.AddTrack(trackId))
+                },
+                onAddTracks = { trackIds ->
+                    viewModel.sendIntent(AlbumDetailUiIntent.AddTracks(trackIds))
+                },
+                onToggleFavoriteAlbum = { albumId ->
+                    viewModel.sendIntent(AlbumDetailUiIntent.ToggleFavoriteAlbum(albumId))
+                },
+                onToggleFavoriteTrack = { trackId ->
+                    viewModel.sendIntent(AlbumDetailUiIntent.ToggleFavoriteTrack(trackId))
+                },
                 navigateToBack = navigateToBack
             )
         }
@@ -93,7 +120,12 @@ fun AlbumDetailScreen(
     album: AlbumUiModel,
     tracks: List<TrackUiModel>?,
     playingTrackId: String?,
+    onPlayTrack: (String) -> Unit,
     onPlayTracks: (List<String>) -> Unit,
+    onAddTrack: (String) -> Unit,
+    onAddTracks: (List<String>) -> Unit,
+    onToggleFavoriteAlbum: (String) -> Unit,
+    onToggleFavoriteTrack: (String) -> Unit,
     navigateToBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -239,16 +271,6 @@ private fun ExpandedTopBar(
     }
 }
 
-@DevicePreviews
-@Composable
-fun ExpandedTopBarPreview() {
-    SpotifyTheme {
-        ExpandedTopBar(
-            imageUrl = null,
-        )
-    }
-}
-
 @Composable
 private fun CollapsedTopBar(
     modifier: Modifier = Modifier,
@@ -278,23 +300,6 @@ private fun CollapsedTopBar(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun CollapsedTopBarPreview() {
-    SpotifyTheme {
-        Column {
-            CollapsedTopBar(
-                albumName = "Album Name",
-                progress = 1f
-            )
-            CollapsedTopBar(
-                albumName = "Album Name",
-                progress = 0f
-            )
-        }
     }
 }
 
@@ -450,7 +455,12 @@ fun AlbumDetailScreenPreview() {
             album = PreviewAlbumUiModel,
             tracks = PreviewTrackUiModels,
             playingTrackId = null,
+            onPlayTrack = {},
             onPlayTracks = {},
+            onAddTrack = {},
+            onAddTracks = {},
+            onToggleFavoriteAlbum = {},
+            onToggleFavoriteTrack = {},
             navigateToBack = {}
         )
     }

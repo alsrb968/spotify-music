@@ -22,6 +22,19 @@ sealed interface FeedUiState {
     ) : FeedUiState
 }
 
+sealed interface FeedUiIntent {
+    data class SelectAlbum(val albumId: String) : FeedUiIntent
+    data class SelectArtist(val artistId: String) : FeedUiIntent
+    data class ShowMore(val feedCollection: FeedCollectionUiModel) : FeedUiIntent
+}
+
+sealed interface FeedUiEffect {
+    data class NavigateToAlbumDetail(val albumId: String) : FeedUiEffect
+    data class NavigateToArtistDetail(val artistId: String) : FeedUiEffect
+    data class ShowMore(val feedCollection: FeedCollectionUiModel) : FeedUiEffect
+    data class ShowToast(val message: String) : FeedUiEffect
+}
+
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val getNewAlbumReleasesUseCase: GetNewAlbumReleasesUseCase,
@@ -32,7 +45,23 @@ class FeedViewModel @Inject constructor(
     private val feedCollections =
         MutableStateFlow<List<FeedCollectionUiModel>>(mutableListOf())
 
+    val state: StateFlow<FeedUiState> = feedCollections.flatMapLatest {
+        flow {
+            emit(FeedUiState.Ready(it))
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = FeedUiState.Loading
+    )
+
+    private val _intent = MutableSharedFlow<FeedUiIntent>(extraBufferCapacity = 1)
+
+    private val _effect = MutableSharedFlow<FeedUiEffect>(extraBufferCapacity = 1)
+    val effect: SharedFlow<FeedUiEffect> = _effect
+
     init {
+        handleIntents()
         viewModelScope.launch {
             launch {
                 getNewAlbumReleases().collectLatest {
@@ -71,15 +100,23 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    val state: StateFlow<FeedUiState> = feedCollections.flatMapLatest {
-        flow {
-            emit(FeedUiState.Ready(it))
+    private fun handleIntents() {
+        viewModelScope.launch {
+            _intent.collectLatest { intent ->
+                when (intent) {
+                    is FeedUiIntent.SelectAlbum -> selectAlbum(intent.albumId)
+                    is FeedUiIntent.SelectArtist -> selectArtist(intent.artistId)
+                    is FeedUiIntent.ShowMore -> showMore(intent.feedCollection)
+                }
+            }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = FeedUiState.Loading
-    )
+    }
+
+    fun sendIntent(intent: FeedUiIntent) {
+        viewModelScope.launch {
+            _intent.emit(intent)
+        }
+    }
 
     private fun getNewAlbumReleases(): Flow<FeedCollectionUiModel> {
         return flow {
@@ -130,6 +167,26 @@ class FeedViewModel @Inject constructor(
             }.let {
                 emit(it)
             }
+        }
+    }
+
+    private fun selectAlbum(albumId: String) {
+        viewModelScope.launch {
+            _effect.emit(FeedUiEffect.NavigateToAlbumDetail(albumId))
+        }
+    }
+
+    private fun selectArtist(artistId: String) {
+        viewModelScope.launch {
+            _effect.emit(FeedUiEffect.NavigateToArtistDetail(artistId))
+            _effect.emit(FeedUiEffect.ShowToast("Artist not implemented"))
+        }
+    }
+
+    private fun showMore(feedCollection: FeedCollectionUiModel) {
+        viewModelScope.launch {
+            _effect.emit(FeedUiEffect.ShowMore(feedCollection))
+            _effect.emit(FeedUiEffect.ShowToast("Show more not implemented"))
         }
     }
 }
