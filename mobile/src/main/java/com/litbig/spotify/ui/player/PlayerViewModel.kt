@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.litbig.spotify.ui.player
 
 import androidx.compose.ui.graphics.Color
@@ -8,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.data.di.RepositoryModule.FakePlayerRepository
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.extension.combine
+import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.repository.PlayerRepository
 import com.litbig.spotify.core.domain.usecase.GetArtistDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.GetSeveralTrackDetailsUseCase
@@ -16,7 +15,6 @@ import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,70 +48,64 @@ class PlayerViewModel @Inject constructor(
     private val _isShowPlayer: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isShowPlayer: StateFlow<Boolean> = _isShowPlayer
 
-    private val trackList: Flow<List<TrackUiModel>> = playerRepository.mediaItems.flatMapLatest { items ->
-        flow {
-            emit(getSeveralTrackDetailsUseCase(items.joinToString(",")))
-        }.map { trackList ->
-            trackList.map {
-                TrackUiModel(
-                    id = it.id,
-                    imageUrl = it.album?.images?.firstOrNull()?.url,
-                    name = it.name,
-                    artists = it.artists.joinToString { artist -> artist.name },
-                    duration = it.durationMs.toLong(),
-                )
+    private val currArtistDetails = MutableStateFlow<ArtistDetails?>(null)
+    private val track = MutableStateFlow<TrackUiModel?>(null)
+
+    private val trackList: Flow<List<TrackUiModel>> = combine(
+        playerRepository.mediaItems,
+        playerRepository.currentMediaItem,
+    ) { items, item ->
+        if (items.isEmpty()) return@combine emptyList()
+
+        val trackDetailsList = getSeveralTrackDetailsUseCase(items.joinToString(","))
+
+        if (item != null) {
+            val index = items.indexOfFirst { it == item }
+            val trackDetails = trackDetailsList.getOrNull(index)
+            currArtistDetails.value = trackDetails?.artists?.firstOrNull()?.let {
+                getArtistDetailsUseCase(it.id)
             }
+            track.value = trackDetails?.let { TrackUiModel.from(it) }
         }
 
+        trackDetailsList.map { TrackUiModel.from(it) }
     }
+
     private val dominantColor = MutableStateFlow(Color.Transparent)
 
     val state: StateFlow<PlayerUiState> = combine(
-        playerRepository.currentMediaItem,
-        playerRepository.mediaItems,
+        track,
+        trackList,
+        currArtistDetails,
         playerRepository.currentPosition,
         playerRepository.isPlaying,
         playerRepository.isShuffle,
         playerRepository.repeatMode,
         dominantColor,
-    ) { currItem, items, currPos, isPlay, isShuf, repeat, domiColor ->
+    ) { currItem, items, artistDetails, currPos, isPlay, isShuf, repeat, domiColor ->
         if (currItem == null) {
             PlayerUiState.Idle
         } else {
-            val index = items.indexOfFirst { it == currItem }
-            val trackList = getSeveralTrackDetailsUseCase(items.joinToString(","))
-            val track = trackList[index]
-            val nowPlaying = TrackUiModel(
-                id = track.id,
-                imageUrl = track.album?.images?.firstOrNull()?.url,
-                name = track.name,
-                artists = track.artists.joinToString { artist -> artist.name },
-                duration = track.durationMs.toLong(),
-            )
-            val playList = trackList.map {
-                TrackUiModel(
-                    id = it.id,
-                    imageUrl = it.album?.images?.firstOrNull()?.url,
-                    name = it.name,
-                    artists = it.artists.joinToString { artist -> artist.name },
-                    duration = it.durationMs.toLong(),
-                )
-            }
-            val isFavorite = isFavoriteUseCase.isFavoriteTrack(track.id).first()
-            val artistDetails = getArtistDetailsUseCase(track.artists.first().id)
-            val artist = ArtistUiModel.from(artistDetails)
-            val artistNames = track.artists.map { it.name }
+            val index = items.indexOfFirst { it.id == currItem.id }
+            val isFavorite = isFavoriteUseCase.isFavoriteTrack(currItem.id).first()
 
-            _nowPlaying = nowPlaying
-            _playList = playList
+            if (artistDetails == null) {
+                return@combine PlayerUiState.Idle
+            }
+
+            val artist = ArtistUiModel.from(artistDetails)
+            val artistNames = currItem.artists.split(",")
+
+            _nowPlaying = currItem
+            _playList = items
             _isPlaying = isPlay
             _isShuffle = isShuf
             _repeatMode = repeat
 
             PlayerUiState.Ready(
                 index,
-                nowPlaying,
-                playList,
+                currItem,
+                items,
                 currPos,
                 isPlay,
                 isShuf,
