@@ -36,7 +36,6 @@ val PLAYER_BAR_HEIGHT = 60.dp
 fun PlayerBar(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
-//    onExpand: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isShowPlayer by viewModel.isShowPlayer.collectAsStateWithLifecycle()

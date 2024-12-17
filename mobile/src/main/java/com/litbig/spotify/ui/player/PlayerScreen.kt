@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,7 @@ import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewTrackUiModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 
 @Composable
 fun PlayerBottomSheet(
@@ -50,6 +52,7 @@ fun PlayerBottomSheet(
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+    val coroutineScope = rememberCoroutineScope()
 
     ModalBottomSheet(
         modifier = modifier,
@@ -66,7 +69,10 @@ fun PlayerBottomSheet(
     ) {
         PlayerScreen(
             onCollapse = {
-                viewModel.showPlayer(false)
+                coroutineScope.launch {
+                    sheetState.hide()
+                    viewModel.showPlayer(false)
+                }
             }
         )
     }
