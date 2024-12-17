@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.litbig.spotify.ui.home.feed
 
 import androidx.lifecycle.ViewModel
@@ -8,7 +10,9 @@ import com.litbig.spotify.core.domain.usecase.SearchArtistUseCase
 import com.litbig.spotify.ui.models.FeedCollectionUiModel
 import com.litbig.spotify.ui.models.FeedUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface FeedUiState {
@@ -25,41 +29,52 @@ class FeedViewModel @Inject constructor(
     private val searchArtistUseCase: SearchArtistUseCase,
 ) : ViewModel() {
 
-    val state: StateFlow<FeedUiState> = combine(
-        getNewAlbumReleases(),
-        getArtistFeeds(
-            "NewJeans",
-            "QWER",
-            "IVE",
-            "KISS OF LIFE",
-            "BTS",
-            "BLACKPINK",
-            "TWICE",
-            "IU",
-            "Red Velvet",
-            "MAMAMOO"
-        ),
-        getAlbumFeedsOfArtists(
-            "Linkin Park",
-            "ROSE",
-            "Aespa",
-            "Madison Beer",
-            "Sabrina Carpenter",
-            "Ariana Grande",
-            "Taylor Swift",
-            "Selena Gomez",
-            "Dua Lipa",
-            "Olivia Rodrigo",
-            "Billie Eilish"
-        ),
-    ) { newAlbumFeed, artistsFeed, albumFeeds ->
-        FeedUiState.Ready(
-            feedCollections = mutableListOf<FeedCollectionUiModel>().apply {
-                add(newAlbumFeed)
-                add(artistsFeed)
-                addAll(albumFeeds)
+    private val feedCollections =
+        MutableStateFlow<List<FeedCollectionUiModel>>(mutableListOf())
+
+    init {
+        viewModelScope.launch {
+            launch {
+                getNewAlbumReleases().collectLatest {
+                    feedCollections.value += it
+                }
             }
-        )
+            launch {
+                getArtistFeeds(
+                    "NewJeans",
+                    "QWER",
+                    "IVE",
+                    "KISS OF LIFE",
+                    "BTS",
+                    "BLACKPINK",
+                    "TWICE",
+                    "IU",
+                    "Red Velvet",
+                    "MAMAMOO"
+                ).collectLatest {
+                    feedCollections.value += it
+                }
+            }
+            launch {
+                getAlbumFeedsOfArtists(
+                    "ROSE",
+                    "Aespa",
+                    "Madison Beer",
+                    "Ariana Grande",
+                    "Dua Lipa",
+                    "Olivia Rodrigo",
+                    "Billie Eilish"
+                ).collectLatest {
+                    feedCollections.value += it
+                }
+            }
+        }
+    }
+
+    val state: StateFlow<FeedUiState> = feedCollections.flatMapLatest {
+        flow {
+            emit(FeedUiState.Ready(it))
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
