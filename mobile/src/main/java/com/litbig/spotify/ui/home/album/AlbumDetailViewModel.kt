@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
-import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.home.HomeSection

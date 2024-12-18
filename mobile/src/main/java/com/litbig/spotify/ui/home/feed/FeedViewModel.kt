@@ -4,9 +4,9 @@ package com.litbig.spotify.ui.home.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsListOfArtistsUseCase
-import com.litbig.spotify.core.domain.usecase.GetNewAlbumReleasesUseCase
-import com.litbig.spotify.core.domain.usecase.SearchArtistUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsListOfArtistsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetNewAlbumReleasesUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.SearchArtistUseCase
 import com.litbig.spotify.ui.models.FeedCollectionUiModel
 import com.litbig.spotify.ui.models.FeedUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel

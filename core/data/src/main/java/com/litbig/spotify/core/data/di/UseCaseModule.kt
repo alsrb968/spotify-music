@@ -1,10 +1,12 @@
 package com.litbig.spotify.core.data.di
 
 import com.litbig.spotify.core.domain.repository.MusicRepository
+import com.litbig.spotify.core.domain.repository.SpotifyRepository
 import com.litbig.spotify.core.domain.repository.StorageRepository
 import com.litbig.spotify.core.domain.usecase.*
 import com.litbig.spotify.core.domain.usecase.favorite.*
 import com.litbig.spotify.core.domain.usecase.metadata.*
+import com.litbig.spotify.core.domain.usecase.spotify.*
 import com.litbig.spotify.core.domain.usecase.storage.AddStorageHashUseCase
 import com.litbig.spotify.core.domain.usecase.storage.GetStorageHashUseCase
 import dagger.Module
@@ -18,154 +20,102 @@ import javax.inject.Singleton
 object UseCaseModule {
     @Provides
     @Singleton
-    fun provideSyncMusicMetadataUseCase(
-        musicRepository: MusicRepository
-    ): SyncMetadataUseCase = SyncMetadataUseCase(
-        musicRepository
-    )
+    fun provideSyncMusicMetadataUseCase(repository: MusicRepository) =
+        SyncMetadataUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetMetadataUseCase(
-        musicRepository: MusicRepository
-    ): GetMetadataUseCase = GetMetadataUseCase(
-        musicRepository
-    )
+    fun provideGetMetadataUseCase(repository: MusicRepository) =
+        GetMetadataUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetMetadataByAlbumUseCase(
-        musicRepository: MusicRepository
-    ): GetMetadataByAlbumUseCase = GetMetadataByAlbumUseCase(
-        musicRepository
-    )
+    fun provideGetMetadataByAlbumUseCase(repository: MusicRepository) =
+        GetMetadataByAlbumUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetMetadataByArtistUseCase(
-        musicRepository: MusicRepository
-    ): GetMetadataByArtistUseCase = GetMetadataByArtistUseCase(
-        musicRepository
-    )
+    fun provideGetMetadataByArtistUseCase(repository: MusicRepository) =
+        GetMetadataByArtistUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetAlbumsUseCase(
-        musicRepository: MusicRepository
-    ): GetAlbumsUseCase = GetAlbumsUseCase(
-        musicRepository
-    )
+    fun provideGetAlbumsUseCase(repository: MusicRepository) =
+        GetAlbumsUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetArtistsUseCase(
-        musicRepository: MusicRepository
-    ): GetArtistsUseCase = GetArtistsUseCase(
-        musicRepository
-    )
+    fun provideGetArtistsUseCase(repository: MusicRepository) =
+        GetArtistsUseCase(repository)
+
+
+    // --- Favorite ---
+    @Provides
+    @Singleton
+    fun provideGetFavoritesUseCase(repository: MusicRepository) =
+        GetFavoritesUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideSearchUseCase(
-        musicRepository: MusicRepository
-    ): SearchUseCase = SearchUseCase(
-        musicRepository
-    )
+    fun provideIsFavoriteUseCase(repository: MusicRepository) =
+        IsFavoriteUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetNewAlbumReleasesUseCase(
-        musicRepository: MusicRepository
-    ): GetNewAlbumReleasesUseCase = GetNewAlbumReleasesUseCase(
-        musicRepository
-    )
+    fun provideToggleFavoriteUseCase(repository: MusicRepository) =
+        ToggleFavoriteUseCase(repository)
+
+
+    // --- Storage ---
+    @Provides
+    @Singleton
+    fun provideAddStorageHashUseCase(repository: StorageRepository) =
+        AddStorageHashUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetArtistDetailsUseCase(
-        musicRepository: MusicRepository
-    ): GetArtistDetailsUseCase = GetArtistDetailsUseCase(
-        musicRepository
-    )
+    fun provideGetStorageHashUseCase(repository: StorageRepository) =
+        GetStorageHashUseCase(repository)
+
+
+    // --- Spotify ---
+    @Provides
+    @Singleton
+    fun provideSearchUseCase(repository: SpotifyRepository) =
+        SearchUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetAlbumDetailsUseCase(
-        musicRepository: MusicRepository
-    ): GetAlbumDetailsUseCase = GetAlbumDetailsUseCase(
-        musicRepository
-    )
+    fun provideGetNewAlbumReleasesUseCase(repository: SpotifyRepository) =
+        GetNewAlbumReleasesUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetSeveralTrackDetailsUseCase(
-        musicRepository: MusicRepository
-    ): GetSeveralTrackDetailsUseCase = GetSeveralTrackDetailsUseCase(
-        musicRepository
-    )
+    fun provideGetArtistDetailsUseCase(repository: SpotifyRepository) =
+        GetArtistDetailsUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideSearchArtistUseCase(
-        musicRepository: MusicRepository
-    ): SearchArtistUseCase = SearchArtistUseCase(
-        musicRepository
-    )
+    fun provideGetAlbumDetailsUseCase(repository: SpotifyRepository) =
+        GetAlbumDetailsUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetFavoritesUseCase(
-        musicRepository: MusicRepository
-    ): GetFavoritesUseCase = GetFavoritesUseCase(
-        musicRepository
-    )
+    fun provideGetSeveralTrackDetailsUseCase(repository: SpotifyRepository) =
+        GetSeveralTrackDetailsUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideIsFavoriteUseCase(
-        musicRepository: MusicRepository
-    ): IsFavoriteUseCase = IsFavoriteUseCase(
-        musicRepository
-    )
+    fun provideSearchArtistUseCase(repository: SpotifyRepository) =
+        SearchArtistUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideToggleFavoriteUseCase(
-        musicRepository: MusicRepository
-    ): ToggleFavoriteUseCase = ToggleFavoriteUseCase(
-        musicRepository
-    )
+    fun provideGetAlbumDetailsListOfArtistsUseCase(repository: SpotifyRepository) =
+        GetAlbumDetailsListOfArtistsUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideAddStorageHashUseCase(
-        storageRepository: StorageRepository
-    ): AddStorageHashUseCase = AddStorageHashUseCase(
-        storageRepository
-    )
-
-    @Provides
-    @Singleton
-    fun provideGetStorageHashUseCase(
-        storageRepository: StorageRepository
-    ): GetStorageHashUseCase = GetStorageHashUseCase(
-        storageRepository
-    )
-
-
-    @Provides
-    @Singleton
-    fun provideGetAlbumDetailsListOfArtistsUseCase(
-        musicRepository: MusicRepository
-    ): GetAlbumDetailsListOfArtistsUseCase = GetAlbumDetailsListOfArtistsUseCase(
-        musicRepository
-    )
-
-    @Provides
-    @Singleton
-    fun provideGetTopTrackDetailsListOfArtistsUseCase(
-        musicRepository: MusicRepository
-    ): GetTopTrackDetailsListOfArtistsUseCase = GetTopTrackDetailsListOfArtistsUseCase(
-        musicRepository
-    )
+    fun provideGetTopTrackDetailsListOfArtistsUseCase(repository: SpotifyRepository) =
+        GetTopTrackDetailsListOfArtistsUseCase(repository)
 }

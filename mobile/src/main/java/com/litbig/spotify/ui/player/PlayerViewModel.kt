@@ -7,8 +7,8 @@ import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.extension.combine
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
-import com.litbig.spotify.core.domain.usecase.GetArtistDetailsUseCase
-import com.litbig.spotify.core.domain.usecase.GetSeveralTrackDetailsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetArtistDetailsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetSeveralTrackDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.ui.models.ArtistUiModel

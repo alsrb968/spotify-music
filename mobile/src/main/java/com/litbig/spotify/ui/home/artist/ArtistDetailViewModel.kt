@@ -4,16 +4,15 @@ import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsListOfArtistsUseCase
-import com.litbig.spotify.core.domain.usecase.GetArtistDetailsUseCase
-import com.litbig.spotify.core.domain.usecase.GetTopTrackDetailsListOfArtistsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsListOfArtistsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetArtistDetailsUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetTopTrackDetailsListOfArtistsUseCase
 import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 sealed interface ArtistDetailUiState {
