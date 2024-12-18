@@ -12,11 +12,11 @@ class PlayerRepositoryImpl @Inject constructor(
     private val playerDataSource: PlayerDataSource,
 ) : PlayerRepository {
     override fun play(path: String) {
-        playerDataSource.play(Uri.fromFile(File(path)))
+        playerDataSource.play(path)
     }
 
     override fun play(paths: List<String>, indexToPlay: Int?) {
-        playerDataSource.play(paths.map { Uri.fromFile(File(it)) }, indexToPlay)
+        playerDataSource.play(paths, indexToPlay)
     }
 
     override fun playIndex(index: Int) {
@@ -56,11 +56,11 @@ class PlayerRepositoryImpl @Inject constructor(
     }
 
     override fun addPlayList(path: String) {
-        playerDataSource.addPlayList(Uri.fromFile(File(path)))
+        playerDataSource.addPlayList(path)
     }
 
     override fun addPlayLists(paths: List<String>) {
-        playerDataSource.addPlayLists(paths.map { Uri.fromFile(File(it)) })
+        playerDataSource.addPlayLists(paths)
     }
 
     override fun removePlayList(index: Int) {
@@ -72,16 +72,10 @@ class PlayerRepositoryImpl @Inject constructor(
     }
 
     override val mediaItems: Flow<List<String>>
-        get() = playerDataSource.mediaItems.map { itemList ->
-            itemList.mapNotNull { item ->
-                item.localConfiguration?.uri?.path
-            }
-        }
+        get() = playerDataSource.mediaItems
 
     override val currentMediaItem: Flow<String?>
-        get() = playerDataSource.currentMediaItem.map { item ->
-            item?.localConfiguration?.uri?.path
-        }
+        get() = playerDataSource.currentMediaItem
 
     override val currentPosition: Flow<Long>
         get() = playerDataSource.currentPosition

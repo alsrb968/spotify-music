@@ -105,6 +105,12 @@ class SpotifyAppState(
         }
     }
 
+    fun navigateToArtist(artistId: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(HomeSection.Artist.createRoute(Uri.encode(artistId)))
+        }
+    }
+
     fun navigateBack() {
         navController.popBackStack()
     }

@@ -7,12 +7,14 @@ import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 interface PlayerDataSource {
-    fun play(uri: Uri)
-    fun play(uris: List<Uri>, indexToPlay: Int? = null)
+    fun play(path: String)
+    fun play(paths: List<String>, indexToPlay: Int? = null)
     fun playIndex(index: Int)
     fun pause()
     fun resume()
@@ -22,15 +24,14 @@ interface PlayerDataSource {
     fun seekTo(position: Long)
     fun setShuffle(isShuffle: Boolean)
     fun setRepeat(repeatMode: Int)
-    fun addPlayList(uri: Uri)
-    fun addPlayLists(uris: List<Uri>)
+    fun addPlayList(path: String)
+    fun addPlayLists(paths: List<String>)
     fun removePlayList(index: Int)
     fun clearPlayList()
     fun release()
 
-    val mediaItems: Flow<List<MediaItem>>
-    val currentMediaItem: Flow<MediaItem?>
-    val currentMediaMetadata: Flow<MediaMetadata?>
+    val mediaItems: Flow<List<String>>
+    val currentMediaItem: Flow<String?>
     val currentPosition: Flow<Long>
     val playbackState: Flow<Int>
     val isPlaying: Flow<Boolean>
@@ -41,12 +42,11 @@ interface PlayerDataSource {
 class PlayerDataSourceImpl @Inject constructor(
     private val exoPlayer: ExoPlayer,
 ) : PlayerDataSource {
-    
+
     private var positionUpdateJob: Job? = null
 
-    private val _mediaItems = MutableStateFlow<List<MediaItem>>(emptyList())
-    private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
-    private val _currentMediaMetadata = MutableStateFlow<MediaMetadata?>(null)
+    private val _mediaItems = MutableStateFlow<List<String>>(emptyList())
+    private val _currentMediaItem = MutableStateFlow<String?>(null)
     private val _currentPosition = MutableStateFlow(0L)
     private val _playbackState = MutableStateFlow(Player.STATE_IDLE)
     private val _isPlaying = MutableStateFlow(false)
@@ -76,7 +76,9 @@ class PlayerDataSourceImpl @Inject constructor(
             for (i in 0 until exoPlayer.mediaItemCount) {
                 items.add(exoPlayer.getMediaItemAt(i))
             }
-            _mediaItems.value = items
+            _mediaItems.value = items.mapNotNull { item ->
+                item.localConfiguration?.uri?.path
+            }
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -99,7 +101,7 @@ class PlayerDataSourceImpl @Inject constructor(
                 }
             }
 
-            _currentMediaItem.value = mediaItem
+            _currentMediaItem.value = mediaItem?.localConfiguration?.uri?.path
         }
 
         @UnstableApi
@@ -120,7 +122,6 @@ class PlayerDataSourceImpl @Inject constructor(
                         "trackNumber=${mediaMetadata.trackNumber}, " +
                         "totalTrackCount=${mediaMetadata.totalTrackCount}"
             )
-            _currentMediaMetadata.value = mediaMetadata
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -188,13 +189,15 @@ class PlayerDataSourceImpl @Inject constructor(
         exoPlayer.addListener(listener)
     }
 
-    override fun play(uri: Uri) {
+    override fun play(path: String) {
+        val uri = Uri.fromFile(File(path))
         exoPlayer.playWhenReady = true
         exoPlayer.setMediaItem(MediaItem.fromUri(uri))
         exoPlayer.prepare()
     }
 
-    override fun play(uris: List<Uri>, indexToPlay: Int?) {
+    override fun play(paths: List<String>, indexToPlay: Int?) {
+        val uris = paths.map { Uri.fromFile(File(it)) }
         exoPlayer.playWhenReady = true
         exoPlayer.setMediaItems(uris.map { MediaItem.fromUri(it) })
         indexToPlay?.let { exoPlayer.seekToDefaultPosition(it) }
@@ -251,11 +254,13 @@ class PlayerDataSourceImpl @Inject constructor(
         exoPlayer.repeatMode = repeatMode
     }
 
-    override fun addPlayList(uri: Uri) {
+    override fun addPlayList(path: String) {
+        val uri = Uri.fromFile(File(path))
         exoPlayer.addMediaItem(MediaItem.fromUri(uri))
     }
 
-    override fun addPlayLists(uris: List<Uri>) {
+    override fun addPlayLists(paths: List<String>) {
+        val uris = paths.map { Uri.fromFile(File(it)) }
         exoPlayer.addMediaItems(uris.map { MediaItem.fromUri(it) })
     }
 
@@ -272,14 +277,11 @@ class PlayerDataSourceImpl @Inject constructor(
         exoPlayer.removeListener(listener)
     }
 
-    override val mediaItems: Flow<List<MediaItem>>
+    override val mediaItems: Flow<List<String>>
         get() = _mediaItems
 
-    override val currentMediaItem: Flow<MediaItem?>
+    override val currentMediaItem: Flow<String?>
         get() = _currentMediaItem
-
-    override val currentMediaMetadata: Flow<MediaMetadata?>
-        get() = _currentMediaMetadata
 
     override val currentPosition: Flow<Long>
         get() = _currentPosition
@@ -295,4 +297,179 @@ class PlayerDataSourceImpl @Inject constructor(
 
     override val repeatMode: Flow<Int>
         get() = _repeatMode
+}
+
+class FakePlayerDataSourceImpl @Inject constructor(
+
+) : PlayerDataSource {
+
+    private val _mediaItems = MutableStateFlow<List<String>>(emptyList())
+    private val _currentMediaItem = MutableStateFlow<String?>(null)
+    private val _currentPosition = MutableStateFlow(0L)
+
+    /**
+     * IDLE: 1
+     * BUFFERING: 2
+     * READY: 3
+     * ENDED: 4
+     */
+    private val _playbackState = MutableStateFlow(Player.STATE_IDLE)
+    private val _isPlaying = MutableStateFlow(false)
+    private val _isShuffle = MutableStateFlow(false)
+
+    /**
+     * OFF: 0
+     * ONE: 1
+     * ALL: 2
+     */
+    private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            launch {
+                _isPlaying.collectLatest { isPlaying ->
+                    if (isPlaying) {
+                        startDurationEncounter()
+                    } else {
+                        stopDurationEncounter()
+                    }
+                }
+            }
+        }
+    }
+
+    private var positionUpdateJob: Job? = null
+
+    private fun startDurationEncounter() {
+        positionUpdateJob?.cancel()
+        positionUpdateJob = CoroutineScope(Dispatchers.Main).launch {
+            while (_isPlaying.value) {
+                delay(500)
+                _currentPosition.value += 500
+                if (_currentPosition.value >= DURATION * 1000) {
+                    val currentIndex = _mediaItems.value.indexOf(_currentMediaItem.value)
+                    if (currentIndex == _mediaItems.value.size - 1) {
+                        _isPlaying.value = false
+                    } else {
+                        next()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun stopDurationEncounter() {
+        positionUpdateJob?.cancel()
+    }
+
+    override fun play(path: String) {
+        _currentPosition.value = 0
+        _mediaItems.value = listOf(path)
+        _currentMediaItem.value = path
+        _isPlaying.value = true
+        _playbackState.value = Player.STATE_READY
+    }
+
+    override fun play(paths: List<String>, indexToPlay: Int?) {
+        _currentPosition.value = 0
+        _mediaItems.value = paths
+        _currentMediaItem.value = paths.getOrNull(indexToPlay ?: 0)
+        _isPlaying.value = true
+        _playbackState.value = Player.STATE_READY
+    }
+
+    override fun playIndex(index: Int) {
+        _currentPosition.value = 0
+        _currentMediaItem.value = _mediaItems.value.getOrNull(index)
+        _isPlaying.value = true
+        _playbackState.value = Player.STATE_READY
+    }
+
+    override fun pause() {
+        _isPlaying.value = false
+    }
+
+    override fun resume() {
+        _isPlaying.value = true
+    }
+
+    override fun stop() {
+        _mediaItems.value = emptyList()
+        _currentMediaItem.value = null
+        _isPlaying.value = false
+        _playbackState.value = 1
+    }
+
+    override fun next() {
+        _currentPosition.value = 0
+        val nextIndex = _mediaItems.value.indexOf(_currentMediaItem.value) + 1
+        _currentMediaItem.value = _mediaItems.value.getOrNull(nextIndex)
+    }
+
+    override fun previous() {
+        _currentPosition.value = 0
+        val previousIndex = _mediaItems.value.indexOf(_currentMediaItem.value) - 1
+        _currentMediaItem.value = _mediaItems.value.getOrNull(previousIndex)
+    }
+
+    override fun seekTo(position: Long) {
+        if (position in 0 until DURATION * 1000) {
+            _currentPosition.value = position
+        }
+    }
+
+    override fun setShuffle(isShuffle: Boolean) {
+        _isShuffle.value = isShuffle
+    }
+
+    override fun setRepeat(mode: Int) {
+        _repeatMode.value = mode
+    }
+
+    override fun addPlayList(path: String) {
+        _mediaItems.value += path
+    }
+
+    override fun addPlayLists(paths: List<String>) {
+        _mediaItems.value += paths
+    }
+
+    override fun removePlayList(index: Int) {
+        _mediaItems.value -= _mediaItems.value.getOrNull(index) ?: return
+    }
+
+    override fun clearPlayList() {
+        _mediaItems.value = emptyList()
+        _currentMediaItem.value = null
+        _isPlaying.value = false
+    }
+
+    override fun release() {
+
+    }
+
+    override val mediaItems: Flow<List<String>>
+        get() = _mediaItems
+
+    override val currentMediaItem: Flow<String?>
+        get() = _currentMediaItem
+
+    override val currentPosition: Flow<Long>
+        get() = _currentPosition
+
+    override val playbackState: Flow<Int>
+        get() = _playbackState
+
+    override val isPlaying: Flow<Boolean>
+        get() = _isPlaying
+
+    override val isShuffle: Flow<Boolean>
+        get() = _isShuffle
+
+    override val repeatMode: Flow<Int>
+        get() = _repeatMode
+
+    companion object {
+        private const val DURATION = 192 // 3m 12s
+    }
 }

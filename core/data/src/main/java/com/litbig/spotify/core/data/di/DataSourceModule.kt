@@ -11,6 +11,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -46,11 +47,25 @@ object DataSourceModule {
         spotifyApi
     )
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class ExoPlayerDataSource
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class FakePlayerDataSource
+
     @Provides
     @Singleton
-    fun providePlayerDataSource(
+    @ExoPlayerDataSource
+    fun provideExoPlayerDataSource(
         exoPlayer: ExoPlayer
     ): PlayerDataSource = PlayerDataSourceImpl(
         exoPlayer
     )
+
+    @Provides
+    @Singleton
+    @FakePlayerDataSource
+    fun provideFakePlayerDataSource(): PlayerDataSource = FakePlayerDataSourceImpl()
 }

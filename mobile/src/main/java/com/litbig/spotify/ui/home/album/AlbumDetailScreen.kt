@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowCircleDown
@@ -23,12 +21,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,12 +28,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
-import com.litbig.spotify.ui.components.TrackItem
+import com.litbig.spotify.ui.components.*
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.shared.Loading
@@ -52,14 +43,11 @@ import com.litbig.spotify.ui.tooling.PreviewTrackUiModels
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.time.Duration.Companion.milliseconds
 
-private val COLLAPSED_TOP_BAR_HEIGHT = 90.dp
-private val EXPANDED_TOP_BAR_HEIGHT = 400.dp
-
 @Composable
 fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
-    navigateToBack: () -> Unit,
+    navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -108,7 +96,7 @@ fun AlbumDetailScreen(
                 onToggleFavoriteTrack = { trackId ->
                     viewModel.sendIntent(AlbumDetailUiIntent.ToggleFavoriteTrack(trackId))
                 },
-                navigateToBack = navigateToBack
+                navigateBack = navigateBack
             )
         }
     }
@@ -126,7 +114,7 @@ fun AlbumDetailScreen(
     onAddTracks: (List<String>) -> Unit,
     onToggleFavoriteAlbum: (String) -> Unit,
     onToggleFavoriteTrack: (String) -> Unit,
-    navigateToBack: () -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     val scrollProgress by remember {
@@ -165,7 +153,7 @@ fun AlbumDetailScreen(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                     shape = CircleShape
                 ),
-            onClick = navigateToBack,
+            onClick = navigateBack,
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -239,67 +227,6 @@ fun AlbumDetailScreen(
                 Spacer(modifier = Modifier.height(150.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun ExpandedTopBar(
-    modifier: Modifier = Modifier,
-    imageUrl: String?,
-    dominantColor: Color = MaterialTheme.colorScheme.background,
-    scrollProgress: Float = 0f
-) {
-    Box(
-        modifier = modifier
-            .background(dominantColor)
-            .fillMaxWidth()
-            .height(EXPANDED_TOP_BAR_HEIGHT - COLLAPSED_TOP_BAR_HEIGHT),
-        contentAlignment = Alignment.BottomStart
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(scrollProgress)
-                .scale(1.0f + scrollProgress * 0.1f),
-            model = imageUrl,
-            contentDescription = "Album Art",
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.TopCenter,
-            placeholder = rememberVectorPainter(image = Icons.Default.Album),
-            error = rememberVectorPainter(image = Icons.Default.Error)
-        )
-    }
-}
-
-@Composable
-private fun CollapsedTopBar(
-    modifier: Modifier = Modifier,
-    albumName: String,
-    dominantColor: Color = MaterialTheme.colorScheme.background,
-    progress: Float
-) {
-    Box(
-        modifier = modifier
-            .background(dominantColor.copy(alpha = progress))
-            .fillMaxWidth()
-            .height(COLLAPSED_TOP_BAR_HEIGHT)
-            .padding(16.dp),
-        contentAlignment = Alignment.BottomStart
-    ) {
-        // 텍스트 애니메이션
-        Text(
-            modifier = Modifier
-                .padding(start = 60.dp, bottom = 4.dp)
-                .graphicsLayer {
-                    alpha = progress.coerceIn(0f, 1f)
-                    translationY = (1f - progress) * 20f // 위로 이동
-                },
-            text = albumName,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
     }
 }
 
@@ -449,7 +376,7 @@ fun IconButtonWithText(
 
 @DevicePreviews
 @Composable
-fun AlbumDetailScreenPreview() {
+private fun AlbumDetailScreenPreview() {
     SpotifyTheme {
         AlbumDetailScreen(
             album = PreviewAlbumUiModel,
@@ -461,7 +388,7 @@ fun AlbumDetailScreenPreview() {
             onAddTracks = {},
             onToggleFavoriteAlbum = {},
             onToggleFavoriteTrack = {},
-            navigateToBack = {}
+            navigateBack = {}
         )
     }
 }

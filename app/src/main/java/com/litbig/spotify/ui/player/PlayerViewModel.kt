@@ -3,7 +3,6 @@ package com.litbig.spotify.ui.player
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.data.di.RepositoryModule.ExoPlayerRepository
 import com.litbig.spotify.core.domain.extension.combine
 import com.litbig.spotify.core.domain.model.local.MusicMetadata
 import com.litbig.spotify.core.domain.repository.MusicRepository
@@ -34,7 +33,7 @@ sealed interface PlayerUiState {
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    @ExoPlayerRepository private val playerRepository: PlayerRepository,
+    private val playerRepository: PlayerRepository,
     private val musicRepository: MusicRepository,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,

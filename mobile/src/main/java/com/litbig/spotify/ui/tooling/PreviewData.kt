@@ -44,4 +44,5 @@ val PreviewArtistUiModel = ArtistUiModel(
     follower = 1000000,
     popularity = 100,
     genres = "Pop, Indie",
+    dominantColor = Color.Transparent,
 )

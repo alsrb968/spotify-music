@@ -3,11 +3,10 @@ package com.litbig.spotify.ui.player
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.data.di.RepositoryModule.FakePlayerRepository
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.extension.combine
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
-import com.litbig.spotify.core.domain.repository.PlayerRepository
+import com.litbig.spotify.core.domain.repository.SpotifyRepository
 import com.litbig.spotify.core.domain.usecase.GetArtistDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.GetSeveralTrackDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
@@ -56,7 +55,7 @@ sealed interface PlayerUiEffect {
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    @FakePlayerRepository private val playerRepository: PlayerRepository,
+    private val spotifyRepository: SpotifyRepository,
     private val getSeveralTrackDetailsUseCase: GetSeveralTrackDetailsUseCase,
     private val getArtistDetailsUseCase: GetArtistDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
@@ -70,8 +69,8 @@ class PlayerViewModel @Inject constructor(
     private val track = MutableStateFlow<TrackUiModel?>(null)
 
     private val trackList: Flow<List<TrackUiModel>> = combine(
-        playerRepository.mediaItems,
-        playerRepository.currentMediaItem,
+        spotifyRepository.mediaItems,
+        spotifyRepository.currentMediaItem,
     ) { items, item ->
         if (items.isEmpty()) return@combine emptyList()
 
@@ -95,10 +94,10 @@ class PlayerViewModel @Inject constructor(
         track,
         trackList,
         currArtistDetails,
-        playerRepository.currentPosition,
-        playerRepository.isPlaying,
-        playerRepository.isShuffle,
-        playerRepository.repeatMode,
+        spotifyRepository.currentPosition,
+        spotifyRepository.isPlaying,
+        spotifyRepository.isShuffle,
+        spotifyRepository.repeatMode,
         dominantColor,
     ) { currItem, items, artistDetails, currPos, isPlay, isShuf, repeat, domiColor ->
         if (currItem == null) {
@@ -182,35 +181,31 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun onPlayIndex(index: Int) {
-        playerRepository.playIndex(index)
+        spotifyRepository.playIndex(index)
     }
 
     private fun onPlayOrPause() {
-        if (_isPlaying) {
-            playerRepository.pause()
-        } else {
-            playerRepository.resume()
-        }
+        spotifyRepository.playOrPause()
     }
 
     private fun onNext() {
-        playerRepository.next()
+        spotifyRepository.next()
     }
 
     private fun onPrevious() {
-        playerRepository.previous()
+        spotifyRepository.previous()
     }
 
     private fun onProgress(position: Long) {
-        playerRepository.seekTo(position)
+        spotifyRepository.seekTo(position)
     }
 
     private fun onShuffle() {
-        playerRepository.setShuffle(!_isShuffle)
+        spotifyRepository.setShuffle(!_isShuffle)
     }
 
     private fun onRepeat() {
-        playerRepository.setRepeat((_repeatMode + 1) % 3)
+        spotifyRepository.setRepeat((_repeatMode + 1) % 3)
     }
 
     private fun onFavorite() {

@@ -5,9 +5,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.litbig.spotify.core.data.di.RepositoryModule.FakePlayerRepository
 import com.litbig.spotify.core.design.extension.darkenColor
-import com.litbig.spotify.core.domain.repository.PlayerRepository
+import com.litbig.spotify.core.domain.repository.SpotifyRepository
 import com.litbig.spotify.core.domain.usecase.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
@@ -49,7 +48,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val getAlbumDetailsUseCase: GetAlbumDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
-    @FakePlayerRepository private val playerRepository: PlayerRepository
+    private val spotifyRepository: SpotifyRepository,
 ) : ViewModel() {
     private val albumId = Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_ALBUM_ID))
 
@@ -58,7 +57,7 @@ class AlbumDetailViewModel @Inject constructor(
     val state: StateFlow<AlbumDetailUiState> = combine(
         getAlbumDetailsUseCase(albumId),
         dominantColor,
-        playerRepository.currentMediaItem,
+        spotifyRepository.currentMediaItem,
     ) { albumDetails, color, currentItem ->
         val imageUrl = albumDetails.images.firstOrNull()?.url
         AlbumDetailUiState.Ready(
@@ -115,20 +114,20 @@ class AlbumDetailViewModel @Inject constructor(
 
     private fun playTrack(trackId: String) {
         Timber.w("play trackId: $trackId")
-        playerRepository.play(trackId)
+        spotifyRepository.playTrack(trackId)
     }
 
     private fun playTracks(trackIdList: List<String>) {
         Timber.w("play trackIdList: $trackIdList")
-        playerRepository.play(trackIdList)
+        spotifyRepository.playTracks(trackIdList)
     }
 
     private fun addPlaylist(trackId: String) {
-        playerRepository.addPlayList(trackId)
+        spotifyRepository.addTrack(trackId)
     }
 
     private fun addPlaylists(trackIdList: List<String>) {
-        playerRepository.addPlayLists(trackIdList)
+        spotifyRepository.addTracks(trackIdList)
     }
 
     private fun toggleFavoriteAlbum(albumId: String) {

@@ -26,6 +26,7 @@ fun FeedScreen(
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = hiltViewModel(),
     onAlbumSelected: (String) -> Unit,
+    onArtistSelected: (String) -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -34,7 +35,7 @@ fun FeedScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is FeedUiEffect.NavigateToAlbumDetail -> onAlbumSelected(effect.albumId)
-                is FeedUiEffect.NavigateToArtistDetail -> Timber.i("NavigateToArtistDetail")
+                is FeedUiEffect.NavigateToArtistDetail -> onArtistSelected(effect.artistId)
                 is FeedUiEffect.ShowMore -> Timber.i("ShowMore")
                 is FeedUiEffect.ShowToast -> onShowSnackBar(effect.message)
             }

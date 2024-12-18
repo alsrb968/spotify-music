@@ -161,7 +161,7 @@ fun ArtistDetailsInfoCard(
 
 @DevicePreviews
 @Composable
-fun ArtistDetailInfoPreview() {
+private fun ArtistDetailInfoPreview() {
     SpotifyTheme {
         ArtistDetailsInfoCard(
             artist = PreviewArtistUiModel,

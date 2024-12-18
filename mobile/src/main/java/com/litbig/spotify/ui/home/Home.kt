@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedScreen
 import com.litbig.spotify.ui.home.album.AlbumDetailScreen
+import com.litbig.spotify.ui.home.artist.ArtistDetailScreen
 import com.litbig.spotify.ui.rememberSpotifyAppState
 
 sealed class HomeSection(val route: String) {
@@ -17,11 +18,17 @@ sealed class HomeSection(val route: String) {
         fun createRoute(albumId: String) = "${ROUTE_ALBUM}/$albumId"
     }
 
+    data object Artist : HomeSection("${ROUTE_ARTIST}/{${ARG_ARTIST_ID}}") {
+        fun createRoute(artistId: String) = "${ROUTE_ARTIST}/$artistId"
+    }
+
     companion object {
         const val ROUTE_FEED = "${Screen.ROUTE_HOME}/list"
         const val ROUTE_ALBUM = "${Screen.ROUTE_HOME}/album"
+        const val ROUTE_ARTIST = "${Screen.ROUTE_HOME}/artist"
 
         const val ARG_ALBUM_ID = "album_id"
+        const val ARG_ARTIST_ID = "artist_id"
     }
 }
 
@@ -41,7 +48,10 @@ fun HomeContainer(
             onAlbumSelected = { albumId, from ->
                 appState.navigateToAlbum(albumId, from)
             },
-            navigateToBack = appState::navigateBack,
+            onArtistSelected = { artistId, from ->
+                appState.navigateToArtist(artistId, from)
+            },
+            navigateBack = appState::navigateBack,
             onShowSnackBar = onShowSnackBar
         )
     }
@@ -50,7 +60,8 @@ fun HomeContainer(
 fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
     onAlbumSelected: (String, NavBackStackEntry) -> Unit,
-    navigateToBack: () -> Unit,
+    onArtistSelected: (String, NavBackStackEntry) -> Unit,
+    navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
     composable(HomeSection.Feed.route) { from ->
@@ -59,6 +70,9 @@ fun NavGraphBuilder.addHomeGraph(
             onAlbumSelected = { albumId ->
                 onAlbumSelected(albumId, from)
             },
+            onArtistSelected = { artistId ->
+                onArtistSelected(artistId, from)
+            },
             onShowSnackBar = onShowSnackBar
         )
     }
@@ -66,7 +80,15 @@ fun NavGraphBuilder.addHomeGraph(
     composable(HomeSection.Album.route) { from ->
         AlbumDetailScreen(
             modifier = modifier,
-            navigateToBack = navigateToBack,
+            navigateBack = navigateBack,
+            onShowSnackBar = onShowSnackBar
+        )
+    }
+
+    composable(HomeSection.Artist.route) { from ->
+        ArtistDetailScreen(
+            modifier = modifier,
+            navigateBack = navigateBack,
             onShowSnackBar = onShowSnackBar
         )
     }
