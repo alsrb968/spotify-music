@@ -89,9 +89,7 @@ fun PlayerBar(
     }
 
     if (isShowPlayer) {
-        PlayerBottomSheet(
-            onShowSnackBar = onShowSnackBar,
-        )
+        PlayerBottomSheet()
     }
 }
 
@@ -108,92 +106,84 @@ fun PlayerBar(
 ) {
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
+            .clickable { onExpand() },
     ) {
-
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .clickable { onExpand() }
+                .height(PLAYER_BAR_HEIGHT)
+                .clip(RoundedCornerShape(6.dp))
+                .background(color = dominantColor),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(PLAYER_BAR_HEIGHT)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(color = dominantColor),
-                verticalAlignment = Alignment.CenterVertically,
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(5.dp))
             ) {
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                ) {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
-                        model = nowPlaying.imageUrl,
-                        contentDescription = "Album Art",
-                        contentScale = ContentScale.Crop,
-                        placeholder = rememberVectorPainter(image = Icons.Default.Album),
-                        error = rememberVectorPainter(image = Icons.Default.Error),
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(34.dp)
-                        .padding(horizontal = 10.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .basicMarquee(),
-                        text = nowPlaying.name,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .basicMarquee(),
-                        text = nowPlaying.artists,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-
-                ControlBar(
-                    modifier = Modifier
-                        .padding(end = 16.dp),
-                    isFavorite = isFavorite,
-                    isPlaying = isPlaying,
-                    actions = actions,
+                AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
+                    model = nowPlaying.imageUrl,
+                    contentDescription = "Album Art",
+                    contentScale = ContentScale.Crop,
+                    placeholder = rememberVectorPainter(image = Icons.Default.Album),
+                    error = rememberVectorPainter(image = Icons.Default.Error),
                 )
             }
 
-
-
-            LinearProgressIndicator(
-                progress = { playingTime.toFloat() / nowPlaying.duration },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .padding(horizontal = 10.dp)
-                    .align(Alignment.BottomCenter),
-                color = MaterialTheme.colorScheme.onSurface,
-                gapSize = 0.dp,
-                drawStopIndicator = {},
+                    .weight(1f)
+                    .height(34.dp)
+                    .padding(horizontal = 10.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .basicMarquee(),
+                    text = nowPlaying.name,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .basicMarquee(),
+                    text = nowPlaying.artists,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            ControlBar(
+                modifier = Modifier
+                    .padding(end = 16.dp),
+                isFavorite = isFavorite,
+                isPlaying = isPlaying,
+                actions = actions,
             )
         }
+
+        LinearProgressIndicator(
+            progress = { playingTime.toFloat() / nowPlaying.duration },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .padding(horizontal = 10.dp)
+                .align(Alignment.BottomCenter),
+            color = MaterialTheme.colorScheme.onSurface,
+            gapSize = 0.dp,
+            drawStopIndicator = {},
+        )
     }
 }
 

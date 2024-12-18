@@ -12,10 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,12 +46,12 @@ import kotlinx.coroutines.launch
 fun PlayerBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel = hiltViewModel(),
-    onShowSnackBar: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     ModalBottomSheet(
         modifier = modifier,
@@ -69,15 +66,28 @@ fun PlayerBottomSheet(
             shouldDismissOnBackPress = true,
         ),
     ) {
-        PlayerScreen(
-            onCollapse = {
-                coroutineScope.launch {
-                    sheetState.hide()
-                    viewModel.sendIntent(PlayerUiIntent.ShowPlayer(false))
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
+            }
+        ) { padding ->
+            PlayerScreen(
+                modifier = Modifier
+                    .padding(padding),
+                onCollapse = {
+                    coroutineScope.launch {
+                        sheetState.hide()
+                        viewModel.sendIntent(PlayerUiIntent.ShowPlayer(false))
+                    }
+                },
+                onShowSnackBar = {
+                    coroutineScope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar(it)
+                    }
                 }
-            },
-            onShowSnackBar = onShowSnackBar
-        )
+            )
+        }
     }
 }
 

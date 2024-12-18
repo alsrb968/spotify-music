@@ -38,13 +38,13 @@ sealed interface PlayerUiState {
 
 sealed interface PlayerUiIntent {
     data class PlayIndex(val index: Int) : PlayerUiIntent
-    object PlayOrPause : PlayerUiIntent
-    object Next : PlayerUiIntent
-    object Previous : PlayerUiIntent
+    data object PlayOrPause : PlayerUiIntent
+    data object Next : PlayerUiIntent
+    data object Previous : PlayerUiIntent
     data class Progress(val position: Long) : PlayerUiIntent
-    object Shuffle : PlayerUiIntent
-    object Repeat : PlayerUiIntent
-    object Favorite : PlayerUiIntent
+    data object Shuffle : PlayerUiIntent
+    data object Repeat : PlayerUiIntent
+    data object Favorite : PlayerUiIntent
     data class FavoriteIndex(val index: Int) : PlayerUiIntent
     data class SetDominantColor(val color: Color) : PlayerUiIntent
     data class ShowPlayer(val isShow: Boolean) : PlayerUiIntent
@@ -105,7 +105,7 @@ class PlayerViewModel @Inject constructor(
             PlayerUiState.Idle
         } else {
             val index = items.indexOfFirst { it.id == currItem.id }
-            val isFavorite = isFavoriteUseCase.isFavoriteTrack(currItem.id).first()
+            val isFavorite = isFavoriteUseCase.isFavoriteTrack(currItem.id).firstOrNull() ?: false
 
             if (artistDetails == null) {
                 return@combine PlayerUiState.Idle
@@ -216,10 +216,11 @@ class PlayerViewModel @Inject constructor(
     private fun onFavorite() {
         viewModelScope.launch {
             _nowPlaying?.let {
-                toggleFavoriteUseCase.toggleFavoriteTrack(
-                    trackName = it.name,
-                    imageUrl = it.imageUrl,
-                )
+                if (toggleFavoriteUseCase.toggleFavoriteTrack(it.id, null)) {
+                    _effect.emit(PlayerUiEffect.ShowToast("Added to favorite"))
+                } else {
+                    _effect.emit(PlayerUiEffect.ShowToast("Removed from favorite"))
+                }
             }
         }
     }
@@ -227,10 +228,11 @@ class PlayerViewModel @Inject constructor(
     private fun onFavoriteIndex(index: Int) {
         viewModelScope.launch {
             _playList[index].let {
-                toggleFavoriteUseCase.toggleFavoriteTrack(
-                    trackName = it.name,
-                    imageUrl = it.imageUrl,
-                )
+                if (toggleFavoriteUseCase.toggleFavoriteTrack(it.id, null)) {
+                    _effect.emit(PlayerUiEffect.ShowToast("Added to favorite"))
+                } else {
+                    _effect.emit(PlayerUiEffect.ShowToast("Removed from favorite"))
+                }
             }
         }
     }

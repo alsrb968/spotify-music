@@ -3,9 +3,9 @@ package com.litbig.spotify.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,14 +23,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.home.HomeContainer
-import com.litbig.spotify.ui.search.SearchScreen
 import com.litbig.spotify.ui.player.PlayerBar
+import com.litbig.spotify.ui.search.SearchScreen
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import kotlinx.coroutines.launch
 import java.util.Locale
-
-val BOTTOM_BAR_HEIGHT = 85.dp
 
 @Composable
 fun SpotifyApp(
@@ -46,13 +44,21 @@ fun SpotifyApp(
         Scaffold(
             modifier = modifier,
             bottomBar = {
-                SpotifyBottomBar(
-                    modifier = Modifier
-                        .height(BOTTOM_BAR_HEIGHT),
-                    tabs = Screen.screens,
-                    currentRoute = currentRoute ?: Screen.Home.route,
-                    navigateToRoute = appState::navigateToBottomBarRoute
-                )
+                Column {
+                    PlayerBar(
+                        onShowSnackBar = { message ->
+                            coroutineScope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        }
+                    )
+                    SpotifyBottomBar(
+                        tabs = Screen.screens,
+                        currentRoute = currentRoute ?: Screen.Home.route,
+                        navigateToRoute = appState::navigateToBottomBarRoute
+                    )
+                }
             },
             snackbarHost = {
                 SnackbarHost(snackbarHostState)
@@ -70,6 +76,7 @@ fun SpotifyApp(
                         modifier = modifier,
                         onShowSnackBar = { message ->
                             coroutineScope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
                                 snackbarHostState.showSnackbar(message)
                             }
                         }
@@ -91,17 +98,6 @@ fun SpotifyApp(
 
                 }
             }
-
-            PlayerBar(
-                modifier = Modifier
-                    .padding(bottom = BOTTOM_BAR_HEIGHT)
-                    .padding(horizontal = 10.dp),
-                onShowSnackBar = { message ->
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(message)
-                    }
-                }
-            )
         }
     } else {
         OfflineDialog { appState.refreshOnline() }
@@ -125,6 +121,7 @@ fun SpotifyBottomBar(
     ) {
         NavigationBar(
             modifier = modifier
+                .height(85.dp)
                 .gradientBackground(
                     ratio = 0.7f,
                     startColor = Color.Transparent,
