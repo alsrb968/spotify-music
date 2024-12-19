@@ -283,7 +283,7 @@ private fun SkeletonTitleAndContent(
 
 @DevicePreviews
 @Composable
-fun ListCellPreview() {
+private fun ListCellPreview() {
     SpotifyTheme {
         val item = PreviewMusicMetadata
         ListCell(
@@ -302,7 +302,7 @@ fun ListCellPreview() {
 
 @DevicePreviews
 @Composable
-fun SkeletonListCellPreview() {
+private fun SkeletonListCellPreview() {
     SpotifyTheme {
         SkeletonListCell()
     }

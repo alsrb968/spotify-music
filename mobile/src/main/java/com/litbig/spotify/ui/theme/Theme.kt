@@ -104,7 +104,7 @@ fun SpotifyTheme(
 //    }
 
     val clickAnimationConfig = ClickAnimationConfig(
-        scaleDown = 0.95f,
+        scaleDown = 0.98f,
         animationDuration = 100
     )
 

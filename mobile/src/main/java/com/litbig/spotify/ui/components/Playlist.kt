@@ -37,11 +37,7 @@ fun RepresentativePlaylist(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "아티스트 추천",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        ListTitle(title = "아티스트 추천")
 
         Box(
             modifier = Modifier

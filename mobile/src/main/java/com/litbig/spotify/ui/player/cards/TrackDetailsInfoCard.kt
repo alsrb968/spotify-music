@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.core.design.extension.clickableScaled
-import com.litbig.spotify.ui.components.FollowButton
+import com.litbig.spotify.ui.components.BorderButton
 import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.player.PlayerViewModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
@@ -123,8 +123,8 @@ fun RoleInfo(
             )
         }
 
-        FollowButton(
-            isFollowed = isFollowed,
+        BorderButton(
+            isActive = isFollowed,
             onClick = onClick
         )
     }
@@ -132,7 +132,7 @@ fun RoleInfo(
 
 @DevicePreviews
 @Composable
-fun RoleInfoPreview() {
+private fun RoleInfoPreview() {
     SpotifyTheme {
         RoleInfo(
             artist = "아티스트 이름",
@@ -145,7 +145,7 @@ fun RoleInfoPreview() {
 
 @DevicePreviews
 @Composable
-fun TrackDetailsInfoCardPreview() {
+private fun TrackDetailsInfoCardPreview() {
     SpotifyTheme {
         TrackDetailsInfoCard(
             artistNameList = List(3) { "Billie Eilish" }

@@ -337,7 +337,7 @@ fun CardButton(
 
 @DevicePreviews
 @Composable
-fun ListScreenPreview() {
+private fun ListScreenPreview() {
     SpotifyTheme {
         ListScreen(
             musicInfo = PreviewMusicInfo,
@@ -357,7 +357,7 @@ fun ListScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @DevicePreviews
 @Composable
-fun OptionBottomSheetPreview() {
+private fun OptionBottomSheetPreview() {
     SpotifyTheme {
         OptionBottomSheet(
             sheetState = rememberStandardBottomSheetState(),

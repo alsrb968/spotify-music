@@ -343,7 +343,7 @@ fun WaveOverlay(
 
 @DevicePreviews
 @Composable
-fun GridCellPreview() {
+private fun GridCellPreview() {
     SpotifyTheme {
         GridCell(
             title = "Folk & Acoustic Mix 2021",
@@ -356,7 +356,7 @@ fun GridCellPreview() {
 
 @DevicePreviews
 @Composable
-fun SkeletonGridCellPreview() {
+private fun SkeletonGridCellPreview() {
     SpotifyTheme {
         SkeletonGridCell()
     }

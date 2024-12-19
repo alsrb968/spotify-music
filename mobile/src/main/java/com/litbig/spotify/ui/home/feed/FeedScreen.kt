@@ -151,7 +151,7 @@ fun MultipleFilterChipExample() {
 
 @DevicePreviews
 @Composable
-fun FeedScreenPreview() {
+private fun FeedScreenPreview() {
     SpotifyTheme {
         FeedScreen(
             feedCollections = PreviewFeedCollectionUiModels,

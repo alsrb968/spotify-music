@@ -132,7 +132,7 @@ fun FeedItem(
 
 @DevicePreviews
 @Composable
-fun FeedCollectionPreview() {
+private fun FeedCollectionPreview() {
     SpotifyTheme {
         FeedCollection(
             feedCollection = PreviewFeedCollectionUiModel,

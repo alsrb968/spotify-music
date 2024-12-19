@@ -150,7 +150,7 @@ fun ListTitle(
 
 @DevicePreviews
 @Composable
-fun ListTitlePreview() {
+private fun ListTitlePreview() {
     SpotifyTheme {
         ListTitle(
             onPlay = { },

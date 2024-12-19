@@ -1,6 +1,5 @@
 package com.litbig.spotify.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -20,15 +20,17 @@ import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 
 @Composable
-fun FollowButton(
+fun BorderButton(
     modifier: Modifier = Modifier,
     shape: Shape = CircleShape,
-    isFollowed: Boolean,
+    isActive: Boolean = false,
+    textActive: String = "팔로잉",
+    textInactive: String = "팔로우하기",
     activatedBorderColor: Color = MaterialTheme.colorScheme.onSurface,
-    deactivatedBorderColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    inactivatedBorderColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: () -> Unit,
 ) {
-    val borderColor = if (isFollowed) activatedBorderColor else deactivatedBorderColor
+    val borderColor = if (isActive) activatedBorderColor else inactivatedBorderColor
 
     Box(
         modifier = modifier
@@ -41,7 +43,9 @@ fun FollowButton(
             .clickableScaled { onClick() },
     ) {
         Text(
-            text = if (isFollowed) "팔로잉" else "팔로우하기",
+            modifier = Modifier
+                .align(Alignment.Center),
+            text = if (isActive) textActive else textInactive,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -50,17 +54,17 @@ fun FollowButton(
 
 @DevicePreviews
 @Composable
-fun FollowButtonPreview() {
+private fun BorderButtonPreview() {
     SpotifyTheme {
         Column {
-            FollowButton(
-                isFollowed = false,
+            BorderButton(
+                isActive = false,
                 onClick = {}
             )
 
-            FollowButton(
+            BorderButton(
                 shape = RoundedCornerShape(4.dp),
-                isFollowed = true,
+                isActive = true,
                 onClick = {}
             )
         }

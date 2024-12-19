@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
@@ -31,6 +32,14 @@ sealed interface ArtistDetailUiState {
     ) : ArtistDetailUiState
 }
 
+sealed interface ArtistDetailUiIntent {
+    data class SetDominantColor(val color: Color) : ArtistDetailUiIntent
+}
+
+sealed interface ArtistDetailUiEffect {
+    data class ShowToast(val message: String) : ArtistDetailUiEffect
+}
+
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -54,9 +63,10 @@ class ArtistDetailViewModel @Inject constructor(
         albums,
         topTracks,
         playlists,
-        ) { artist, albums, tracks, playlists ->
+        dominantColor,
+    ) { artist, albums, tracks, playlists, color ->
         ArtistDetailUiState.Ready(
-            artist = ArtistUiModel.from(artist),
+            artist = ArtistUiModel.from(artist).copy(dominantColor = color),
             albums = albums.items.map { AlbumUiModel.from(it) },
             topTracks = tracks.map { TrackUiModel.from(it) },
             playlists = playlists.map { PlaylistUiModel.from(it) },
@@ -67,6 +77,11 @@ class ArtistDetailViewModel @Inject constructor(
         initialValue = ArtistDetailUiState.Loading
     )
 
+    private val _intent = MutableSharedFlow<ArtistDetailUiIntent>(extraBufferCapacity = 1)
+
+    private val _effect = MutableSharedFlow<ArtistDetailUiEffect>(extraBufferCapacity = 1)
+    val effect: SharedFlow<ArtistDetailUiEffect> = _effect
+
     init {
         viewModelScope.launch {
             artistDetails.collectLatest { artistDetails ->
@@ -75,17 +90,26 @@ class ArtistDetailViewModel @Inject constructor(
                 }
             }
         }
+        handleIntents()
     }
 
-    private suspend fun getArtistDetails(artistId: String) =
-        flowOf(getArtistDetailsUseCase(artistId))
+    private fun handleIntents() {
+        viewModelScope.launch {
+            _intent.collectLatest { intent ->
+                when (intent) {
+                    is ArtistDetailUiIntent.SetDominantColor -> setDominantColor(intent.color)
+                }
+            }
+        }
+    }
 
-    private suspend fun getAlbums(artistId: String) =
-        flowOf(spotifyRepository.getAlbumsOfArtist(artistId))
+    fun sendIntent(intent: ArtistDetailUiIntent) {
+        viewModelScope.launch {
+            _intent.emit(intent)
+        }
+    }
 
-    private suspend fun getTopTracks(artistId: String) =
-        flowOf(spotifyRepository.getTopTracksOfArtist(artistId))
-
-    private suspend fun getPlaylists(artistId: String) =
-        flowOf(spotifyRepository.searchPlaylistOfArtist(artistId))
+    private fun setDominantColor(color: Color) {
+        dominantColor.value = color.darkenColor(0.5f)
+    }
 }

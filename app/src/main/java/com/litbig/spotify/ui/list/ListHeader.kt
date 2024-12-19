@@ -134,7 +134,7 @@ fun ListHeader(
 
 @DevicePreviews
 @Composable
-fun ListHeaderPreview() {
+private fun ListHeaderPreview() {
     SpotifyTheme {
         ListHeader(
             musicInfo = PreviewMusicInfo,

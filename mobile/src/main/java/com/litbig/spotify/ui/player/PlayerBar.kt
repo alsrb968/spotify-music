@@ -235,7 +235,7 @@ data class PlayerBarActions(
 
 @DevicePreviews
 @Composable
-fun PlayerBarPreview() {
+private fun PlayerBarPreview() {
     SpotifyTheme {
         PlayerBar(
             nowPlaying = PreviewTrackUiModel,

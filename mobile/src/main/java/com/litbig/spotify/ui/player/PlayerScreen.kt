@@ -31,6 +31,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.core.domain.extension.toHumanReadableDuration
+import com.litbig.spotify.ui.components.SquareCard
 import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.player.cards.ArtistDetailsInfoCard
 import com.litbig.spotify.ui.player.cards.TrackDetailsInfoCard
@@ -303,44 +304,6 @@ fun PlayerScreen(
     }
 }
 
-@Composable
-fun SquareCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Layout(
-        content = {
-            Card(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxSize(),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = RoundedCornerShape(8.dp),
-            ) {
-                content()
-            }
-        },
-        modifier = modifier
-    ) { measurables, constraints ->
-        // 가로와 세로 중 최소값을 기준으로 1:1 크기 계산
-        val size = constraints.maxWidth.coerceAtMost(constraints.maxHeight)
-        val imageConstraints = constraints.copy(
-            minWidth = size,
-            maxWidth = size,
-            minHeight = size,
-            maxHeight = size
-        )
-
-        // 이미지 측정
-        val placeable = measurables.first().measure(imageConstraints)
-
-        layout(size, size) {
-            // 이미지 배치
-            placeable.placeRelative(0, 0)
-        }
-    }
-}
-
 data class PlayerScreenActions(
     val isFavorite: (String) -> Flow<Boolean>,
     val onFavorite: () -> Unit,
@@ -556,7 +519,7 @@ fun ControlPanelBottom(
 
 @DevicePreviews
 @Composable
-fun PlayerScreenPreview() {
+private fun PlayerScreenPreview() {
     SpotifyTheme {
         PlayerScreen(
             nowPlaying = PreviewTrackUiModel,

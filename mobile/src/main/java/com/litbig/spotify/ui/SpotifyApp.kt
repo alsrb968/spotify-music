@@ -178,7 +178,7 @@ fun SpotifyBottomBar(
 
 @DevicePreviews
 @Composable
-fun SpotifyBottomBarPreview() {
+private fun SpotifyBottomBarPreview() {
     SpotifyTheme {
         SpotifyBottomBar(
             tabs = Screen.screens,
@@ -204,7 +204,7 @@ fun OfflineDialog(onRetry: () -> Unit) {
 
 @DevicePreviews
 @Composable
-fun OfflineDialogPreview() {
+private fun OfflineDialogPreview() {
     SpotifyTheme {
         OfflineDialog { }
     }

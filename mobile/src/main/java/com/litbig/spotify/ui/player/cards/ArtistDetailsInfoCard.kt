@@ -18,11 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.litbig.spotify.ui.components.FollowButton
+import com.litbig.spotify.ui.components.BorderButton
+import com.litbig.spotify.ui.components.SquareCard
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.player.PlayerUiState
 import com.litbig.spotify.ui.player.PlayerViewModel
-import com.litbig.spotify.ui.player.SquareCard
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewArtistUiModel
@@ -129,8 +129,8 @@ fun ArtistDetailsInfoCard(
 
                     val isFollowed = remember { mutableStateOf(false) }
 
-                    FollowButton(
-                        isFollowed = isFollowed.value,
+                    BorderButton(
+                        isActive = isFollowed.value,
                         onClick = {
                             isFollowed.value = !isFollowed.value
                         }

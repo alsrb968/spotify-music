@@ -3,6 +3,15 @@ package com.litbig.spotify.ui.tooling
 import androidx.compose.ui.graphics.Color
 import com.litbig.spotify.ui.models.*
 
+val PreviewLoremIpsum = """
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ullamcorper pharetra massa,
+        sed suscipit nunc mollis in. Sed tincidunt orci lacus, vel ullamcorper nibh congue quis.
+        Etiam imperdiet facilisis ligula id facilisis. Suspendisse potenti. Cras vehicula neque sed
+        nulla auctor scelerisque. Vestibulum at congue risus, vel aliquet eros. In arcu mauris,
+        facilisis eget magna quis, rhoncus volutpat mi. Phasellus vel sollicitudin quam, eu
+        consectetur dolor. Proin lobortis venenatis sem, in vestibulum est. Duis ac nibh interdum,
+        """.trimIndent()
+
 val PreviewFeedUiModel = FeedUiModel(
     id = "1",
     imageUrl = null,
@@ -37,6 +46,8 @@ val PreviewAlbumUiModel = AlbumUiModel(
     dominantColor = Color.Transparent,
 )
 
+val PreviewAlbumUiModels = List(10) { PreviewAlbumUiModel }
+
 val PreviewArtistUiModel = ArtistUiModel(
     id = "1",
     imageUrl = null,
@@ -46,6 +57,8 @@ val PreviewArtistUiModel = ArtistUiModel(
     genres = "Pop, Indie",
     dominantColor = Color.Transparent,
 )
+
+val PreviewArtistUiModels = List(10) { PreviewArtistUiModel }
 
 val PreviewPlaylistUiModel = PlaylistUiModel(
     id = "1",

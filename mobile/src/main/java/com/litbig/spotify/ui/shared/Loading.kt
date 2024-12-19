@@ -25,7 +25,7 @@ fun Loading(
 
 @DevicePreviews
 @Composable
-fun LoadingPreview() {
+private fun LoadingPreview() {
     SpotifyTheme {
         Loading()
     }
