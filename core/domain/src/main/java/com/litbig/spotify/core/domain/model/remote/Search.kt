@@ -4,4 +4,5 @@ data class Search(
     val tracks: Tracks?,
     val artists: Artists?,
     val albums: Albums?,
+    val playlists: Playlists?,
 )

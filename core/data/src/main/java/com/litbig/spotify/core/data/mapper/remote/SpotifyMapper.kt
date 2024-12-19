@@ -7,7 +7,8 @@ fun SearchResponse.toSearch(): Search {
     return Search(
         tracks = tracks?.toTracks(),
         artists = artists?.toArtists(),
-        albums = albums?.toAlbums()
+        albums = albums?.toAlbums(),
+        playlists = playlists?.toPlaylists(),
     )
 }
 
@@ -19,7 +20,7 @@ fun TracksResponse.toTracks(): Tracks {
         offset = offset,
         previous = previous,
         total = total,
-        items = items.toTrackDetails()
+        items = items?.toTrackDetails()
     )
 }
 
@@ -44,6 +45,18 @@ fun AlbumsResponse.toAlbums(): Albums {
         previous = previous,
         total = total,
         items = items.toAlbumDetails()
+    )
+}
+
+fun PlaylistsResponse.toPlaylists(): Playlists {
+    return Playlists(
+        href = href,
+        limit = limit,
+        next = next,
+        offset = offset,
+        previous = previous,
+        total = total,
+        items = items.mapNotNull { it?.toPlaylistDetails() }
     )
 }
 
@@ -122,6 +135,29 @@ fun List<AlbumDetailsResponse>.toAlbumDetails(): List<AlbumDetails> {
     return map { it.toAlbumDetails() }
 }
 
+fun PlaylistDetailsResponse.toPlaylistDetails(): PlaylistDetails {
+    return PlaylistDetails(
+        collaborative = collaborative,
+        description = description,
+        externalUrls = externalUrls.toExternalUrls(),
+        href = href,
+        id = id,
+        images = images.toImageInfoList(),
+        name = name,
+        owner = owner.toOwner(),
+        public = public,
+        snapshotId = snapshotId,
+        tracks = tracks.toTracks(),
+        type = type,
+        uri = uri,
+        primaryColor = primaryColor
+    )
+}
+
+fun List<PlaylistDetailsResponse?>.toPlaylistDetails(): List<PlaylistDetails> {
+    return mapNotNull { it?.toPlaylistDetails() }
+}
+
 fun ExternalIdsResponse.toExternalIds(): ExternalIds {
     return ExternalIds(
         isrc = isrc,
@@ -174,4 +210,15 @@ fun ImageInfoResponse.toImageInfo(): ImageInfo {
 
 fun List<ImageInfoResponse>.toImageInfoList(): List<ImageInfo> {
     return map { it.toImageInfo() }
+}
+
+fun OwnerResponse.toOwner(): Owner {
+    return Owner(
+        externalUrls = externalUrls.toExternalUrls(),
+        href = href,
+        id = id,
+        type = type,
+        uri = uri,
+        displayName = displayName
+    )
 }

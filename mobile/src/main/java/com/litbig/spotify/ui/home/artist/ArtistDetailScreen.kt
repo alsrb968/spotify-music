@@ -27,14 +27,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.components.*
 import com.litbig.spotify.ui.models.ArtistUiModel
+import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
+import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewArtistUiModel
+import com.litbig.spotify.ui.tooling.PreviewPlaylistUiModels
 import com.litbig.spotify.ui.tooling.PreviewTrackUiModels
 
 @Composable
@@ -44,7 +49,23 @@ fun ArtistDetailScreen(
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
+    when (val s = state) {
+        is ArtistDetailUiState.Loading -> {
+            Loading(modifier = Modifier.fillMaxSize())
+        }
+
+        is ArtistDetailUiState.Ready -> {
+            ArtistDetailScreen(
+                modifier = modifier,
+                artist = s.artist,
+                topTracks = s.topTracks,
+                playlists = s.playlists,
+                navigateBack = navigateBack,
+            )
+        }
+    }
 }
 
 @Composable
@@ -52,6 +73,7 @@ fun ArtistDetailScreen(
     modifier: Modifier = Modifier,
     artist: ArtistUiModel,
     topTracks: List<TrackUiModel>,
+    playlists: List<PlaylistUiModel>,
     navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -138,15 +160,32 @@ fun ArtistDetailScreen(
                             endColor = MaterialTheme.colorScheme.background
                         ),
                     artist = artist,
-
                 )
             }
 
             item {
                 Text(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .clickableScaled { /* todo */ },
                     text = buildTracksInfo(topTracks),
                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 32.sp),
                 )
+            }
+
+            item {
+                playlists.firstOrNull()?.let { playlist ->
+                    RepresentativePlaylist(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        artistImageUrl = artist.imageUrl,
+                        albumImageUrl = playlist.imageUrl,
+                        description = playlist.description,
+                        title = playlist.name,
+                        subTitle = "플레이리스트",
+                        onClick = { /* todo */ }
+                    )
+                }
             }
         }
     }
@@ -296,6 +335,7 @@ private fun ArtistDetailScreenPreview() {
         ArtistDetailScreen(
             artist = PreviewArtistUiModel,
             topTracks = PreviewTrackUiModels,
+            playlists = PreviewPlaylistUiModels,
             navigateBack = { }
         )
     }

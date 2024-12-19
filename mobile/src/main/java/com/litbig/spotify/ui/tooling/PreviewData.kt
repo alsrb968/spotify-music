@@ -46,3 +46,12 @@ val PreviewArtistUiModel = ArtistUiModel(
     genres = "Pop, Indie",
     dominantColor = Color.Transparent,
 )
+
+val PreviewPlaylistUiModel = PlaylistUiModel(
+    id = "1",
+    imageUrl = null,
+    name = "Happier Than Ever",
+    description = "Billie Eilish's playlist",
+)
+
+val PreviewPlaylistUiModels = List(10) { PreviewPlaylistUiModel }

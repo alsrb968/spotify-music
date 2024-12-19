@@ -179,7 +179,6 @@ class FeedViewModel @Inject constructor(
     private fun selectArtist(artistId: String) {
         viewModelScope.launch {
             _effect.emit(FeedUiEffect.NavigateToArtistDetail(artistId))
-            _effect.emit(FeedUiEffect.ShowToast("Artist not implemented"))
         }
     }
 
