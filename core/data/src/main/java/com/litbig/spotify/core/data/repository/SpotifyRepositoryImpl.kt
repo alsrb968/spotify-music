@@ -50,6 +50,15 @@ class SpotifyRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun searchArtists(artistName: String): List<ArtistDetails>? {
+        return spotifyDataSource.search(
+            query = artistName,
+            type = "artist",
+        ).let { search ->
+            search.artists?.items?.toArtistDetails()
+        }
+    }
+
     override suspend fun searchAlbum(albumName: String): AlbumDetails? {
         return spotifyDataSource.search(
             query = albumName,

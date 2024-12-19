@@ -3,6 +3,7 @@ package com.litbig.spotify.ui.home.artist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,6 +77,7 @@ fun ArtistDetailScreen(
                 albums = s.albums,
                 topTracks = s.topTracks,
                 playlists = s.playlists,
+                otherArtists = s.otherArtists,
                 navigateBack = navigateBack,
             )
         }
@@ -89,6 +91,7 @@ fun ArtistDetailScreen(
     albums: List<AlbumUiModel>,
     topTracks: List<TrackUiModel>,
     playlists: List<PlaylistUiModel>,
+    otherArtists: List<ArtistUiModel>,
     navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -243,12 +246,51 @@ fun ArtistDetailScreen(
                             )
                         }
 
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            ListTitle(title = "아티스트 플레이리스트")
+                            LazyRow(
+                                state = rememberLazyListState(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                val lists = playlists.drop(1)
+                                items(lists.size) { index ->
+                                    val playlist = lists[index]
+                                    ListItemHorizontalMedium(
+                                        imageUrl = playlist.imageUrl,
+                                        title = playlist.name,
+                                        onClick = { /* todo */ }
+                                    )
+                                }
+                            }
+                        }
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            ListTitle(title = "팬들이 좋아하는 다른 음악")
+                            LazyRow(
+                                state = rememberLazyListState(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(otherArtists.size) { index ->
+                                    val otherArtist = otherArtists[index]
+                                    ListItemHorizontalMedium(
+                                        imageUrl = otherArtist.imageUrl,
+                                        shape = CircleShape,
+                                        title = otherArtist.name,
+                                        onClick = { /* todo */ }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
 
             item {
-                Spacer(modifier = Modifier.height(150.dp))
+                Spacer(modifier = Modifier.height(200.dp))
             }
         }
     }
@@ -521,6 +563,7 @@ private fun ArtistDetailScreenPreview() {
             albums = PreviewAlbumUiModels,
             topTracks = PreviewTrackUiModels,
             playlists = PreviewPlaylistUiModels,
+            otherArtists = PreviewArtistUiModels,
             navigateBack = { }
         )
     }

@@ -6,12 +6,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.design.extension.darkenColor
-import com.litbig.spotify.core.domain.model.remote.ArtistDetails
+import com.litbig.spotify.core.domain.extension.combine
 import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
-import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsListOfArtistsUseCase
 import com.litbig.spotify.core.domain.usecase.spotify.GetArtistDetailsUseCase
-import com.litbig.spotify.core.domain.usecase.spotify.GetTopTrackDetailsListOfArtistsUseCase
 import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.ArtistUiModel
@@ -29,6 +27,7 @@ sealed interface ArtistDetailUiState {
         val albums: List<AlbumUiModel>,
         val topTracks: List<TrackUiModel>,
         val playlists: List<PlaylistUiModel>,
+        val otherArtists: List<ArtistUiModel>,
     ) : ArtistDetailUiState
 }
 
@@ -55,21 +54,23 @@ class ArtistDetailViewModel @Inject constructor(
     private val artistDetails = flow { emit(spotifyRepository.getArtistDetails(artistId)) }
     private val albums = flow { emit(spotifyRepository.getAlbumsOfArtist(artistId)) }
     private val topTracks = flow { emit(spotifyRepository.getTopTracksOfArtist(artistId)) }
-
     private val playlists = MutableStateFlow<List<PlaylistDetails>>(emptyList())
+    private val otherArtists = MutableStateFlow<List<ArtistUiModel>>(emptyList())
 
     val state: StateFlow<ArtistDetailUiState> = combine(
         artistDetails,
         albums,
         topTracks,
         playlists,
+        otherArtists,
         dominantColor,
-    ) { artist, albums, tracks, playlists, color ->
+    ) { artist, albums, tracks, playlists, others, color ->
         ArtistDetailUiState.Ready(
             artist = ArtistUiModel.from(artist).copy(dominantColor = color),
             albums = albums.items.map { AlbumUiModel.from(it) },
             topTracks = tracks.map { TrackUiModel.from(it) },
             playlists = playlists.map { PlaylistUiModel.from(it) },
+            otherArtists = others,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -85,8 +86,9 @@ class ArtistDetailViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             artistDetails.collectLatest { artistDetails ->
-                artistDetails.name.let {
-                    playlists.value = spotifyRepository.searchPlaylistOfArtist(it) ?: emptyList()
+                artistDetails.name.let { artistName ->
+                    playlists.value = spotifyRepository.searchPlaylistOfArtist(artistName) ?: emptyList()
+                    otherArtists.value = spotifyRepository.searchArtists(artistName)?.drop(1)?.map { ArtistUiModel.from(it) } ?: emptyList()
                 }
             }
         }

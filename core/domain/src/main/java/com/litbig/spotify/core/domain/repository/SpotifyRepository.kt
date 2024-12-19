@@ -14,6 +14,7 @@ interface SpotifyRepository {
 
     suspend fun searchTrack(trackName: String, artistName: String): TrackDetails?
     suspend fun searchArtist(artistName: String): ArtistDetails?
+    suspend fun searchArtists(artistName: String): List<ArtistDetails>?
     suspend fun searchAlbum(albumName: String): AlbumDetails?
     suspend fun searchPlaylistOfArtist(artistName: String): List<PlaylistDetails>?
 

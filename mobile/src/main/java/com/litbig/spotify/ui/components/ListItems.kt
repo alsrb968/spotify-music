@@ -11,7 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -20,6 +23,9 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
+import com.litbig.spotify.ui.tooling.PreviewArtistUiModel
+import com.litbig.spotify.ui.tooling.PreviewFeedUiModel
+import com.litbig.spotify.ui.tooling.PreviewTrackUiModel
 
 @Composable
 fun ListTitle(
@@ -70,7 +76,7 @@ fun ListItemVerticalMedium(
     ) {
         AsyncImage(
             modifier = Modifier
-                .size(80.dp)
+                .size(90.dp)
                 .clip(RoundedCornerShape(4.dp)),
             model = imageUrl,
             contentDescription = "Thumbnail",
@@ -101,12 +107,63 @@ fun ListItemVerticalMedium(
     }
 }
 
+@Composable
+fun ListItemHorizontalMedium(
+    modifier: Modifier = Modifier,
+    imageUrl: String?,
+    shape: Shape = RectangleShape,
+    title: String,
+    subtitle: String? = null,
+    onClick: () -> Unit,
+) {
+    val size = 145.dp
+
+    Column(
+        modifier = modifier
+            .clickableScaled { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(size)
+                .clip(shape),
+            model = imageUrl,
+            contentDescription = "Thumbnail",
+            contentScale = ContentScale.Crop,
+            placeholder = rememberVectorPainter(image = Icons.Default.Album),
+            error = rememberVectorPainter(image = Icons.Default.Error),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            modifier = Modifier
+                .widthIn(max = size),
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+        )
+
+        subtitle?.let {
+            Text(
+                modifier = Modifier
+                    .widthIn(max = size),
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+        }
+    }
+}
+
 @DevicePreviews
 @Composable
 private fun ListTitlePreview() {
     SpotifyTheme {
         ListTitle(
-            title = "Title",
+            title = PreviewArtistUiModel.name,
             onMore = {}
         )
     }
@@ -118,8 +175,21 @@ private fun ListItemVerticalMediumPreview() {
     SpotifyTheme {
         ListItemVerticalMedium(
             imageUrl = null,
-            title = "Title",
-            subtitle = "Subtitle",
+            title = PreviewTrackUiModel.name,
+            subtitle = PreviewTrackUiModel.artists,
+            onClick = {}
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun ListItemHorizontalMediumPreview() {
+    SpotifyTheme {
+        ListItemHorizontalMedium(
+            imageUrl = null,
+            title = PreviewTrackUiModel.name,
+//            subtitle = PreviewTrackUiModel.artists,
             onClick = {}
         )
     }

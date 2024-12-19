@@ -42,7 +42,7 @@ fun RepresentativePlaylist(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp)
+                .height(220.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .clickableScaled { onClick() },
         ) {
