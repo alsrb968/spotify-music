@@ -13,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 class SpotifyRepositoryImpl @Inject constructor(
@@ -73,7 +72,6 @@ class SpotifyRepositoryImpl @Inject constructor(
             query = artistName,
             type = "playlist",
         ).let { search ->
-            Timber.d("items: ${search.playlists?.items}")
             search.playlists?.items?.toPlaylistDetails()
         }
     }

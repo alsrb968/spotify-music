@@ -53,6 +53,7 @@ import java.util.Locale
 fun ArtistDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ArtistDetailViewModel = hiltViewModel(),
+    navigateToArtist: (String) -> Unit,
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
@@ -78,6 +79,7 @@ fun ArtistDetailScreen(
                 topTracks = s.topTracks,
                 playlists = s.playlists,
                 otherArtists = s.otherArtists,
+                navigateToArtist = navigateToArtist,
                 navigateBack = navigateBack,
             )
         }
@@ -92,6 +94,7 @@ fun ArtistDetailScreen(
     topTracks: List<TrackUiModel>,
     playlists: List<PlaylistUiModel>,
     otherArtists: List<ArtistUiModel>,
+    navigateToArtist: (String) -> Unit,
     navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -280,7 +283,9 @@ fun ArtistDetailScreen(
                                         imageUrl = otherArtist.imageUrl,
                                         shape = CircleShape,
                                         title = otherArtist.name,
-                                        onClick = { /* todo */ }
+                                        onClick = {
+                                            navigateToArtist(otherArtist.id)
+                                        }
                                     )
                                 }
                             }
@@ -564,6 +569,7 @@ private fun ArtistDetailScreenPreview() {
             topTracks = PreviewTrackUiModels,
             playlists = PreviewPlaylistUiModels,
             otherArtists = PreviewArtistUiModels,
+            navigateToArtist = { },
             navigateBack = { }
         )
     }
