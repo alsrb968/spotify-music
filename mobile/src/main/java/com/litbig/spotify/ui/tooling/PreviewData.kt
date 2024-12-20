@@ -2,6 +2,7 @@ package com.litbig.spotify.ui.tooling
 
 import androidx.compose.ui.graphics.Color
 import com.litbig.spotify.ui.models.*
+import java.util.Calendar
 
 val PreviewLoremIpsum = """
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ullamcorper pharetra massa,
@@ -40,9 +41,12 @@ val PreviewTrackUiModels = List(10) { PreviewTrackUiModel }
 val PreviewAlbumUiModel = AlbumUiModel(
     id = "1",
     imageUrl = null,
+    albumType = "album",
     name = "Happier Than Ever",
     artists = "Billie Eilish",
     totalTime = 192000L,
+    releaseDate = 1734696600000,
+    copyright = "\u00A9 2021 Universal Music Group\n\u2117 2021 Universal Music Group",
     dominantColor = Color.Transparent,
 )
 

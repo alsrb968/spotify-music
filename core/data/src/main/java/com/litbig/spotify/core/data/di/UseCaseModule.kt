@@ -96,6 +96,11 @@ object UseCaseModule {
 
     @Provides
     @Singleton
+    fun provideGetSeveralArtistDetailsUseCase(repository: SpotifyRepository) =
+        GetSeveralArtistDetailsUseCase(repository)
+
+    @Provides
+    @Singleton
     fun provideGetAlbumDetailsUseCase(repository: SpotifyRepository) =
         GetAlbumDetailsUseCase(repository)
 

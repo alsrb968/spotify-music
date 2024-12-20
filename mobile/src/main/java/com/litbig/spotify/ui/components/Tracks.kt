@@ -38,7 +38,6 @@ fun TrackItem(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp)
-            .padding(horizontal = 16.dp)
             .clickableScaled { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {

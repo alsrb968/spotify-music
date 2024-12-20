@@ -6,12 +6,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.design.extension.darkenColor
+import com.litbig.spotify.core.domain.model.remote.AlbumDetails
+import com.litbig.spotify.core.domain.model.remote.ArtistDetails
+import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
 import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
+import com.litbig.spotify.core.domain.usecase.spotify.GetSeveralArtistDetailsUseCase
 import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.models.AlbumUiModel
+import com.litbig.spotify.ui.models.ArtistUiModel
+import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -23,7 +29,9 @@ sealed interface AlbumDetailUiState {
     data object Loading : AlbumDetailUiState
     data class Ready(
         val album: AlbumUiModel,
-        val tracks: List<TrackUiModel>?,
+        val artists: List<ArtistUiModel>,
+        val tracks: List<TrackUiModel>,
+        val playlists: List<PlaylistUiModel>,
         val playingTrackId: String?,
     ) : AlbumDetailUiState
 }
@@ -46,25 +54,37 @@ sealed interface AlbumDetailUiEffect {
 class AlbumDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getAlbumDetailsUseCase: GetAlbumDetailsUseCase,
+    private val getSeveralArtistDetailsUseCase: GetSeveralArtistDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isFavoriteUseCase: IsFavoriteUseCase,
     private val spotifyRepository: SpotifyRepository,
 ) : ViewModel() {
     private val albumId = Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_ALBUM_ID))
 
+    private val albumDetails = MutableStateFlow<AlbumDetails?>(null)
+    private val artistDetailsList = MutableStateFlow<List<ArtistDetails>>(emptyList())
+    private val playlistDetailsList = MutableStateFlow<List<PlaylistDetails>>(emptyList())
     private val dominantColor = MutableStateFlow(Color.Transparent)
 
     val state: StateFlow<AlbumDetailUiState> = combine(
-        getAlbumDetailsUseCase(albumId),
+        albumDetails,
+        artistDetailsList,
+        playlistDetailsList,
         dominantColor,
         spotifyRepository.currentMediaItem,
-    ) { albumDetails, color, currentItem ->
-        val imageUrl = albumDetails.images.firstOrNull()?.url
+    ) { album, artists, playlists, color, currentItem ->
+        if (album == null) {
+            return@combine AlbumDetailUiState.Loading
+        }
+
+        val imageUrl = album.images.firstOrNull()?.url
         AlbumDetailUiState.Ready(
-            album = AlbumUiModel.from(albumDetails).copy(dominantColor = color),
-            tracks = albumDetails.tracks?.items?.map {
+            album = AlbumUiModel.from(album).copy(dominantColor = color),
+            artists = artists.map { ArtistUiModel.from(it) },
+            playlists = playlists.map { PlaylistUiModel.from(it) },
+            tracks = album.tracks?.items?.map {
                 TrackUiModel.from(it).copy(imageUrl = imageUrl)
-            },
+            } ?: emptyList(),
             playingTrackId = currentItem
         )
     }.stateIn(
@@ -79,6 +99,25 @@ class AlbumDetailViewModel @Inject constructor(
     val effect: SharedFlow<AlbumDetailUiEffect> = _effect
 
     init {
+        viewModelScope.launch {
+            launch {
+                getAlbumDetailsUseCase(albumId).collectLatest {
+                    albumDetails.value = it
+                }
+            }
+            launch {
+                albumDetails.collectLatest { albumDetails ->
+                    if (albumDetails == null) return@collectLatest
+                    val artistIds = albumDetails.artists.map { it.id }
+                    getSeveralArtistDetailsUseCase(artistIds.joinToString(",")).collectLatest { artists ->
+                        artistDetailsList.value = artists
+                    }
+                    val albumName = albumDetails.name
+                    playlistDetailsList.value = spotifyRepository.searchPlaylistOfArtist(albumName) ?: emptyList()
+                }
+            }
+        }
+
         handleIntents()
     }
 

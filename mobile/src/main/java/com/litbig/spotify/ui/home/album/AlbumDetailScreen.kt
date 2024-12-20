@@ -1,46 +1,59 @@
 @file:OptIn(
     ExperimentalFoundationApi::class
 )
+@file:Suppress("UNNECESSARY_SAFE_CALL", "USELESS_ELVIS")
 
 package com.litbig.spotify.ui.home.album
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowCircleDown
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
-import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.components.*
+import com.litbig.spotify.ui.home.artist.PlaylistInfo
 import com.litbig.spotify.ui.models.AlbumUiModel
+import com.litbig.spotify.ui.models.ArtistUiModel
+import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
-import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewAlbumUiModel
-import com.litbig.spotify.ui.tooling.PreviewTrackUiModels
+import com.litbig.spotify.ui.tooling.*
 import kotlinx.coroutines.flow.collectLatest
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -76,7 +89,9 @@ fun AlbumDetailScreen(
             AlbumDetailScreen(
                 modifier = modifier,
                 album = s.album,
+                artists = s.artists,
                 tracks = s.tracks,
+                playlists = s.playlists,
                 playingTrackId = s.playingTrackId,
                 onPlayTrack = { trackId ->
                     viewModel.sendIntent(AlbumDetailUiIntent.PlayTrack(trackId))
@@ -106,7 +121,9 @@ fun AlbumDetailScreen(
 fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
     album: AlbumUiModel,
-    tracks: List<TrackUiModel>?,
+    artists: List<ArtistUiModel>,
+    tracks: List<TrackUiModel>,
+    playlists: List<PlaylistUiModel>,
     playingTrackId: String?,
     onPlayTrack: (String) -> Unit,
     onPlayTracks: (List<String>) -> Unit,
@@ -116,116 +133,64 @@ fun AlbumDetailScreen(
     onToggleFavoriteTrack: (String) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val listState = rememberLazyListState()
-    val scrollProgress by remember {
-        derivedStateOf {
-            val maxOffset = 600f // 희미해지기 시작하는 최대 오프셋 값
-            val firstVisibleItem = listState.firstVisibleItemIndex
-            val scrollOffset = listState.firstVisibleItemScrollOffset.toFloat()
-            if (firstVisibleItem == 0) {
-                1f - (scrollOffset / maxOffset).coerceIn(0f, 1f)
-            } else 0f
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        CollapsedTopBar(
-            modifier = Modifier.zIndex(2f),
-            albumName = album.name,
-            dominantColor = album.dominantColor,
-            progress = 1f - scrollProgress
-        )
-        ExpandedTopBar(
-            imageUrl = album.imageUrl,
-            dominantColor = album.dominantColor,
-            scrollProgress = scrollProgress
-        )
-
-        IconButton(
-            modifier = Modifier
-                .zIndex(3f)
-                .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 32.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                    shape = CircleShape
-                ),
-            onClick = navigateBack,
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = MaterialTheme.colorScheme.onSurface
+    ScrollableTopBarSurface(
+        modifier = modifier,
+        imageUrl = album.imageUrl,
+        dominantColor = album.dominantColor,
+        title = album.name,
+        onBack = navigateBack,
+        header = { mod ->
+            AlbumInfoTitle(
+                modifier = mod,
+                album = album,
+                artists = artists,
+                tracksTotalTime = album.totalTime,
+                onPlayTracks = {
+                    tracks.map { track -> track.id }?.let {
+                        onPlayTracks(it)
+                    }
+                }
             )
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            state = listState,
-            horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        SimpleTrackListInfo(
+            tracks = tracks,
+            onClick = { /* todo */ }
+        )
+
+        ListTitle(
+            title = SimpleDateFormat("M월 d일, yyyy", Locale.KOREA)
+            .format(album.releaseDate)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item {
-                Spacer(modifier = Modifier.height(EXPANDED_TOP_BAR_HEIGHT - COLLAPSED_TOP_BAR_HEIGHT * 2))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(COLLAPSED_TOP_BAR_HEIGHT)
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    Text(
-                        text = album.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.headlineLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            item {
-                AlbumInfoTitle(
-                    modifier = Modifier
-                        .gradientBackground(
-                            ratio = 1f,
-                            startColor = album.dominantColor,
-                            endColor = MaterialTheme.colorScheme.background
-                        ),
-                    artists = album.artists,
-                    tracksTotalTime = album.totalTime,
-                    onPlayTracks = {
-                        tracks?.map { it.id }?.let {
-                            onPlayTracks(it)
-                        }
-                    }
+            artists?.forEach { artist ->
+                ListItemVerticalMedium(
+                    imageUrl = artist.imageUrl,
+                    imageSize = 60.dp,
+                    shape = CircleShape,
+                    title = artist.name,
+                    onClick = { /* todo */ }
                 )
             }
+        }
 
-            tracks?.let {
-                items(it.size) { index ->
-                    val track = it[index]
-                    TrackItem(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.background),
-                        imageUrl = track.imageUrl,
-                        isPlaying = playingTrackId == track.id,
-                        title = track.name,
-                        artist = track.artists,
-                        onClick = { /* todo */ },
-                        onMore = { /* todo */ }
-                    )
-                }
-            }
+        ListTitle(title = "이건 어떠신가요") {
+            PlaylistInfo(
+                playlists = playlists,
+                onPlaylist = { /* todo */ }
+            )
+        }
 
-            item {
-                Spacer(modifier = Modifier.height(150.dp))
-            }
+        album.copyright?.let {
+            Text(
+                text = album.copyright,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                lineHeight = 16.sp,
+            )
         }
     }
 }
@@ -233,7 +198,8 @@ fun AlbumDetailScreen(
 @Composable
 fun AlbumInfoTitle(
     modifier: Modifier = Modifier,
-    artists: String,
+    album: AlbumUiModel,
+    artists: List<ArtistUiModel>?,
     tracksTotalTime: Long,
     onPlayTracks: () -> Unit,
 ) {
@@ -242,40 +208,10 @@ fun AlbumInfoTitle(
             .fillMaxWidth()
             .padding(16.dp),
     ) {
-        Text(
-            text = artists,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        ArtistsOfAlbum(
+            artists = artists ?: emptyList(),
+            onClick = { /* todo */ }
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row {
-            IconButtonWithText(
-                icon = {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        painter = painterResource(id = R.drawable.logo),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                text = "나만의 플레이리스트",
-                onClick = {/* todo */ }
-            )
-
-            IconButtonWithText(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                text = "추천 상세정보",
-                onClick = {/* todo */ }
-            )
-        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -285,8 +221,16 @@ fun AlbumInfoTitle(
         } else {
             "%s분".format(duration.inWholeMinutes)
         }
+        val type = when (album.albumType) {
+            "album" -> "앨범"
+            "single" -> "싱글"
+            "compilation" -> "EP"
+            else -> ""
+        }
+        val year = SimpleDateFormat("yyyy", Locale.US)
+            .format(album.releaseDate)
         Text(
-            text = time,
+            text = "$type ∙ $year",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -328,6 +272,16 @@ fun AlbumInfoTitle(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            IconButton(
+                onClick = { /* todo */ }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.property_1_shuffle_on),
+                    contentDescription = "Shuffle",
+                    tint = Color.Unspecified
+                )
+            }
+
             FloatingActionButton(
                 modifier = Modifier,
                 shape = CircleShape,
@@ -345,6 +299,53 @@ fun AlbumInfoTitle(
             }
         }
     }
+}
+
+@Composable
+fun ArtistsOfAlbum(
+    modifier: Modifier = Modifier,
+    artists: List<ArtistUiModel>,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .clickableScaled { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box {
+            val artistList = artists.take(3)
+            val size = artistList.size
+            artistList.forEachIndexed { index, artist ->
+                Box(
+                    modifier = Modifier
+                        .padding(start = (size - 1 - index) * 14.dp)
+                ) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape),
+                        model = artist.imageUrl,
+                        contentDescription = "Artist Image",
+                        placeholder = rememberVectorPainter(image = Icons.Default.Album),
+                        error = rememberVectorPainter(image = Icons.Default.Error),
+                    )
+                }
+            }
+        }
+
+        val artistNames = if (artists.size > 2)
+            "${artists[0].name}, ${artists[1].name} 외 ${artists.size - 2}명"
+        else
+            artists.joinToString { it.name }
+
+        Text(
+            text = artistNames,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+
 }
 
 @Composable
@@ -374,13 +375,57 @@ fun IconButtonWithText(
     }
 }
 
+@Composable
+fun SimpleTrackListInfo(
+    modifier: Modifier = Modifier,
+    tracks: List<TrackUiModel>,
+    onClick: () -> Unit,
+) {
+    val text = buildAnnotatedString {
+        tracks.forEachIndexed { index, track ->
+            if (index == 5) {
+                append(
+                    AnnotatedString(
+                        text = "더 보기",
+                    )
+                )
+                return@buildAnnotatedString
+            }
+
+            append(
+                AnnotatedString(
+                    text = track.name,
+                )
+            )
+
+            if (index != tracks.lastIndex) {
+                append(
+                    AnnotatedString(
+                        text = " ∙ ",
+                    )
+                )
+            }
+        }
+    }
+
+    Text(
+        modifier = modifier
+            .clickableScaled { onClick() },
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 32.sp),
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
 @DevicePreviews
 @Composable
 private fun AlbumDetailScreenPreview() {
     SpotifyTheme {
         AlbumDetailScreen(
             album = PreviewAlbumUiModel,
+            artists = PreviewArtistUiModels,
             tracks = PreviewTrackUiModels,
+            playlists = PreviewPlaylistUiModels,
             playingTrackId = null,
             onPlayTrack = {},
             onPlayTracks = {},

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
@@ -73,8 +74,10 @@ fun ListTitle(
 fun ListItemVerticalMedium(
     modifier: Modifier = Modifier,
     imageUrl: String?,
+    imageSize: Dp = 90.dp,
+    shape: Shape = RoundedCornerShape(4.dp),
     title: String,
-    subtitle: String,
+    subtitle: String? = null,
     onClick: () -> Unit,
 ) {
     Row(
@@ -85,8 +88,8 @@ fun ListItemVerticalMedium(
     ) {
         AsyncImage(
             modifier = Modifier
-                .size(90.dp)
-                .clip(RoundedCornerShape(4.dp)),
+                .size(imageSize)
+                .clip(shape),
             model = imageUrl,
             contentDescription = "Thumbnail",
             placeholder = rememberVectorPainter(image = Icons.Default.Album),
@@ -106,12 +109,14 @@ fun ListItemVerticalMedium(
                 maxLines = 1,
             )
 
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
+            subtitle?.let {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
