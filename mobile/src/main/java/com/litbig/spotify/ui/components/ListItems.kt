@@ -32,31 +32,40 @@ fun ListTitle(
     modifier: Modifier = Modifier,
     title: String,
     onMore: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit = {},
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-
-        onMore?.let {
+        Row(
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                modifier = Modifier
-                    .clickableScaled { onMore() },
-                text = stringResource(R.string.show_all),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                modifier = Modifier.weight(1f),
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
+
+            onMore?.let {
+                Text(
+                    modifier = Modifier
+                        .clickableScaled { onMore() },
+                    text = stringResource(R.string.show_all),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
         }
+
+        content()
     }
 }
 
@@ -120,6 +129,7 @@ fun ListItemHorizontalMedium(
 
     Column(
         modifier = modifier
+            .height(200.dp)
             .clickableScaled { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -164,7 +174,8 @@ private fun ListTitlePreview() {
     SpotifyTheme {
         ListTitle(
             title = PreviewArtistUiModel.name,
-            onMore = {}
+            onMore = {},
+            content = {}
         )
     }
 }
@@ -188,8 +199,8 @@ private fun ListItemHorizontalMediumPreview() {
     SpotifyTheme {
         ListItemHorizontalMedium(
             imageUrl = null,
-            title = PreviewTrackUiModel.name,
-//            subtitle = PreviewTrackUiModel.artists,
+            title = PreviewTrackUiModel.name + PreviewTrackUiModel.name + PreviewTrackUiModel.name,
+            subtitle = PreviewTrackUiModel.artists,
             onClick = {}
         )
     }

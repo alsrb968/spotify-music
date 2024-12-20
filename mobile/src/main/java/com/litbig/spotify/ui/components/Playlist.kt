@@ -20,73 +20,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.core.design.extension.clickableScaled
+import com.litbig.spotify.ui.home.artist.RepresentativePlaylist
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 
-@Composable
-fun RepresentativePlaylist(
-    modifier: Modifier = Modifier,
-    artistImageUrl: String?,
-    albumImageUrl: String?,
-    description: String,
-    title: String,
-    subTitle: String,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        ListTitle(title = "아티스트 추천")
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .clickableScaled { onClick() },
-        ) {
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize(),
-                model = artistImageUrl,
-                contentDescription = "Artist Thumbnail",
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter,
-                placeholder = rememberVectorPainter(image = Icons.Default.Album),
-                error = rememberVectorPainter(image = Icons.Default.Error),
-                colorFilter = ColorFilter.tint(
-                    color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                    blendMode = BlendMode.Multiply,
-                )
-            )
-
-            if (description.isNotEmpty()) {
-                ChipDescription(
-                    modifier = Modifier
-                        .padding(
-                            top = 16.dp,
-                            start = 16.dp
-                        ),
-                    imageUrl = artistImageUrl,
-                    description = description,
-                )
-            }
-
-            RepresentativeAlbumInfo(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(
-                        bottom = 16.dp,
-                        start = 16.dp
-                    ),
-                imageUrl = albumImageUrl,
-                title = title,
-                subTitle = subTitle,
-            )
-        }
-    }
-}
 
 @Composable
 fun ChipDescription(
@@ -170,20 +108,5 @@ fun RepresentativeAlbumInfo(
                 maxLines = 1,
             )
         }
-    }
-}
-
-@DevicePreviews
-@Composable
-private fun RepresentativePlaylistPreview() {
-    SpotifyTheme {
-        RepresentativePlaylist(
-            artistImageUrl = null,
-            albumImageUrl = null,
-            description = "‘IM THE DRAMA' OUT NOW \uD83D\uDC85 Tap the ⨁ to be the first to hear new Bebe Rexha songs as soon as they’re released.",
-            title = "Bebe Rexha - I'm The Drama",
-            subTitle = "플레이리스트",
-            onClick = { }
-        )
     }
 }

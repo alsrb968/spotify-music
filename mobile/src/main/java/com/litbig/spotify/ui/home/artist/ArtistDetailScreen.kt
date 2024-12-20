@@ -2,13 +2,11 @@ package com.litbig.spotify.ui.home.artist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.MoreVert
@@ -17,7 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -30,14 +30,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
-import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.components.*
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.ArtistUiModel
@@ -53,6 +51,7 @@ import java.util.Locale
 fun ArtistDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ArtistDetailViewModel = hiltViewModel(),
+    navigateToAlbum: (String) -> Unit,
     navigateToArtist: (String) -> Unit,
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
@@ -79,6 +78,7 @@ fun ArtistDetailScreen(
                 topTracks = s.topTracks,
                 playlists = s.playlists,
                 otherArtists = s.otherArtists,
+                navigateToAlbum = navigateToAlbum,
                 navigateToArtist = navigateToArtist,
                 navigateBack = navigateBack,
             )
@@ -94,209 +94,73 @@ fun ArtistDetailScreen(
     topTracks: List<TrackUiModel>,
     playlists: List<PlaylistUiModel>,
     otherArtists: List<ArtistUiModel>,
+    navigateToAlbum: (String) -> Unit,
     navigateToArtist: (String) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val listState = rememberLazyListState()
-    val scrollProgress by remember {
-        derivedStateOf {
-            val maxOffset = 600f // 희미해지기 시작하는 최대 오프셋 값
-            val firstVisibleItem = listState.firstVisibleItemIndex
-            val scrollOffset = listState.firstVisibleItemScrollOffset.toFloat()
-            if (firstVisibleItem == 0) {
-                1f - (scrollOffset / maxOffset).coerceIn(0f, 1f)
-            } else 0f
+    ScrollableTopBarSurface(
+        modifier = modifier,
+        imageUrl = artist.imageUrl,
+        dominantColor = artist.dominantColor,
+        title = artist.name,
+        onBack = navigateBack,
+        header = {
+            ArtistInfoTitle(
+                modifier = it,
+                artist = artist,
+            )
         }
-    }
-
-
-    Box(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
     ) {
-        CollapsedTopBar(
-            modifier = Modifier.zIndex(2f),
-            albumName = artist.name,
-            dominantColor = artist.dominantColor,
-            progress = 1f - scrollProgress
-        )
-        ExpandedTopBar(
-            imageUrl = artist.imageUrl,
-            dominantColor = artist.dominantColor,
-            scrollProgress = scrollProgress
+        SimpleTopTrackListInfo(
+            tracks = topTracks,
+            onClick = { /* todo */ }
         )
 
-        IconButton(
-            modifier = Modifier
-                .zIndex(3f)
-                .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 32.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                    shape = CircleShape
-                ),
-            onClick = navigateBack,
+        playlists.firstOrNull()?.let { playlist ->
+            ListTitle(title = "아티스트 추천") {
+                RepresentativePlaylist(
+                    artistImageUrl = artist.imageUrl,
+                    albumImageUrl = playlist.imageUrl,
+                    description = playlist.description,
+                    title = playlist.name,
+                    subTitle = "플레이리스트",
+                    onClick = { /* todo */ }
+                )
+            }
+        }
+
+        ListTitle(
+            title = "인기음악",
+            onMore = { /* todo */ },
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = MaterialTheme.colorScheme.onSurface
+            SimpleAlbumListInfo(
+                albums = albums,
+                onMore = { /* todo */ },
+                onAlbum = { albumId ->
+                     navigateToAlbum(albumId)
+                }
             )
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            state = listState,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(EXPANDED_TOP_BAR_HEIGHT - COLLAPSED_TOP_BAR_HEIGHT * 2))
-            }
+        ListTitle(title = "상세정보") {
+            ArtistDetailInfo(
+                artist = artist,
+                onClick = { /* todo */ }
+            )
+        }
 
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(COLLAPSED_TOP_BAR_HEIGHT)
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    Text(
-                        text = artist.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.headlineLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+        ListTitle(title = "아티스트 플레이리스트") {
+            PlaylistInfo(
+                playlists = playlists.drop(1),
+                onPlaylist = { /* todo */ }
+            )
+        }
 
-            item {
-                ArtistInfoTitle(
-                    modifier = Modifier
-                        .gradientBackground(
-                            ratio = 1f,
-                            startColor = artist.dominantColor,
-                            endColor = MaterialTheme.colorScheme.background
-                        ),
-                    artist = artist,
-                )
-            }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(32.dp)
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .clickableScaled { /* todo */ },
-                            text = buildTracksInfo(topTracks),
-                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 32.sp),
-                        )
-
-                        playlists.firstOrNull()?.let { playlist ->
-                            RepresentativePlaylist(
-                                artistImageUrl = artist.imageUrl,
-                                albumImageUrl = playlist.imageUrl,
-                                description = playlist.description,
-                                title = playlist.name,
-                                subTitle = "플레이리스트",
-                                onClick = { /* todo */ }
-                            )
-                        }
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            ListTitle(
-                                title = "인기음악",
-                                onMore = { /* todo */ }
-                            )
-
-                            albums.take(4).forEachIndexed { index, album ->
-                                ListItemVerticalMedium(
-                                    imageUrl = album.imageUrl,
-                                    title = album.name,
-                                    subtitle = album.artists,
-                                    onClick = { /* todo */ }
-                                )
-                            }
-
-                            BorderButton(
-                                modifier = Modifier
-                                    .width(180.dp),
-                                textInactive = "디스코그래피 보기",
-                                onClick = { /* todo */ }
-                            )
-                        }
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            ListTitle(title = "상세정보")
-                            ArtistDetailInfo(
-                                artist = artist,
-                                onClick = { /* todo */ }
-                            )
-                        }
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            ListTitle(title = "아티스트 플레이리스트")
-                            LazyRow(
-                                state = rememberLazyListState(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                val lists = playlists.drop(1)
-                                items(lists.size) { index ->
-                                    val playlist = lists[index]
-                                    ListItemHorizontalMedium(
-                                        imageUrl = playlist.imageUrl,
-                                        title = playlist.name,
-                                        onClick = { /* todo */ }
-                                    )
-                                }
-                            }
-                        }
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            ListTitle(title = "팬들이 좋아하는 다른 음악")
-                            LazyRow(
-                                state = rememberLazyListState(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                items(otherArtists.size) { index ->
-                                    val otherArtist = otherArtists[index]
-                                    ListItemHorizontalMedium(
-                                        imageUrl = otherArtist.imageUrl,
-                                        shape = CircleShape,
-                                        title = otherArtist.name,
-                                        onClick = {
-                                            navigateToArtist(otherArtist.id)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(200.dp))
-            }
+        ListTitle(title = "팬들이 좋아하는 다른 음악") {
+            OtherArtistInfo(
+                artists = otherArtists,
+                onClick = navigateToArtist
+            )
         }
     }
 }
@@ -387,10 +251,12 @@ fun ArtistInfoTitle(
 }
 
 @Composable
-fun buildTracksInfo(
+fun SimpleTopTrackListInfo(
+    modifier: Modifier = Modifier,
     tracks: List<TrackUiModel>,
-): AnnotatedString {
-    return buildAnnotatedString {
+    onClick: () -> Unit
+) {
+    val text = buildAnnotatedString {
         tracks.forEachIndexed { index, track ->
             if (index == 5) {
                 append(
@@ -436,6 +302,94 @@ fun buildTracksInfo(
             }
         }
     }
+
+    Text(
+        modifier = modifier
+            .clickableScaled { onClick() },
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 32.sp),
+    )
+}
+
+@Composable
+fun RepresentativePlaylist(
+    modifier: Modifier = Modifier,
+    artistImageUrl: String?,
+    albumImageUrl: String?,
+    description: String,
+    title: String,
+    subTitle: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .clickableScaled { onClick() },
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .fillMaxSize(),
+            model = artistImageUrl,
+            contentDescription = "Artist Thumbnail",
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
+            placeholder = rememberVectorPainter(image = Icons.Default.Album),
+            error = rememberVectorPainter(image = Icons.Default.Error),
+            colorFilter = ColorFilter.tint(
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                blendMode = BlendMode.Multiply,
+            )
+        )
+
+        if (description.isNotEmpty()) {
+            ChipDescription(
+                modifier = Modifier
+                    .padding(
+                        top = 16.dp,
+                        start = 16.dp
+                    ),
+                imageUrl = artistImageUrl,
+                description = description,
+            )
+        }
+
+        RepresentativeAlbumInfo(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(
+                    bottom = 16.dp,
+                    start = 16.dp
+                ),
+            imageUrl = albumImageUrl,
+            title = title,
+            subTitle = subTitle,
+        )
+    }
+}
+
+@Composable
+fun SimpleAlbumListInfo(
+    albums: List<AlbumUiModel>,
+    onMore: () -> Unit,
+    onAlbum: (String) -> Unit
+) {
+    albums.take(4).forEachIndexed { index, album ->
+        ListItemVerticalMedium(
+            imageUrl = album.imageUrl,
+            title = album.name,
+            subtitle = album.artists,
+            onClick = { onAlbum(album.id) }
+        )
+    }
+
+    BorderButton(
+        modifier = Modifier
+            .width(180.dp),
+        textInactive = "디스코그래피 보기",
+        onClick = onMore
+    )
 }
 
 @Composable
@@ -496,7 +450,8 @@ fun ArtistDetailInfo(
                     Text(
                         text = buildAnnotatedString {
                             withStyle(MaterialTheme.typography.headlineSmall.toSpanStyle()) {
-                                val format = NumberFormat.getNumberInstance(Locale.US).format(artist.follower)
+                                val format = NumberFormat.getNumberInstance(Locale.US)
+                                    .format(artist.follower)
                                 append(format.toString())
                             }
                             append(" ")
@@ -559,6 +514,52 @@ fun ArtistDetailInfo(
     }
 }
 
+@Composable
+fun PlaylistInfo(
+    modifier: Modifier = Modifier,
+    playlists: List<PlaylistUiModel>,
+    onPlaylist: (String) -> Unit
+) {
+    LazyRow(
+        modifier = modifier,
+        state = rememberLazyListState(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(playlists.size) { index ->
+            val playlist = playlists[index]
+            ListItemHorizontalMedium(
+                imageUrl = playlist.imageUrl,
+                title = playlist.name,
+                onClick = { onPlaylist(playlist.id) }
+            )
+        }
+    }
+}
+
+@Composable
+fun OtherArtistInfo(
+    modifier: Modifier = Modifier,
+    artists: List<ArtistUiModel>,
+    onClick: (String) -> Unit,
+) {
+    LazyRow(
+        modifier = modifier,
+        state = rememberLazyListState(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(artists.size) { index ->
+            val artist = artists[index]
+            ListItemHorizontalMedium(
+                imageUrl = artist.imageUrl,
+                shape = CircleShape,
+                title = artist.name,
+                onClick = { onClick(artist.id) }
+            )
+        }
+    }
+}
+
+
 @DevicePreviews
 @Composable
 private fun ArtistDetailScreenPreview() {
@@ -569,8 +570,76 @@ private fun ArtistDetailScreenPreview() {
             topTracks = PreviewTrackUiModels,
             playlists = PreviewPlaylistUiModels,
             otherArtists = PreviewArtistUiModels,
+            navigateToAlbum = { },
             navigateToArtist = { },
             navigateBack = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun ArtistInfoTitlePreview() {
+    SpotifyTheme {
+        ArtistInfoTitle(artist = PreviewArtistUiModel)
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun SimpleTopTrackListInfoPreview() {
+    SpotifyTheme {
+        SimpleTopTrackListInfo(
+            tracks = PreviewTrackUiModels,
+            onClick = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun RepresentativePlaylistPreview() {
+    SpotifyTheme {
+        RepresentativePlaylist(
+            artistImageUrl = null,
+            albumImageUrl = null,
+            description = "‘IM THE DRAMA' OUT NOW \uD83D\uDC85 Tap the ⨁ to be the first to hear new Bebe Rexha songs as soon as they’re released.",
+            title = "Bebe Rexha - I'm The Drama",
+            subTitle = "플레이리스트",
+            onClick = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun ArtistDetailInfoPreview() {
+    SpotifyTheme {
+        ArtistDetailInfo(
+            artist = PreviewArtistUiModel,
+            onClick = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun PlaylistInfoPreview() {
+    SpotifyTheme {
+        PlaylistInfo(
+            playlists = PreviewPlaylistUiModels,
+            onPlaylist = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun OtherArtistInfoPreview() {
+    SpotifyTheme {
+        OtherArtistInfo(
+            artists = PreviewArtistUiModels,
+            onClick = { }
         )
     }
 }
