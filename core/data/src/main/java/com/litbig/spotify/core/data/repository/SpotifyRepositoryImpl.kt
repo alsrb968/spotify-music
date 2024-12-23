@@ -112,6 +112,14 @@ class SpotifyRepositoryImpl @Inject constructor(
         return spotifyDataSource.getNewAlbumReleases(limit, offset)?.toAlbums()
     }
 
+    override suspend fun getPlaylistDetails(playlistId: String): PlaylistDetails {
+        return spotifyDataSource.getPlaylistDetails(playlistId).toPlaylistDetails()
+    }
+
+    override suspend fun getUserProfile(userId: String): UserProfile {
+        return spotifyDataSource.getUserProfile(userId).toUserProfile()
+    }
+
     override suspend fun insertFavorite(id: String, type: String) {
         val favorite = Favorite(
             name = id,

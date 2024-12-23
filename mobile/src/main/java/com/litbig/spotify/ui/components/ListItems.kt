@@ -124,14 +124,13 @@ fun ListItemVerticalMedium(
 @Composable
 fun ListItemHorizontalMedium(
     modifier: Modifier = Modifier,
+    size: Dp = 145.dp,
     imageUrl: String?,
     shape: Shape = RectangleShape,
     title: String,
     subtitle: String? = null,
     onClick: () -> Unit,
 ) {
-    val size = 145.dp
-
     Column(
         modifier = modifier
             .height(200.dp)

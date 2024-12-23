@@ -111,6 +111,12 @@ class SpotifyAppState(
         }
     }
 
+    fun navigateToPlaylist(playlistId: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(HomeSection.Playlist.createRoute(Uri.encode(playlistId)))
+        }
+    }
+
     fun navigateBack() {
         navController.popBackStack()
     }

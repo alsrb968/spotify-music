@@ -70,6 +70,7 @@ class FeedViewModel @Inject constructor(
             }
             launch {
                 getArtistFeeds(
+                    "Bebe Rexha",
                     "NewJeans",
                     "QWER",
                     "IVE",
@@ -77,9 +78,7 @@ class FeedViewModel @Inject constructor(
                     "BTS",
                     "BLACKPINK",
                     "TWICE",
-                    "IU",
                     "Red Velvet",
-                    "MAMAMOO"
                 ).collectLatest {
                     feedCollections.value += it
                 }

@@ -27,6 +27,8 @@ interface SpotifyRepository {
     suspend fun getAlbumDetails(albumId: String): AlbumDetails
     suspend fun getSeveralAlbumDetails(albumIds: String): List<AlbumDetails>
     suspend fun getNewAlbumReleases(limit: Int = 10, offset: Int = 0): Albums?
+    suspend fun getPlaylistDetails(playlistId: String): PlaylistDetails
+    suspend fun getUserProfile(userId: String): UserProfile
 
 
     suspend fun insertFavorite(id: String, type: String)

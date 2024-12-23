@@ -76,4 +76,17 @@ interface SpotifyApi {
         @Query("offset") offset: Int,
         @Header("Authorization") accessToken: String
     ): SearchResponse
+
+    @GET("v1/playlists/{id}")
+    suspend fun getPlaylistDetails(
+        @Path("id") playlistId: String,
+        @Query("market") market: String = "KR",
+        @Header("Authorization") accessToken: String
+    ): PlaylistDetailsResponse
+
+    @GET("v1/users/{id}")
+    suspend fun getUserProfile(
+        @Path("id") userId: String,
+        @Header("Authorization") accessToken: String
+    ): UserProfileResponse
 }

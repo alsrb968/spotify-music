@@ -55,6 +55,14 @@ interface SpotifyDataSource {
         limit: Int = 10,
         offset: Int = 0,
     ): AlbumsResponse?
+
+    suspend fun getPlaylistDetails(
+        playlistId: String,
+    ): PlaylistDetailsResponse
+
+    suspend fun getUserProfile(
+        userId: String,
+    ): UserProfileResponse
 }
 
 class SpotifyDataSourceImpl @Inject constructor(
@@ -174,5 +182,19 @@ class SpotifyDataSourceImpl @Inject constructor(
         offset: Int,
     ): AlbumsResponse? {
         return api.getNewAlbumReleases(limit, offset, getAccessToken()).albums
+    }
+
+    override suspend fun getPlaylistDetails(playlistId: String): PlaylistDetailsResponse {
+        return api.getPlaylistDetails(
+            playlistId = playlistId,
+            accessToken = getAccessToken()
+        )
+    }
+
+    override suspend fun getUserProfile(userId: String): UserProfileResponse {
+        return api.getUserProfile(
+            userId = userId,
+            accessToken = getAccessToken()
+        )
     }
 }

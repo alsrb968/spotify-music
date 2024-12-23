@@ -1,5 +1,6 @@
 package com.litbig.spotify.core.data.mapper.remote
 
+import android.text.Html
 import com.litbig.spotify.core.data.model.remote.*
 import com.litbig.spotify.core.domain.model.remote.*
 
@@ -138,8 +139,9 @@ fun List<AlbumDetailsResponse>.toAlbumDetails(): List<AlbumDetails> {
 fun PlaylistDetailsResponse.toPlaylistDetails(): PlaylistDetails {
     return PlaylistDetails(
         collaborative = collaborative,
-        description = description,
+        description = description.decodeHtml(),
         externalUrls = externalUrls.toExternalUrls(),
+        followers = followers?.toFollowers(),
         href = href,
         id = id,
         images = images.toImageInfoList(),
@@ -147,7 +149,7 @@ fun PlaylistDetailsResponse.toPlaylistDetails(): PlaylistDetails {
         owner = owner.toOwner(),
         public = public,
         snapshotId = snapshotId,
-        tracks = tracks.toTracks(),
+        tracks = tracks.toPlaylistTracks(),
         type = type,
         uri = uri,
         primaryColor = primaryColor
@@ -156,6 +158,41 @@ fun PlaylistDetailsResponse.toPlaylistDetails(): PlaylistDetails {
 
 fun List<PlaylistDetailsResponse?>.toPlaylistDetails(): List<PlaylistDetails> {
     return mapNotNull { it?.toPlaylistDetails() }
+}
+
+fun PlaylistTracksResponse.toPlaylistTracks(): PlaylistTracks {
+    return PlaylistTracks(
+        href = href,
+        limit = limit,
+        next = next,
+        offset = offset,
+        previous = previous,
+        total = total,
+        items = items?.toPlaylistTrackDetails()
+    )
+}
+
+fun PlaylistTrackDetailsResponse.toPlaylistTrackDetails(): PlaylistTrackDetails {
+    return PlaylistTrackDetails(
+        addedAt = addedAt,
+        addedBy = addedBy.toAddedBy(),
+        isLocal = isLocal,
+        track = track.toTrackDetails()
+    )
+}
+
+fun List<PlaylistTrackDetailsResponse?>.toPlaylistTrackDetails(): List<PlaylistTrackDetails> {
+    return mapNotNull { it?.toPlaylistTrackDetails() }
+}
+
+fun AddedByResponse.toAddedBy(): AddedBy {
+    return AddedBy(
+        externalUrls = externalUrls.toExternalUrls(),
+        href = href,
+        id = id,
+        type = type,
+        uri = uri,
+    )
 }
 
 fun ExternalIdsResponse.toExternalIds(): ExternalIds {
@@ -221,4 +258,21 @@ fun OwnerResponse.toOwner(): Owner {
         uri = uri,
         displayName = displayName
     )
+}
+
+fun UserProfileResponse.toUserProfile(): UserProfile {
+    return UserProfile(
+        displayName = displayName,
+        externalUrls = externalUrls.toExternalUrls(),
+        followers = followers.toFollowers(),
+        href = href,
+        id = id,
+        images = images.toImageInfoList(),
+        type = type,
+        uri = uri
+    )
+}
+
+fun String.decodeHtml(): String {
+    return Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
 }

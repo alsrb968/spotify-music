@@ -53,6 +53,7 @@ fun ArtistDetailScreen(
     viewModel: ArtistDetailViewModel = hiltViewModel(),
     navigateToAlbum: (String) -> Unit,
     navigateToArtist: (String) -> Unit,
+    navigateToPlaylist: (String) -> Unit,
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
@@ -80,6 +81,7 @@ fun ArtistDetailScreen(
                 otherArtists = s.otherArtists,
                 navigateToAlbum = navigateToAlbum,
                 navigateToArtist = navigateToArtist,
+                navigateToPlaylist = navigateToPlaylist,
                 navigateBack = navigateBack,
             )
         }
@@ -96,6 +98,7 @@ fun ArtistDetailScreen(
     otherArtists: List<ArtistUiModel>,
     navigateToAlbum: (String) -> Unit,
     navigateToArtist: (String) -> Unit,
+    navigateToPlaylist: (String) -> Unit,
     navigateBack: () -> Unit,
 ) {
     ScrollableTopBarSurface(
@@ -124,7 +127,9 @@ fun ArtistDetailScreen(
                     description = playlist.description,
                     title = playlist.name,
                     subTitle = "플레이리스트",
-                    onClick = { /* todo */ }
+                    onClick = {
+                        navigateToPlaylist(playlist.id)
+                    }
                 )
             }
         }
@@ -152,7 +157,7 @@ fun ArtistDetailScreen(
         ListTitle(title = "아티스트 플레이리스트") {
             PlaylistInfo(
                 playlists = playlists.drop(1),
-                onPlaylist = { /* todo */ }
+                onPlaylist = navigateToPlaylist
             )
         }
 
@@ -572,6 +577,7 @@ private fun ArtistDetailScreenPreview() {
             otherArtists = PreviewArtistUiModels,
             navigateToAlbum = { },
             navigateToArtist = { },
+            navigateToPlaylist = { },
             navigateBack = { }
         )
     }

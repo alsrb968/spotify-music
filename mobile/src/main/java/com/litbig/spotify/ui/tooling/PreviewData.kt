@@ -68,7 +68,16 @@ val PreviewPlaylistUiModel = PlaylistUiModel(
     id = "1",
     imageUrl = null,
     name = "Happier Than Ever",
+    follower = 1000000,
     description = "Billie Eilish's playlist",
+    dominantColor = Color.Transparent,
 )
 
 val PreviewPlaylistUiModels = List(10) { PreviewPlaylistUiModel }
+
+val PreviewOwnerUiModel = OwnerUiModel(
+    id = "1",
+    imageUrl = null,
+    name = "Billie Eilish",
+    follower = 1000000,
+)

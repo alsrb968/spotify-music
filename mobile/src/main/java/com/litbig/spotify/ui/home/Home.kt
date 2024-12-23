@@ -10,6 +10,7 @@ import com.litbig.spotify.ui.Screen
 import com.litbig.spotify.ui.home.feed.FeedScreen
 import com.litbig.spotify.ui.home.album.AlbumDetailScreen
 import com.litbig.spotify.ui.home.artist.ArtistDetailScreen
+import com.litbig.spotify.ui.home.playlist.PlaylistDetailScreen
 import com.litbig.spotify.ui.rememberSpotifyAppState
 
 sealed class HomeSection(val route: String) {
@@ -22,13 +23,19 @@ sealed class HomeSection(val route: String) {
         fun createRoute(artistId: String) = "${ROUTE_ARTIST}/$artistId"
     }
 
+    data object Playlist : HomeSection("${ROUTE_PLAYLIST}/{${ARG_PLAYLIST_ID}}") {
+        fun createRoute(playlistId: String) = "${ROUTE_PLAYLIST}/$playlistId"
+    }
+
     companion object {
         const val ROUTE_FEED = "${Screen.ROUTE_HOME}/list"
         const val ROUTE_ALBUM = "${Screen.ROUTE_HOME}/album"
         const val ROUTE_ARTIST = "${Screen.ROUTE_HOME}/artist"
+        const val ROUTE_PLAYLIST = "${Screen.ROUTE_HOME}/playlist"
 
         const val ARG_ALBUM_ID = "album_id"
         const val ARG_ARTIST_ID = "artist_id"
+        const val ARG_PLAYLIST_ID = "playlist_id"
     }
 }
 
@@ -51,6 +58,9 @@ fun HomeContainer(
             onArtistSelected = { artistId, from ->
                 appState.navigateToArtist(artistId, from)
             },
+            onPlaylistSelected = { playlistId, from ->
+                appState.navigateToPlaylist(playlistId, from)
+            },
             navigateBack = appState::navigateBack,
             onShowSnackBar = onShowSnackBar
         )
@@ -61,6 +71,7 @@ fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
     onAlbumSelected: (String, NavBackStackEntry) -> Unit,
     onArtistSelected: (String, NavBackStackEntry) -> Unit,
+    onPlaylistSelected: (String, NavBackStackEntry) -> Unit,
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
@@ -93,6 +104,20 @@ fun NavGraphBuilder.addHomeGraph(
             },
             navigateToArtist = { artistId ->
                 onArtistSelected(artistId, from)
+            },
+            navigateToPlaylist = { playlistId ->
+                onPlaylistSelected(playlistId, from)
+            },
+            navigateBack = navigateBack,
+            onShowSnackBar = onShowSnackBar
+        )
+    }
+
+    composable(HomeSection.Playlist.route) { from ->
+        PlaylistDetailScreen(
+            modifier = modifier,
+            navigateToPlaylist = { playlistId ->
+                onPlaylistSelected(playlistId, from)
             },
             navigateBack = navigateBack,
             onShowSnackBar = onShowSnackBar
