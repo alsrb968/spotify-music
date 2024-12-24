@@ -37,4 +37,14 @@ class ToggleFavoriteUseCase @Inject constructor(
             return true
         }
     }
+
+    suspend fun toggleFavoritePlaylist(playlistName: String, imageUrl: String?): Boolean {
+        if (repository.isFavorite(playlistName, "playlist").first()) {
+            repository.deleteFavorite(playlistName, "playlist")
+            return false
+        } else {
+            repository.insertFavorite(Favorite(playlistName, "playlist", imageUrl))
+            return true
+        }
+    }
 }

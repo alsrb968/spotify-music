@@ -80,7 +80,7 @@ fun ScrollableTopBarSurface(
     title: String,
     contentHorizonPadding: Dp = 16.dp,
     contentSpaceBy: Dp = 32.dp,
-    contentBottomPadding: Dp = 200.dp,
+    contentBottomPadding: Dp = 150.dp,
     content: @Composable () -> Unit,
 ) {
     val listState = rememberLazyListState()

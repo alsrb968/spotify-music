@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.design.extension.darkenColor
+import com.litbig.spotify.core.domain.extension.combine
 import com.litbig.spotify.core.domain.model.remote.AlbumDetails
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
@@ -32,6 +33,7 @@ sealed interface AlbumDetailUiState {
         val artists: List<ArtistUiModel>,
         val tracks: List<TrackUiModel>,
         val playlists: List<PlaylistUiModel>,
+        val isFavorite: Boolean,
         val playingTrackId: String?,
     ) : AlbumDetailUiState
 }
@@ -43,10 +45,18 @@ sealed interface AlbumDetailUiIntent {
     data class AddTracks(val trackIds: List<String>) : AlbumDetailUiIntent
     data class ToggleFavoriteAlbum(val albumId: String) : AlbumDetailUiIntent
     data class ToggleFavoriteTrack(val trackId: String) : AlbumDetailUiIntent
+    data class NavigateToAlbumDetail(val albumId: String) : AlbumDetailUiIntent
+    data class NavigateToArtistDetail(val artistId: String) : AlbumDetailUiIntent
+    data class NavigateToPlaylistDetail(val playlistId: String) : AlbumDetailUiIntent
+    data object NavigateBack : AlbumDetailUiIntent
     data class SetDominantColor(val color: Color) : AlbumDetailUiIntent
 }
 
 sealed interface AlbumDetailUiEffect {
+    data class NavigateToAlbumDetail(val albumId: String) : AlbumDetailUiEffect
+    data class NavigateToArtistDetail(val artistId: String) : AlbumDetailUiEffect
+    data class NavigateToPlaylistDetail(val playlistId: String) : AlbumDetailUiEffect
+    data object NavigateBack : AlbumDetailUiEffect
     data class ShowToast(val message: String) : AlbumDetailUiEffect
 }
 
@@ -64,15 +74,17 @@ class AlbumDetailViewModel @Inject constructor(
     private val albumDetails = MutableStateFlow<AlbumDetails?>(null)
     private val artistDetailsList = MutableStateFlow<List<ArtistDetails>>(emptyList())
     private val playlistDetailsList = MutableStateFlow<List<PlaylistDetails>>(emptyList())
+    private val isFavorite = MutableStateFlow(false)
     private val dominantColor = MutableStateFlow(Color.Transparent)
 
     val state: StateFlow<AlbumDetailUiState> = combine(
         albumDetails,
         artistDetailsList,
         playlistDetailsList,
+        isFavorite,
         dominantColor,
         spotifyRepository.currentMediaItem,
-    ) { album, artists, playlists, color, currentItem ->
+    ) { album, artists, playlists, isFav, color, currentItem ->
         if (album == null) {
             return@combine AlbumDetailUiState.Loading
         }
@@ -85,6 +97,7 @@ class AlbumDetailViewModel @Inject constructor(
             tracks = album.tracks?.items?.map {
                 TrackUiModel.from(it).copy(imageUrl = imageUrl)
             } ?: emptyList(),
+            isFavorite = isFav,
             playingTrackId = currentItem
         )
     }.stateIn(
@@ -116,6 +129,11 @@ class AlbumDetailViewModel @Inject constructor(
                     playlistDetailsList.value = spotifyRepository.searchPlaylistOfArtist(albumName) ?: emptyList()
                 }
             }
+            launch {
+                isFavoriteUseCase.isFavoriteAlbum(albumId).collectLatest { isFav ->
+                    isFavorite.value = isFav
+                }
+            }
         }
 
         handleIntents()
@@ -131,6 +149,10 @@ class AlbumDetailViewModel @Inject constructor(
                     is AlbumDetailUiIntent.AddTracks -> addPlaylists(intent.trackIds)
                     is AlbumDetailUiIntent.ToggleFavoriteAlbum -> toggleFavoriteAlbum(intent.albumId)
                     is AlbumDetailUiIntent.ToggleFavoriteTrack -> toggleFavoriteTrack(intent.trackId)
+                    is AlbumDetailUiIntent.NavigateToAlbumDetail -> navigateToAlbumDetail(intent.albumId)
+                    is AlbumDetailUiIntent.NavigateToArtistDetail -> navigateToArtistDetail(intent.artistId)
+                    is AlbumDetailUiIntent.NavigateToPlaylistDetail -> navigateToPlaylistDetail(intent.playlistId)
+                    is AlbumDetailUiIntent.NavigateBack -> navigateBack()
                     is AlbumDetailUiIntent.SetDominantColor -> setDominantColor(intent.color)
                 }
             }
@@ -141,14 +163,6 @@ class AlbumDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _intent.emit(intent)
         }
-    }
-
-    fun isFavoriteTrack(trackId: String): Flow<Boolean> {
-        return isFavoriteUseCase.isFavoriteTrack(trackId)
-    }
-
-    fun isFavoriteAlbum(albumId: String): Flow<Boolean> {
-        return isFavoriteUseCase.isFavoriteAlbum(albumId)
     }
 
     private fun playTrack(trackId: String) {
@@ -187,6 +201,22 @@ class AlbumDetailViewModel @Inject constructor(
                 _effect.emit(AlbumDetailUiEffect.ShowToast("Removed from favorite"))
             }
         }
+    }
+
+    private fun navigateToAlbumDetail(albumId: String) {
+        _effect.tryEmit(AlbumDetailUiEffect.NavigateToAlbumDetail(albumId))
+    }
+
+    private fun navigateToArtistDetail(artistId: String) {
+        _effect.tryEmit(AlbumDetailUiEffect.NavigateToArtistDetail(artistId))
+    }
+
+    private fun navigateToPlaylistDetail(playlistId: String) {
+        _effect.tryEmit(AlbumDetailUiEffect.NavigateToPlaylistDetail(playlistId))
+    }
+
+    private fun navigateBack() {
+        _effect.tryEmit(AlbumDetailUiEffect.NavigateBack)
     }
 
     private fun setDominantColor(color: Color) {

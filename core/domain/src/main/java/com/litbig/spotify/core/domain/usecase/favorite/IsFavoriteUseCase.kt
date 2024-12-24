@@ -18,4 +18,8 @@ class IsFavoriteUseCase @Inject constructor(
     fun isFavoriteArtist(artistName: String): Flow<Boolean> {
         return repository.isFavorite(artistName, "artist")
     }
+
+    fun isFavoritePlaylist(playlistName: String): Flow<Boolean> {
+        return repository.isFavorite(playlistName, "playlist")
+    }
 }

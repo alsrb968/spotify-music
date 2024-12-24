@@ -1,15 +1,8 @@
-@file:OptIn(
-    ExperimentalFoundationApi::class
-)
-@file:Suppress("UNNECESSARY_SAFE_CALL", "USELESS_ELVIS")
+@file:Suppress("UNNECESSARY_SAFE_CALL")
 
 package com.litbig.spotify.ui.home.album
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
@@ -17,7 +10,6 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowCircleDown
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,7 +23,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,12 +45,14 @@ import com.litbig.spotify.ui.tooling.*
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
+    navigateToAlbum: (String) -> Unit,
+    navigateToArtist: (String) -> Unit,
+    navigateToPlaylist: (String) -> Unit,
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
@@ -68,6 +61,10 @@ fun AlbumDetailScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
+                is AlbumDetailUiEffect.NavigateToAlbumDetail -> navigateToAlbum(effect.albumId)
+                is AlbumDetailUiEffect.NavigateToArtistDetail -> navigateToArtist(effect.artistId)
+                is AlbumDetailUiEffect.NavigateToPlaylistDetail -> navigateToPlaylist(effect.playlistId)
+                is AlbumDetailUiEffect.NavigateBack -> navigateBack()
                 is AlbumDetailUiEffect.ShowToast -> onShowSnackBar(effect.message)
             }
         }
@@ -92,26 +89,30 @@ fun AlbumDetailScreen(
                 artists = s.artists,
                 tracks = s.tracks,
                 playlists = s.playlists,
-                playingTrackId = s.playingTrackId,
-                onPlayTrack = { trackId ->
-                    viewModel.sendIntent(AlbumDetailUiIntent.PlayTrack(trackId))
+                isFavorite = s.isFavorite,
+                onPlayTracks = { viewModel.sendIntent(AlbumDetailUiIntent.PlayTracks(it)) },
+                onToggleFavoriteAlbum = {
+                    viewModel.sendIntent(
+                        AlbumDetailUiIntent.ToggleFavoriteAlbum(
+                            it
+                        )
+                    )
                 },
-                onPlayTracks = { trackIds ->
-                    viewModel.sendIntent(AlbumDetailUiIntent.PlayTracks(trackIds))
+                navigateToArtist = {
+                    viewModel.sendIntent(
+                        AlbumDetailUiIntent.NavigateToArtistDetail(
+                            it
+                        )
+                    )
                 },
-                onAddTrack = { trackId ->
-                    viewModel.sendIntent(AlbumDetailUiIntent.AddTrack(trackId))
+                navigateToPlaylist = {
+                    viewModel.sendIntent(
+                        AlbumDetailUiIntent.NavigateToPlaylistDetail(
+                            it
+                        )
+                    )
                 },
-                onAddTracks = { trackIds ->
-                    viewModel.sendIntent(AlbumDetailUiIntent.AddTracks(trackIds))
-                },
-                onToggleFavoriteAlbum = { albumId ->
-                    viewModel.sendIntent(AlbumDetailUiIntent.ToggleFavoriteAlbum(albumId))
-                },
-                onToggleFavoriteTrack = { trackId ->
-                    viewModel.sendIntent(AlbumDetailUiIntent.ToggleFavoriteTrack(trackId))
-                },
-                navigateBack = navigateBack
+                navigateBack = { viewModel.sendIntent(AlbumDetailUiIntent.NavigateBack) },
             )
         }
     }
@@ -124,13 +125,11 @@ fun AlbumDetailScreen(
     artists: List<ArtistUiModel>,
     tracks: List<TrackUiModel>,
     playlists: List<PlaylistUiModel>,
-    playingTrackId: String?,
-    onPlayTrack: (String) -> Unit,
+    isFavorite: Boolean,
     onPlayTracks: (List<String>) -> Unit,
-    onAddTrack: (String) -> Unit,
-    onAddTracks: (List<String>) -> Unit,
     onToggleFavoriteAlbum: (String) -> Unit,
-    onToggleFavoriteTrack: (String) -> Unit,
+    navigateToArtist: (String) -> Unit,
+    navigateToPlaylist: (String) -> Unit,
     navigateBack: () -> Unit,
 ) {
     ScrollableTopBarSurface(
@@ -144,12 +143,17 @@ fun AlbumDetailScreen(
                 modifier = mod,
                 album = album,
                 artists = artists,
-                tracksTotalTime = album.totalTime,
+                isFavorite = isFavorite,
+                onAddFavorite = { onToggleFavoriteAlbum(album.id) },
+                onDownload = { /* todo */ },
+                onMore = { /* todo */ },
+                onShuffle = { /* todo */ },
                 onPlayTracks = {
                     tracks.map { track -> track.id }?.let {
                         onPlayTracks(it)
                     }
-                }
+                },
+                navigateToTrack = { /* todo */ }
             )
         }
     ) {
@@ -160,7 +164,7 @@ fun AlbumDetailScreen(
 
         ListTitle(
             title = SimpleDateFormat("M월 d일, yyyy", Locale.KOREA)
-            .format(album.releaseDate)
+                .format(album.releaseDate)
         )
 
         Column(
@@ -172,7 +176,7 @@ fun AlbumDetailScreen(
                     imageSize = 60.dp,
                     shape = CircleShape,
                     title = artist.name,
-                    onClick = { /* todo */ }
+                    onClick = { navigateToArtist(artist.id) }
                 )
             }
         }
@@ -180,7 +184,7 @@ fun AlbumDetailScreen(
         ListTitle(title = "이건 어떠신가요") {
             PlaylistInfo(
                 playlists = playlists,
-                onPlaylist = { /* todo */ }
+                onPlaylist = navigateToPlaylist
             )
         }
 
@@ -200,8 +204,13 @@ fun AlbumInfoTitle(
     modifier: Modifier = Modifier,
     album: AlbumUiModel,
     artists: List<ArtistUiModel>?,
-    tracksTotalTime: Long,
+    isFavorite: Boolean,
+    onAddFavorite: () -> Unit,
+    onDownload: () -> Unit,
+    onMore: () -> Unit,
+    onShuffle: () -> Unit,
     onPlayTracks: () -> Unit,
+    navigateToTrack: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -210,17 +219,11 @@ fun AlbumInfoTitle(
     ) {
         ArtistsOfAlbum(
             artists = artists ?: emptyList(),
-            onClick = { /* todo */ }
+            onClick = navigateToTrack
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val duration = tracksTotalTime.milliseconds
-        val time = if (duration.inWholeHours > 0) {
-            "%s시간 %s분".format(duration.inWholeHours, duration.inWholeMinutes % 60)
-        } else {
-            "%s분".format(duration.inWholeMinutes)
-        }
         val type = when (album.albumType) {
             "album" -> "앨범"
             "single" -> "싱글"
@@ -240,18 +243,13 @@ fun AlbumInfoTitle(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = { /* todo */ }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.AddCircleOutline,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            FavoriteButton(
+                isFavorite = isFavorite,
+                onClick = { onAddFavorite() }
+            )
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = onDownload
             ) {
                 Icon(
                     imageVector = Icons.Outlined.ArrowCircleDown,
@@ -260,8 +258,8 @@ fun AlbumInfoTitle(
                 )
             }
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = onMore
             ) {
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
@@ -272,8 +270,8 @@ fun AlbumInfoTitle(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = onShuffle
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.property_1_shuffle_on),
@@ -426,13 +424,11 @@ private fun AlbumDetailScreenPreview() {
             artists = PreviewArtistUiModels,
             tracks = PreviewTrackUiModels,
             playlists = PreviewPlaylistUiModels,
-            playingTrackId = null,
-            onPlayTrack = {},
+            isFavorite = false,
             onPlayTracks = {},
-            onAddTrack = {},
-            onAddTracks = {},
             onToggleFavoriteAlbum = {},
-            onToggleFavoriteTrack = {},
+            navigateToArtist = {},
+            navigateToPlaylist = {},
             navigateBack = {}
         )
     }

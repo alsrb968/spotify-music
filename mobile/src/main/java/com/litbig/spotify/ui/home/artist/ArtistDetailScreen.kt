@@ -44,6 +44,7 @@ import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.*
+import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -58,6 +59,19 @@ fun ArtistDetailScreen(
     onShowSnackBar: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is ArtistDetailUiEffect.NavigateBack -> navigateBack()
+                is ArtistDetailUiEffect.NavigateToTrackDetail -> { /* todo */ }
+                is ArtistDetailUiEffect.NavigateToAlbumDetail -> navigateToAlbum(effect.albumId)
+                is ArtistDetailUiEffect.NavigateToArtistDetail -> navigateToArtist(effect.artistId)
+                is ArtistDetailUiEffect.NavigateToPlaylistDetail -> navigateToPlaylist(effect.playlistId)
+                is ArtistDetailUiEffect.ShowToast -> onShowSnackBar(effect.message)
+            }
+        }
+    }
 
     when (val s = state) {
         is ArtistDetailUiState.Loading -> {
@@ -79,10 +93,13 @@ fun ArtistDetailScreen(
                 topTracks = s.topTracks,
                 playlists = s.playlists,
                 otherArtists = s.otherArtists,
-                navigateToAlbum = navigateToAlbum,
-                navigateToArtist = navigateToArtist,
-                navigateToPlaylist = navigateToPlaylist,
-                navigateBack = navigateBack,
+                isFavorite = s.isFavorite,
+                toggleFavorite = { viewModel.sendIntent(ArtistDetailUiIntent.ToggleFavorite) },
+                playTracks = { viewModel.sendIntent(ArtistDetailUiIntent.PlayTracks) },
+                navigateToAlbum = { viewModel.sendIntent(ArtistDetailUiIntent.NavigateToAlbumDetail(it)) },
+                navigateToArtist = { viewModel.sendIntent(ArtistDetailUiIntent.NavigateToArtistDetail(it)) },
+                navigateToPlaylist = { viewModel.sendIntent(ArtistDetailUiIntent.NavigateToPlaylistDetail(it)) },
+                navigateBack = { viewModel.sendIntent(ArtistDetailUiIntent.NavigateBack) },
             )
         }
     }
@@ -96,6 +113,9 @@ fun ArtistDetailScreen(
     topTracks: List<TrackUiModel>,
     playlists: List<PlaylistUiModel>,
     otherArtists: List<ArtistUiModel>,
+    isFavorite: Boolean,
+    toggleFavorite: () -> Unit,
+    playTracks: () -> Unit,
     navigateToAlbum: (String) -> Unit,
     navigateToArtist: (String) -> Unit,
     navigateToPlaylist: (String) -> Unit,
@@ -111,6 +131,11 @@ fun ArtistDetailScreen(
             ArtistInfoTitle(
                 modifier = it,
                 artist = artist,
+                isFavorite = isFavorite,
+                onFavorite = toggleFavorite,
+                onMore = { /* todo */ },
+                onShuffle = { /* todo */ },
+                onPlay = playTracks
             )
         }
     ) {
@@ -174,6 +199,11 @@ fun ArtistDetailScreen(
 fun ArtistInfoTitle(
     modifier: Modifier = Modifier,
     artist: ArtistUiModel,
+    isFavorite: Boolean,
+    onFavorite: () -> Unit,
+    onMore: () -> Unit,
+    onShuffle: () -> Unit,
+    onPlay: () -> Unit,
 ) {
     val follower = artist.follower
     val formattedFollower = "월별 청취자 " +
@@ -208,14 +238,14 @@ fun ArtistInfoTitle(
         ) {
             BorderButton(
                 shape = RoundedCornerShape(4.dp),
-                isActive = false,
-                onClick = { /* todo */ }
+                isActive = isFavorite,
+                onClick = onFavorite,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = onMore
             ) {
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
@@ -226,8 +256,8 @@ fun ArtistInfoTitle(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = onShuffle
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.property_1_shuffle_on),
@@ -239,7 +269,7 @@ fun ArtistInfoTitle(
             FloatingActionButton(
                 modifier = Modifier,
                 shape = CircleShape,
-                onClick = { /* todo */ },
+                onClick = onPlay,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -575,6 +605,9 @@ private fun ArtistDetailScreenPreview() {
             topTracks = PreviewTrackUiModels,
             playlists = PreviewPlaylistUiModels,
             otherArtists = PreviewArtistUiModels,
+            isFavorite = false,
+            toggleFavorite = { },
+            playTracks = { },
             navigateToAlbum = { },
             navigateToArtist = { },
             navigateToPlaylist = { },
@@ -587,7 +620,14 @@ private fun ArtistDetailScreenPreview() {
 @Composable
 private fun ArtistInfoTitlePreview() {
     SpotifyTheme {
-        ArtistInfoTitle(artist = PreviewArtistUiModel)
+        ArtistInfoTitle(
+            artist = PreviewArtistUiModel,
+            isFavorite = false,
+            onFavorite = { },
+            onMore = { },
+            onShuffle = { },
+            onPlay = { }
+        )
     }
 }
 

@@ -91,6 +91,15 @@ fun NavGraphBuilder.addHomeGraph(
     composable(HomeSection.Album.route) { from ->
         AlbumDetailScreen(
             modifier = modifier,
+            navigateToAlbum = { albumId ->
+                onAlbumSelected(albumId, from)
+            },
+            navigateToArtist = { artistId ->
+                onArtistSelected(artistId, from)
+            },
+            navigateToPlaylist = { playlistId ->
+                onPlaylistSelected(playlistId, from)
+            },
             navigateBack = navigateBack,
             onShowSnackBar = onShowSnackBar
         )

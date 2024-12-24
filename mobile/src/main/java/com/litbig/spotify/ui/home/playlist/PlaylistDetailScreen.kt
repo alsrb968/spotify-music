@@ -1,18 +1,12 @@
 package com.litbig.spotify.ui.home.playlist
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowCircleDown
 import androidx.compose.material.icons.outlined.MoreVert
@@ -32,11 +26,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
+import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
-import com.litbig.spotify.ui.components.ListItemHorizontalMedium
-import com.litbig.spotify.ui.components.ListItemVerticalMedium
-import com.litbig.spotify.ui.components.ListTitle
-import com.litbig.spotify.ui.components.ScrollableTopBarSurface
+import com.litbig.spotify.ui.components.*
 import com.litbig.spotify.ui.home.artist.SimpleTopTrackListInfo
 import com.litbig.spotify.ui.models.OwnerUiModel
 import com.litbig.spotify.ui.models.PlaylistUiModel
@@ -44,6 +36,7 @@ import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.*
+import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
@@ -58,10 +51,29 @@ fun PlaylistDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is PlaylistDetailUiEffect.NavigateBack -> navigateBack()
+                is PlaylistDetailUiEffect.NavigateToPlaylistDetail -> navigateToPlaylist(effect.playlistId)
+                is PlaylistDetailUiEffect.NavigateToOwnerDetail -> {
+                    /* todo */
+                }
+
+                is PlaylistDetailUiEffect.NavigateToTracks -> {
+                    /* todo */
+                }
+
+                is PlaylistDetailUiEffect.ShowToast -> onShowSnackBar(effect.message)
+            }
+        }
+    }
+
     when (val s = state) {
         PlaylistDetailUiState.Loading -> {
             Loading(modifier = modifier.fillMaxSize())
         }
+
         is PlaylistDetailUiState.Ready -> {
 
             val context = LocalContext.current
@@ -76,8 +88,18 @@ fun PlaylistDetailScreen(
                 tracks = s.tracks,
                 otherPlaylists = s.otherPlaylists,
                 owner = s.owner,
-                navigateToPlaylist = navigateToPlaylist,
-                navigateBack = navigateBack,
+                isFavorite = s.isFavorite,
+                actions = PlayListDetailsActions(
+                    onBack = { viewModel.sendIntent(PlaylistDetailUiIntent.Back) },
+                    onOwner = { viewModel.sendIntent(PlaylistDetailUiIntent.SelectOwner) },
+                    onFavorite = { viewModel.sendIntent(PlaylistDetailUiIntent.ToggleFavorite) },
+                    onDownload = { viewModel.sendIntent(PlaylistDetailUiIntent.DownloadTracks) },
+                    onMore = { viewModel.sendIntent(PlaylistDetailUiIntent.ShowMore) },
+                    onShuffle = { /* todo */ },
+                    onPlay = { viewModel.sendIntent(PlaylistDetailUiIntent.PlayTracks) },
+                    onTracks = { viewModel.sendIntent(PlaylistDetailUiIntent.SelectTracks) },
+                    onPlaylist = { viewModel.sendIntent(PlaylistDetailUiIntent.SelectPlaylist(it)) },
+                ),
             )
         }
     }
@@ -90,27 +112,29 @@ fun PlaylistDetailScreen(
     tracks: List<TrackUiModel>,
     otherPlaylists: List<PlaylistUiModel>,
     owner: OwnerUiModel,
-    navigateToPlaylist: (String) -> Unit,
-    navigateBack: () -> Unit,
+    isFavorite: Boolean,
+    actions: PlayListDetailsActions,
 ) {
     ScrollableTopBarSurface(
         modifier = modifier,
         imageUrl = playlist.imageUrl,
         dominantColor = playlist.dominantColor,
         title = playlist.name,
-        onBack = navigateBack,
+        onBack = { actions.onBack() },
         header = {
             PlaylistInfoTitle(
                 modifier = it,
                 playlist = playlist,
                 tracks = tracks,
                 owner = owner,
+                isFavorite = isFavorite,
+                actions = actions,
             )
         }
     ) {
         SimpleTopTrackListInfo(
             tracks = tracks,
-            onClick = { /* todo */ }
+            onClick = { actions.onTracks() }
         )
 
         ListTitle(title = "다른 추천 항목") {
@@ -132,7 +156,7 @@ fun PlaylistDetailScreen(
                         imageUrl = other.imageUrl,
                         title = other.name,
                         subtitle = other.description,
-                        onClick = { navigateToPlaylist(other.id) }
+                        onClick = { actions.onPlaylist(other.id) }
                     )
                 }
             }
@@ -147,6 +171,8 @@ fun PlaylistInfoTitle(
     playlist: PlaylistUiModel,
     tracks: List<TrackUiModel>,
     owner: OwnerUiModel,
+    isFavorite: Boolean,
+    actions: PlayListDetailsActions,
 ) {
     Column(
         modifier = modifier
@@ -162,7 +188,8 @@ fun PlaylistInfoTitle(
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier,
+            modifier = Modifier
+                .clickableScaled { actions.onOwner() },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -221,18 +248,13 @@ fun PlaylistInfoTitle(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = { /* todo */ }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.AddCircleOutline,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            FavoriteButton(
+                isFavorite = isFavorite,
+                onClick = { actions.onFavorite() }
+            )
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = { actions.onDownload() }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.ArrowCircleDown,
@@ -241,8 +263,8 @@ fun PlaylistInfoTitle(
                 )
             }
 
-            IconButton(
-                onClick = { /* todo */ }
+            ScalableIconButton(
+                onClick = { actions.onMore() }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
@@ -254,7 +276,7 @@ fun PlaylistInfoTitle(
             Spacer(modifier = Modifier.weight(1f))
 
             IconButton(
-                onClick = { /* todo */ }
+                onClick = { actions.onShuffle() }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.property_1_shuffle_on),
@@ -266,7 +288,7 @@ fun PlaylistInfoTitle(
             FloatingActionButton(
                 modifier = Modifier,
                 shape = CircleShape,
-                onClick = { /* todo */ },
+                onClick = { actions.onPlay() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -282,6 +304,18 @@ fun PlaylistInfoTitle(
     }
 }
 
+data class PlayListDetailsActions(
+    val onBack: () -> Unit,
+    val onOwner: () -> Unit,
+    val onFavorite: () -> Unit,
+    val onDownload: () -> Unit,
+    val onMore: () -> Unit,
+    val onShuffle: () -> Unit,
+    val onPlay: () -> Unit,
+    val onTracks: () -> Unit,
+    val onPlaylist: (String) -> Unit,
+)
+
 @DevicePreviews
 @Composable
 private fun PlaylistDetailScreenPreview() {
@@ -291,8 +325,18 @@ private fun PlaylistDetailScreenPreview() {
             tracks = PreviewTrackUiModels,
             otherPlaylists = PreviewPlaylistUiModels,
             owner = PreviewOwnerUiModel,
-            navigateToPlaylist = {},
-            navigateBack = {},
+            isFavorite = true,
+            actions = PlayListDetailsActions(
+                onBack = {},
+                onOwner = {},
+                onFavorite = {},
+                onDownload = {},
+                onMore = {},
+                onShuffle = {},
+                onPlay = {},
+                onTracks = {},
+                onPlaylist = {},
+            ),
         )
     }
 }
