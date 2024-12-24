@@ -1,4 +1,5 @@
 @file:Suppress("UNNECESSARY_SAFE_CALL")
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.litbig.spotify.ui.home.album
 
@@ -12,9 +13,7 @@ import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowCircleDown
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -153,7 +152,7 @@ fun AlbumDetailScreen(
                         onPlayTracks(it)
                     }
                 },
-                navigateToTrack = { /* todo */ }
+                navigateToArtist = navigateToArtist
             )
         }
     ) {
@@ -203,23 +202,37 @@ fun AlbumDetailScreen(
 fun AlbumInfoTitle(
     modifier: Modifier = Modifier,
     album: AlbumUiModel,
-    artists: List<ArtistUiModel>?,
+    artists: List<ArtistUiModel>,
     isFavorite: Boolean,
     onAddFavorite: () -> Unit,
     onDownload: () -> Unit,
     onMore: () -> Unit,
     onShuffle: () -> Unit,
     onPlayTracks: () -> Unit,
-    navigateToTrack: () -> Unit,
+    navigateToArtist: (String) -> Unit,
 ) {
+    var isShowBottomSheet by remember { mutableStateOf(false) }
+    if (isShowBottomSheet) {
+        ArtistsBottomSheet(
+            artists = artists,
+            onArtistSelected = navigateToArtist,
+            onShow = { isShowBottomSheet = it }
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
     ) {
         ArtistsOfAlbum(
-            artists = artists ?: emptyList(),
-            onClick = navigateToTrack
+            artists = artists,
+            onClick = {
+                if (artists.size == 1) {
+                    navigateToArtist(artists.first().id)
+                } else {
+                    isShowBottomSheet = true
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
