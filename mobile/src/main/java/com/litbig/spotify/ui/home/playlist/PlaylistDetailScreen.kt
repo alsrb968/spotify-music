@@ -6,8 +6,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.ArrowCircleDown
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
@@ -46,6 +48,7 @@ fun PlaylistDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: PlaylistDetailViewModel = hiltViewModel(),
     navigateToPlaylist: (String) -> Unit,
+    navigateToTracks: (String) -> Unit,
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
@@ -60,10 +63,7 @@ fun PlaylistDetailScreen(
                     /* todo */
                 }
 
-                is PlaylistDetailUiEffect.NavigateToTracks -> {
-                    /* todo */
-                }
-
+                is PlaylistDetailUiEffect.NavigateToTracks -> navigateToTracks(effect.playlistId)
                 is PlaylistDetailUiEffect.ShowToast -> onShowSnackBar(effect.message)
             }
         }

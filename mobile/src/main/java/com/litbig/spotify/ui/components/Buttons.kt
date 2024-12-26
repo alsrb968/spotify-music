@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -84,11 +85,18 @@ fun ScalableIconButton(
         label = "IconButtonScale"
     )
 
+    val alpha by animateFloatAsState(
+        targetValue = if (isPressed) 0.8f else 1f,
+        animationSpec = tween(100),
+        label = "IconButtonAlpha"
+    )
+
     Box(
         modifier = modifier
             .size(48.dp)
             .padding(4.dp)
             .scale(scale) // Scale 애니메이션 적용
+            .alpha(alpha) // Pressed 상태일 때 투명도 조절
             .clickable(
                 interactionSource = interactionSource,
                 indication = null, // Ripple 제거

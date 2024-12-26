@@ -28,6 +28,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.litbig.spotify.R
 import com.litbig.spotify.ui.home.HomeSection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 sealed class Screen(
     @StringRes val title: Int,
@@ -114,6 +117,14 @@ class SpotifyAppState(
     fun navigateToPlaylist(playlistId: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate(HomeSection.Playlist.createRoute(Uri.encode(playlistId)))
+        }
+    }
+
+    fun navigateToTracks(playlistId: String, from: NavBackStackEntry) {
+        CoroutineScope(Dispatchers.Main).launch {
+            if (from.lifecycleIsResumed()) {
+                navController.navigate(HomeSection.Tracks.createRoute(Uri.encode(playlistId)))
+            }
         }
     }
 
