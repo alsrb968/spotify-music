@@ -44,6 +44,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
@@ -100,6 +101,7 @@ androidx-compose = [
     "androidx-constraintlayout-compose",
     "androidx-hilt-compose",
     "androidx-ui",
+    "androidx-ui-fonts",
     "androidx-ui-graphics",
     "androidx-ui-tooling-preview",
     "androidx-material3",
