@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
 import com.litbig.spotify.ui.home.HomeSection
@@ -125,6 +126,6 @@ class TracksViewModel @Inject constructor(
     }
 
     private fun setDominantColor(color: Color) {
-        dominantColor.value = color
+        dominantColor.value = color.darkenColor(0.5f)
     }
 }

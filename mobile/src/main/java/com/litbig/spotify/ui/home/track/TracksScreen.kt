@@ -1,28 +1,24 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.litbig.spotify.ui.home.track
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
-import com.litbig.spotify.core.design.extension.gradientBackground
-import com.litbig.spotify.ui.components.ListItemVerticalMedium
-import com.litbig.spotify.ui.components.ScalableIconButton
-import com.litbig.spotify.ui.components.ScrollableTopBarSurface
+import com.litbig.spotify.ui.components.*
 import com.litbig.spotify.ui.models.TrackUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
@@ -41,7 +37,7 @@ fun TracksScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(viewModel.effect) {
+    LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is TracksUiEffect.NavigateBack -> navigateBack()
@@ -88,17 +84,13 @@ fun TracksScreen(
 ) {
     ScrollableTopBarSurface(
         modifier = modifier,
+        expandStyle = TopBarExpandStyle.TRACK,
         onBack = navigateBack,
         header = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .gradientBackground(
-                        ratio = 0.5f,
-                        startColor = dominantColor,
-                        endColor = MaterialTheme.colorScheme.background,
-                    )
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 Text(
                     modifier = Modifier
@@ -132,32 +124,72 @@ fun TrackItem(
     onClick: () -> Unit,
     onMore: () -> Unit,
 ) {
-    Row(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(8.dp),
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        ListItemVerticalMedium(
-            modifier = Modifier
-                .weight(1f),
-            imageUrl = track.imageUrl,
-            imageSize = 70.dp,
-            title = track.name,
-            subtitle = track.artists,
-            onClick = onClick,
+    var isShowBottomSheet by remember { mutableStateOf(false) }
+    if (isShowBottomSheet) {
+        MenuBottomSheet(
+            modifier = Modifier,
+            onShow = { isShowBottomSheet = it },
+            header = {
+                ListItemVerticalMedium(
+                    imageUrl = track.imageUrl,
+                    imageSize = 50.dp,
+                    shape = RectangleShape,
+                    title = track.name,
+                    subtitle = track.artists,
+                    onClick = {},
+                )
+            },
+            content = {
+                MenuIconItem(
+                    imageVector = Icons.Default.Favorite,
+                    title = "좋아요 표시한 곡에 추가",
+                )
+                MenuIconItem(
+                    imageVector = Icons.Default.AddCircleOutline,
+                    title = "플레이리스트에 추가",
+                )
+                MenuIconItem(
+                    imageVector = Icons.Default.PermIdentity,
+                    title = "아티스트로 이동하기",
+                )
+                MenuIconItem(
+                    imageVector = Icons.Default.Share,
+                    title = "공유",
+                )
+            }
         )
+    }
 
-        ScalableIconButton(
-            onClick = onMore,
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(6.dp),
+    ) {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More",
-                tint = MaterialTheme.colorScheme.onSurface,
+            ListItemVerticalMedium(
+                modifier = Modifier
+                    .weight(1f),
+                imageUrl = track.imageUrl,
+                imageSize = 70.dp,
+                shape = RectangleShape,
+                title = track.name,
+                subtitle = track.artists,
+                onClick = onClick,
             )
+
+            ScalableIconButton(
+                onClick = {
+                    isShowBottomSheet = true
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 }

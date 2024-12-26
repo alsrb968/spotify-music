@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -23,10 +26,7 @@ import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.ui.theme.SpotifyTheme
-import com.litbig.spotify.ui.tooling.DevicePreviews
-import com.litbig.spotify.ui.tooling.PreviewArtistUiModel
-import com.litbig.spotify.ui.tooling.PreviewFeedUiModel
-import com.litbig.spotify.ui.tooling.PreviewTrackUiModel
+import com.litbig.spotify.ui.tooling.*
 
 @Composable
 fun ListTitle(
@@ -78,6 +78,7 @@ fun ListItemVerticalMedium(
     shape: Shape = RoundedCornerShape(4.dp),
     title: String,
     subtitle: String? = null,
+    placeholder: Painter = rememberVectorPainter(image = Icons.Default.Album),
     onClick: () -> Unit,
 ) {
     Row(
@@ -92,7 +93,7 @@ fun ListItemVerticalMedium(
                 .clip(shape),
             model = imageUrl,
             contentDescription = "Thumbnail",
-            placeholder = rememberVectorPainter(image = Icons.Default.Album),
+            placeholder = placeholder,
             error = rememberVectorPainter(image = Icons.Default.Error),
         )
 
@@ -129,6 +130,7 @@ fun ListItemHorizontalMedium(
     shape: Shape = RectangleShape,
     title: String,
     subtitle: String? = null,
+    placeholder: Painter = rememberVectorPainter(image = Icons.Default.Album),
     onClick: () -> Unit,
 ) {
     Column(
@@ -144,7 +146,7 @@ fun ListItemHorizontalMedium(
             model = imageUrl,
             contentDescription = "Thumbnail",
             contentScale = ContentScale.Crop,
-            placeholder = rememberVectorPainter(image = Icons.Default.Album),
+            placeholder = placeholder,
             error = rememberVectorPainter(image = Icons.Default.Error),
         )
 
@@ -172,6 +174,32 @@ fun ListItemHorizontalMedium(
     }
 }
 
+@Composable
+fun MenuIconItem(
+    modifier: Modifier = Modifier,
+    imageVector: ImageVector,
+    title: String,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = title,
+            tint = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
 @DevicePreviews
 @Composable
 private fun ListTitlePreview() {
@@ -192,6 +220,7 @@ private fun ListItemVerticalMediumPreview() {
             imageUrl = null,
             title = PreviewTrackUiModel.name,
             subtitle = PreviewTrackUiModel.artists,
+            placeholder = PreviewAlbumArt(),
             onClick = {}
         )
     }
@@ -205,7 +234,19 @@ private fun ListItemHorizontalMediumPreview() {
             imageUrl = null,
             title = PreviewTrackUiModel.name + PreviewTrackUiModel.name + PreviewTrackUiModel.name,
             subtitle = PreviewTrackUiModel.artists,
+            placeholder = PreviewAlbumArt(),
             onClick = {}
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun MenuIconItemPreview() {
+    SpotifyTheme {
+        MenuIconItem(
+            imageVector = Icons.Default.Album,
+            title = "Album",
         )
     }
 }

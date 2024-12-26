@@ -1,8 +1,14 @@
 package com.litbig.spotify.ui.tooling
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import com.litbig.spotify.R
 import com.litbig.spotify.ui.models.*
-import java.util.Calendar
+
+@Composable
+fun PreviewAlbumArt(): Painter = painterResource(id = R.drawable.preview_album)
 
 val PreviewLoremIpsum = """
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ullamcorper pharetra massa,

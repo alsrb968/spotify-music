@@ -70,6 +70,10 @@ fun SquareCard(
     }
 }
 
+enum class TopBarExpandStyle {
+    ARTIST, TRACK
+}
+
 @Composable
 fun ScrollableTopBarSurface(
     modifier: Modifier = Modifier,
@@ -78,6 +82,7 @@ fun ScrollableTopBarSurface(
     imageUrl: String?,
     dominantColor: Color = Color.Transparent,
     title: String,
+    expandStyle: TopBarExpandStyle = TopBarExpandStyle.ARTIST,
     contentHorizonPadding: Dp = 16.dp,
     contentSpaceBy: Dp = 32.dp,
     contentBottomPadding: Dp = 150.dp,
@@ -105,11 +110,23 @@ fun ScrollableTopBarSurface(
             dominantColor = dominantColor,
             progress = 1f - scrollProgress
         )
-        ExpandedTopBar(
-            imageUrl = imageUrl,
-            dominantColor = dominantColor,
-            scrollProgress = scrollProgress
-        )
+
+        when (expandStyle) {
+            TopBarExpandStyle.ARTIST ->
+                ExpandedTopBar(
+                    title = title,
+                    imageUrl = imageUrl,
+                    dominantColor = dominantColor,
+                    scrollProgress = scrollProgress,
+                )
+            TopBarExpandStyle.TRACK ->
+                ExpandedTopBarTracks(
+                    title = title,
+                    subtitle = "여기에서 미리 듣기 곡을 이용할 수 있습니다. 전체 버전은 셔플 재생하세요.",
+                    dominantColor = dominantColor,
+                    scrollProgress = scrollProgress,
+                )
+        }
 
         IconButton(
             modifier = Modifier
@@ -136,25 +153,7 @@ fun ScrollableTopBarSurface(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
-                Spacer(modifier = Modifier.height(EXPANDED_TOP_BAR_HEIGHT - COLLAPSED_TOP_BAR_HEIGHT * 2))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(COLLAPSED_TOP_BAR_HEIGHT)
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    Text(
-                        text = title,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.headlineLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Spacer(modifier = Modifier.height(EXPANDED_TOP_BAR_HEIGHT))
             }
 
             item {
@@ -185,7 +184,13 @@ fun ScrollableTopBarSurface(
             }
 
             item {
-                Spacer(modifier = Modifier.height(contentBottomPadding))
+                Box(
+                    modifier = Modifier
+                        .height(contentBottomPadding)
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    Spacer(modifier = Modifier.fillMaxSize())
+                }
             }
         }
     }
