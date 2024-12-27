@@ -4,14 +4,14 @@ import androidx.compose.ui.graphics.Color
 import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 
 data class ArtistUiModel(
-    val id: String,
-    val imageUrl: String?,
-    val name: String,
+    override val id: String,
+    override val imageUrl: String?,
+    override val name: String,
     val follower: Int,
     val popularity: Int,
     val genres: String,
     val dominantColor: Color,
-) {
+) : UiModel {
     companion object {
         @JvmStatic
         fun from(artistDetails: ArtistDetails): ArtistUiModel {

@@ -7,17 +7,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AcUnit
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.AcUnit
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.LibraryMusic
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Lifecycle
@@ -34,30 +24,42 @@ import kotlinx.coroutines.launch
 
 sealed class Screen(
     @StringRes val title: Int,
-    val icons: Pair<ImageVector, ImageVector>,
+    val icons: Pair<Int, Int>,
     val route: String,
 ) {
     data object Home : Screen(
         title = R.string.home_feed,
-        icons = Pair(Icons.Filled.Home, Icons.Outlined.Home),
+        icons = Pair(
+            R.drawable.ic_home_normal,
+            R.drawable.ic_home_selected
+        ),
         route = ROUTE_HOME,
     )
 
     data object Search : Screen(
         title = R.string.home_search,
-        icons = Pair(Icons.Filled.Search, Icons.Outlined.Search),
+        icons = Pair(
+            R.drawable.ic_search_normal,
+            R.drawable.ic_search_selected
+        ),
         route = ROUTE_SEARCH
     )
 
     data object Library : Screen(
         title = R.string.home_library,
-        icons = Pair(Icons.Filled.LibraryMusic, Icons.Outlined.LibraryMusic),
+        icons = Pair(
+            R.drawable.ic_library_normal,
+            R.drawable.ic_library_selected
+        ),
         route = ROUTE_LIBRARY
     )
 
     data object Premium : Screen(
         title = R.string.home_premium,
-        icons = Pair(Icons.Filled.AcUnit, Icons.Outlined.AcUnit),
+        icons = Pair(
+            R.drawable.ic_spotify,
+            R.drawable.ic_spotify
+        ),
         route = ROUTE_PREMIUM
     )
 

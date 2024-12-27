@@ -6,16 +6,16 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 data class AlbumUiModel(
-    val id: String,
-    val imageUrl: String?,
+    override val id: String,
+    override val imageUrl: String?,
     val albumType: String,
-    val name: String,
+    override val name: String,
     val artists: String,
     val totalTime: Long,
     val releaseDate: Long,
     val copyright: String?,
     val dominantColor: Color,
-) {
+) : UiModel {
     companion object {
         @JvmStatic
         fun from(albumDetails: AlbumDetails): AlbumUiModel {

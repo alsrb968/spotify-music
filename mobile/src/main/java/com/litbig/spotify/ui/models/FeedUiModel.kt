@@ -5,11 +5,11 @@ import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.TrackDetails
 
 data class FeedUiModel(
-    val id: String,
-    val imageUrl: String?,
-    val name: String,
+    override val id: String,
+    override val imageUrl: String?,
+    override val name: String,
     val type: String,
-) {
+) : UiModel {
     companion object {
         @JvmStatic
         fun from(album: AlbumDetails): FeedUiModel {

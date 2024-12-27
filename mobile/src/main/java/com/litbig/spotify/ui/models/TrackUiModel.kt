@@ -3,12 +3,12 @@ package com.litbig.spotify.ui.models
 import com.litbig.spotify.core.domain.model.remote.TrackDetails
 
 data class TrackUiModel(
-    val id: String,
-    val imageUrl: String?,
-    val name: String,
+    override val id: String,
+    override val imageUrl: String?,
+    override val name: String,
     val artists: String,
     val duration: Long,
-) {
+) : UiModel {
     companion object {
         @JvmStatic
         fun from(trackDetails: TrackDetails): TrackUiModel {

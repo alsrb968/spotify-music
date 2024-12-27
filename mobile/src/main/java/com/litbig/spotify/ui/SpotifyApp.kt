@@ -13,8 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import androidx.navigation.compose.NavHost
@@ -23,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.home.HomeContainer
+import com.litbig.spotify.ui.library.LibraryScreen
 import com.litbig.spotify.ui.player.PlayerBar
 import com.litbig.spotify.ui.search.SearchScreen
 import com.litbig.spotify.ui.theme.SpotifyTheme
@@ -69,7 +72,7 @@ fun SpotifyApp(
                     .consumeWindowInsets(padding)
                     .background(MaterialTheme.colorScheme.background),
                 navController = appState.navController,
-                startDestination = Screen.Home.route
+                startDestination = Screen.Library.route
             ) {
                 composable(Screen.Home.route) { backStackEntry ->
                     HomeContainer(
@@ -91,7 +94,18 @@ fun SpotifyApp(
                 }
 
                 composable(Screen.Library.route) { from ->
-
+                    LibraryScreen(
+                        modifier = modifier,
+                        navigateToAlbum = { albumId ->
+                            appState.navigateToAlbum(albumId, from)
+                        },
+                        navigateToArtist = { artistId ->
+                            appState.navigateToArtist(artistId, from)
+                        },
+                        navigateToPlaylist = { playlistId ->
+                            appState.navigateToPlaylist(playlistId, from)
+                        }
+                    )
                 }
 
                 composable(Screen.Premium.route) { from ->
@@ -148,8 +162,10 @@ fun SpotifyBottomBar(
 
                 NavigationBarItem(
                     icon = {
+                        val iconSelected = ImageVector.vectorResource(screen.icons.first)
+                        val iconNormal = ImageVector.vectorResource(screen.icons.second)
                         Icon(
-                            imageVector = screen.icons.let { if (selected) it.first else it.second },
+                            imageVector = screen.icons.let { if (selected) iconNormal else iconSelected },
                             tint = tint,
                             contentDescription = text
                         )

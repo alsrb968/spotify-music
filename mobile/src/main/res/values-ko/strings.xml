@@ -7,8 +7,16 @@
     <!-- Home Tabs -->
     <string name="home_feed">홈</string>
     <string name="home_search">검색</string>
-    <string name="home_library">라이브러리</string>
+    <string name="home_library">내 라이브러리</string>
     <string name="home_premium">프리미엄</string>
 
     <string name="show_all">모두 표시</string>
+
+    <!-- Library Filter Chips -->
+    <string name="playlist">플레이리스트</string>
+    <string name="podcast">팟캐스트</string>
+    <string name="album">앨범</string>
+    <string name="artist">아티스트</string>
+    <string name="recent">최근</string>
+    <string name="liked_songs">좋아요 표시한 곡</string>
 </resources>

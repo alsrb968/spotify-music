@@ -13,4 +13,13 @@
     <string name="home_premium">Premium</string>
 
     <string name="show_all">Show All</string>
+
+    <!-- Library Filter Chips -->
+    <string name="playlist">Playlist</string>
+    <string name="podcast">Podcast</string>
+    <string name="album">Album</string>
+    <string name="artist">Artist</string>
+    <string name="recent">Most recent</string>
+    <string name="liked_songs">Liked Songs</string>
+    <string name="bullet" translatable="false">·</string>
 </resources>

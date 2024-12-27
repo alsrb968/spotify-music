@@ -1,9 +1,15 @@
 package com.litbig.spotify.core.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.litbig.spotify.core.data.datasource.local.PlayerDataSource
 import com.litbig.spotify.core.data.datasource.local.RoomMusicDataSource
 import com.litbig.spotify.core.data.datasource.remote.SpotifyDataSource
+import com.litbig.spotify.core.data.mapper.local.toFavorite
 import com.litbig.spotify.core.data.mapper.local.toFavoriteEntity
+import com.litbig.spotify.core.data.mapper.local.toFavoriteList
 import com.litbig.spotify.core.data.mapper.remote.*
 import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.remote.*
@@ -12,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -135,6 +142,10 @@ class SpotifyRepositoryImpl @Inject constructor(
 
     override suspend fun deleteFavorite(id: String, type: String) {
         roomDataSource.deleteFavorite(id, type)
+    }
+
+    override fun getFavorites(count: Int): Flow<List<Favorite>> {
+        return roomDataSource.getFavorites(count).map { it.toFavoriteList() }
     }
 
     override fun playTrack(trackId: String) {

@@ -2,17 +2,15 @@ package com.litbig.spotify.ui.home.feed
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.litbig.spotify.ui.components.FeedCollection
+import com.litbig.spotify.ui.components.SpotifyFilterChips
 import com.litbig.spotify.ui.models.FeedCollectionUiModel
 import com.litbig.spotify.ui.shared.Loading
 import com.litbig.spotify.ui.theme.SpotifyTheme
@@ -83,7 +81,15 @@ fun FeedScreen(
                 bottom = navigationBarHeight,
             ),
         topBar = {
-            MultipleFilterChipExample()
+            SpotifyFilterChips(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                filters = listOf("전체", "Wrapped 연말결산", "음악", "팟캐스트", "최근 재생한 항목"),
+                initialSelectedFilter = "전체",
+                onFilterSelected = { filter ->
+                    Timber.i("Selected filter: $filter")
+                }
+            )
         },
     ) { padding ->
         LazyColumn(
@@ -101,50 +107,6 @@ fun FeedScreen(
                     }
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun MultipleFilterChipExample() {
-    val filters = listOf("전체", "Wrapped 연말결산", "음악", "팟캐스트", "최근 재생한 항목")
-    val selectedFilter = remember { mutableStateOf(filters.first()) }
-
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-    ) {
-        items(filters.size) { index ->
-            val filter = filters[index]
-            val selected = selectedFilter.value == filter
-
-            FilterChip(
-                shape = CircleShape,
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    labelColor = MaterialTheme.colorScheme.onSurface,
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = selected,
-                    borderColor = Color.Transparent,
-                ),
-                label = {
-                    Text(
-                        text = filter,
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                },
-                selected = selected,
-                onClick = {
-                    selectedFilter.value = filter
-                },
-            )
         }
     }
 }

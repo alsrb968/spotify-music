@@ -1,5 +1,7 @@
 package com.litbig.spotify.core.domain.repository
 
+import androidx.paging.PagingData
+import com.litbig.spotify.core.domain.model.local.Favorite
 import com.litbig.spotify.core.domain.model.remote.*
 import kotlinx.coroutines.flow.Flow
 
@@ -34,6 +36,7 @@ interface SpotifyRepository {
     suspend fun insertFavorite(id: String, type: String)
     fun isFavorite(id: String, type: String): Flow<Boolean>
     suspend fun deleteFavorite(id: String, type: String)
+    fun getFavorites(count: Int = Int.MAX_VALUE): Flow<List<Favorite>>
 
 
     fun playTrack(trackId: String)

@@ -134,7 +134,9 @@ fun ListItemVerticalMedium(
     shape: Shape = RoundedCornerShape(4.dp),
     title: String,
     subtitle: String? = null,
+    subtitleContent: @Composable ColumnScope.() -> Unit = {},
     placeholder: Painter = rememberVectorPainter(image = Icons.Default.Album),
+    error: Painter = rememberVectorPainter(image = Icons.Default.Error),
     onClick: () -> Unit,
 ) {
     Row(
@@ -150,7 +152,7 @@ fun ListItemVerticalMedium(
             model = imageUrl,
             contentDescription = "Thumbnail",
             placeholder = placeholder,
-            error = rememberVectorPainter(image = Icons.Default.Error),
+            error = error
         )
 
         Column(
@@ -174,6 +176,8 @@ fun ListItemVerticalMedium(
                     maxLines = 1,
                 )
             }
+
+            subtitleContent()
         }
     }
 }
