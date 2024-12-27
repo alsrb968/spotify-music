@@ -28,6 +28,7 @@ val PreviewFeedUiModel = FeedUiModel(
 
 val PreviewFeedCollectionUiModel = FeedCollectionUiModel(
     title = "Billie Eilish's Albums",
+    titleType = FeedCollectionType.NEW_ALBUM_RELEASES,
     feeds = List(10) { PreviewFeedUiModel },
 )
 

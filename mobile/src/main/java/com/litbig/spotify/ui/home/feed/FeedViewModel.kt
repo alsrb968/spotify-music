@@ -4,9 +4,11 @@ package com.litbig.spotify.ui.home.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.litbig.spotify.core.domain.repository.SpotifyRepository
 import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsListOfArtistsUseCase
 import com.litbig.spotify.core.domain.usecase.spotify.GetNewAlbumReleasesUseCase
 import com.litbig.spotify.core.domain.usecase.spotify.SearchArtistUseCase
+import com.litbig.spotify.ui.models.FeedCollectionType
 import com.litbig.spotify.ui.models.FeedCollectionUiModel
 import com.litbig.spotify.ui.models.FeedUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,6 +42,7 @@ class FeedViewModel @Inject constructor(
     private val getNewAlbumReleasesUseCase: GetNewAlbumReleasesUseCase,
     private val getAlbumDetailsListOfArtistsUseCase: GetAlbumDetailsListOfArtistsUseCase,
     private val searchArtistUseCase: SearchArtistUseCase,
+    private val spotifyRepository: SpotifyRepository,
 ) : ViewModel() {
 
     private val feedCollections =
@@ -125,7 +128,8 @@ class FeedViewModel @Inject constructor(
                 }
             }?.let { feeds ->
                 FeedCollectionUiModel(
-                    title = "New Album Releases",
+                    title = "새 앨범을 소개합니다!",
+                    titleType = FeedCollectionType.NEW_ALBUM_RELEASES,
                     feeds = feeds,
                 )
             }?.let {
@@ -140,7 +144,8 @@ class FeedViewModel @Inject constructor(
                 FeedUiModel.from(artistDetails)
             }.let { feeds ->
                 FeedCollectionUiModel(
-                    title = "Artists",
+                    title = "인기 아티스트",
+                    titleType = FeedCollectionType.ARTISTS,
                     feeds = feeds
                 )
             }.let {
@@ -151,21 +156,24 @@ class FeedViewModel @Inject constructor(
 
     private fun getAlbumFeedsOfArtists(vararg artistNames: String): Flow<List<FeedCollectionUiModel>> {
         return flow {
-            getAlbumDetailsListOfArtistsUseCase(*artistNames).map { albumDetailsList ->
-                val name = albumDetailsList.firstOrNull()?.artists?.firstOrNull()?.name ?: ""
-                val feeds = albumDetailsList.map { albumDetails ->
-                    FeedUiModel.from(albumDetails)
+            artistNames
+                .mapNotNull { spotifyRepository.searchArtists(it)?.first() }
+                .map { artistDetails ->
+                    val name = artistDetails.name
+                    val imageUrl = artistDetails.images?.firstOrNull()?.url
+                    val albumDetailsList = spotifyRepository.getAlbumsOfArtist(artistDetails.id).items
+                    val feeds = albumDetailsList.map { albumDetails ->
+                        FeedUiModel.from(albumDetails)
+                    }
+                    FeedCollectionUiModel(
+                        imageUrl = imageUrl,
+                        title = name,
+                        titleType = FeedCollectionType.ALBUMS_OF_ARTISTS,
+                        feeds = feeds,
+                    )
+                }.let { collections ->
+                    emit(collections)
                 }
-                Pair(name, feeds)
-            }.map { pair ->
-                val (name, feeds) = pair
-                FeedCollectionUiModel(
-                    title = "${name}'s Albums",
-                    feeds = feeds,
-                )
-            }.let {
-                emit(it)
-            }
         }
     }
 

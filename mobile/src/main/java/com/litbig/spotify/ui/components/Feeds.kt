@@ -22,11 +22,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
+import com.litbig.spotify.ui.models.FeedCollectionType
 import com.litbig.spotify.ui.models.FeedCollectionUiModel
 import com.litbig.spotify.ui.models.FeedUiModel
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 import com.litbig.spotify.ui.tooling.PreviewFeedCollectionUiModel
+import kotlinx.serialization.json.JsonNull.content
 
 @Composable
 fun FeedCollection(
@@ -36,38 +38,14 @@ fun FeedCollection(
     onArtist: (String) -> Unit,
     onMore: () -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth(),
+    FeedCollection(
+        modifier = modifier,
+        feedCollection = feedCollection,
+        onMore = onMore
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.weight(1f),
-                text = feedCollection.title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Text(
-                text = stringResource(R.string.show_all),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.clickableScaled { onMore() }
-            )
-        }
-
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             val feeds = feedCollection.feeds
@@ -87,13 +65,42 @@ fun FeedCollection(
 }
 
 @Composable
+fun FeedCollection(
+    modifier: Modifier = Modifier,
+    feedCollection: FeedCollectionUiModel,
+    onMore: () -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit
+) {
+    if (feedCollection.titleType == FeedCollectionType.ALBUMS_OF_ARTISTS) {
+        ArtistListTitle(
+            modifier = modifier
+                .padding(horizontal = 16.dp),
+            imageUrl = feedCollection.imageUrl,
+            title = feedCollection.title,
+            subtitle = "팬들을 위한 음악",
+        ) {
+            content()
+        }
+    } else {
+        ListTitle(
+            modifier = modifier
+                .padding(horizontal = 16.dp),
+            title = feedCollection.title,
+            onMore = { onMore() }
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
 fun FeedItem(
     modifier: Modifier = Modifier,
     feed: FeedUiModel,
     shape: Shape = RoundedCornerShape(16.dp),
     onClick: () -> Unit
 ) {
-    val size = 180.dp
+    val size = 165.dp
     Column(
         modifier = modifier
             .width(size)

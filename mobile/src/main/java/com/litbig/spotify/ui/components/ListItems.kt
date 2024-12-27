@@ -1,6 +1,7 @@
 package com.litbig.spotify.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
@@ -41,7 +42,7 @@ fun ListTitle(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -49,7 +50,7 @@ fun ListTitle(
             Text(
                 modifier = Modifier.weight(1f),
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -62,6 +63,61 @@ fun ListTitle(
                     text = stringResource(R.string.show_all),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
+
+        content()
+    }
+}
+
+@Composable
+fun ArtistListTitle(
+    modifier: Modifier = Modifier,
+    imageUrl: String?,
+    placeholder: Painter = rememberVectorPainter(image = Icons.Default.Album),
+    title: String,
+    subtitle: String,
+    content: @Composable ColumnScope.() -> Unit = {},
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Row(
+            modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape),
+                model = imageUrl,
+                contentDescription = "Thumbnail",
+                placeholder = placeholder,
+                error = rememberVectorPainter(image = Icons.Default.Error),
+            )
+
+            Column(
+                modifier = Modifier,
+            ) {
+                Text(
+                    modifier = Modifier,
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Text(
+                    modifier = Modifier,
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -208,6 +264,19 @@ private fun ListTitlePreview() {
             title = PreviewArtistUiModel.name,
             onMore = {},
             content = {}
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+private fun ArtistListTitlePreview() {
+    SpotifyTheme {
+        ArtistListTitle(
+            imageUrl = null,
+            placeholder = PreviewAlbumArt(),
+            title = PreviewArtistUiModel.name,
+            subtitle = "팬들을 위한 음악"
         )
     }
 }

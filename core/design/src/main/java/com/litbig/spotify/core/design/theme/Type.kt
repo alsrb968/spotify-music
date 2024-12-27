@@ -39,19 +39,21 @@ val SpotifyTypography = androidx.compose.material3.Typography(
     ),
     headlineSmall = TextStyle(
         fontFamily = SpotifyFonts,
-        fontSize = 22.sp,
+        fontSize = 26.sp,
+        fontWeight = FontWeight.Bold,
 //        letterSpacing = 0.02.em
     ),
 
     titleLarge = TextStyle( // Daily Mix 3
         fontFamily = SpotifyFonts,
-        fontSize = 20.sp,
+        fontSize = 22.sp,
         fontWeight = FontWeight.Bold,
 //        letterSpacing = 0.01.em
     ),
     titleMedium = TextStyle( // Song Title: Ocean Eyes Book 20
         fontFamily = SpotifyFonts,
         fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
 //        letterSpacing = 0.01.em
     ),
     titleSmall = TextStyle( // Dur: 2 : 12 = Book 20
