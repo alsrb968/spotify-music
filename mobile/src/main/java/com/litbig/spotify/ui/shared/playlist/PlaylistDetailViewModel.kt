@@ -8,10 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.litbig.spotify.core.design.extension.darkenColor
 import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
-import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.models.OwnerUiModel
 import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
+import com.litbig.spotify.ui.shared.DetailsSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -54,7 +54,7 @@ class PlaylistDetailViewModel @Inject constructor(
     private val spotifyRepository: SpotifyRepository,
 ) : ViewModel() {
     private val playlistId: String =
-        Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_PLAYLIST_ID))
+        Uri.decode(savedStateHandle.get<String>(DetailsSection.ARG_PLAYLIST_ID))
 
     private val dominantColor = MutableStateFlow(Color.Transparent)
 

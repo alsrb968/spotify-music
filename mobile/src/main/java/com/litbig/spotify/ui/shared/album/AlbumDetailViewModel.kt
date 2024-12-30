@@ -15,11 +15,11 @@ import com.litbig.spotify.core.domain.usecase.spotify.GetAlbumDetailsUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.IsFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.favorite.ToggleFavoriteUseCase
 import com.litbig.spotify.core.domain.usecase.spotify.GetSeveralArtistDetailsUseCase
-import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
+import com.litbig.spotify.ui.shared.DetailsSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -69,7 +69,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val isFavoriteUseCase: IsFavoriteUseCase,
     private val spotifyRepository: SpotifyRepository,
 ) : ViewModel() {
-    private val albumId = Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_ALBUM_ID))
+    private val albumId = Uri.decode(savedStateHandle.get<String>(DetailsSection.ARG_ALBUM_ID))
 
     private val albumDetails = MutableStateFlow<AlbumDetails?>(null)
     private val artistDetailsList = MutableStateFlow<List<ArtistDetails>>(emptyList())

@@ -12,15 +12,14 @@ import com.litbig.spotify.core.domain.model.remote.ArtistDetails
 import com.litbig.spotify.core.domain.model.remote.PlaylistDetails
 import com.litbig.spotify.core.domain.model.remote.TrackDetails
 import com.litbig.spotify.core.domain.repository.SpotifyRepository
-import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel
+import com.litbig.spotify.ui.shared.DetailsSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 sealed interface ArtistDetailUiState {
@@ -63,7 +62,7 @@ class ArtistDetailViewModel @Inject constructor(
 //    private val getTopTrackDetailsListOfArtistsUseCase: GetTopTrackDetailsListOfArtistsUseCase,
     private val spotifyRepository: SpotifyRepository,
 ) : ViewModel() {
-    private val artistId = Uri.decode(savedStateHandle.get<String>(HomeSection.ARG_ARTIST_ID))
+    private val artistId = Uri.decode(savedStateHandle.get<String>(DetailsSection.ARG_ARTIST_ID))
 
     private val dominantColor = MutableStateFlow(Color.Transparent)
 
