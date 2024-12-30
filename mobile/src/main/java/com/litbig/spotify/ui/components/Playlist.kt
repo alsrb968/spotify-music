@@ -20,7 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.litbig.spotify.core.design.extension.clickableScaled
-import com.litbig.spotify.ui.home.artist.RepresentativePlaylist
+import com.litbig.spotify.ui.shared.artist.RepresentativePlaylist
 import com.litbig.spotify.ui.theme.SpotifyTheme
 import com.litbig.spotify.ui.tooling.DevicePreviews
 

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.runtime.*
@@ -17,10 +16,6 @@ import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.litbig.spotify.R
-import com.litbig.spotify.ui.home.HomeSection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 sealed class Screen(
     @StringRes val title: Int,
@@ -104,32 +99,6 @@ class SpotifyAppState(
         }
     }
 
-    fun navigateToAlbum(albumId: String, from: NavBackStackEntry) {
-        if (from.lifecycleIsResumed()) {
-            navController.navigate(HomeSection.Album.createRoute(Uri.encode(albumId)))
-        }
-    }
-
-    fun navigateToArtist(artistId: String, from: NavBackStackEntry) {
-        if (from.lifecycleIsResumed()) {
-            navController.navigate(HomeSection.Artist.createRoute(Uri.encode(artistId)))
-        }
-    }
-
-    fun navigateToPlaylist(playlistId: String, from: NavBackStackEntry) {
-        if (from.lifecycleIsResumed()) {
-            navController.navigate(HomeSection.Playlist.createRoute(Uri.encode(playlistId)))
-        }
-    }
-
-    fun navigateToTracks(playlistId: String, from: NavBackStackEntry) {
-        CoroutineScope(Dispatchers.Main).launch {
-            if (from.lifecycleIsResumed()) {
-                navController.navigate(HomeSection.Tracks.createRoute(Uri.encode(playlistId)))
-            }
-        }
-    }
-
     fun navigateBack() {
         navController.popBackStack()
     }
@@ -149,7 +118,7 @@ class SpotifyAppState(
     }
 }
 
-private fun NavBackStackEntry.lifecycleIsResumed() =
+fun NavBackStackEntry.lifecycleIsResumed() =
     this.lifecycle.currentState == Lifecycle.State.RESUMED
 
 private val NavGraph.startDestination: NavDestination?

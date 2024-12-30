@@ -1,7 +1,7 @@
 @file:Suppress("UNNECESSARY_SAFE_CALL")
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.litbig.spotify.ui.home.album
+package com.litbig.spotify.ui.shared.album
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -33,7 +33,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.ui.components.*
-import com.litbig.spotify.ui.home.artist.PlaylistInfo
+import com.litbig.spotify.ui.shared.artist.PlaylistInfo
 import com.litbig.spotify.ui.models.AlbumUiModel
 import com.litbig.spotify.ui.models.ArtistUiModel
 import com.litbig.spotify.ui.models.PlaylistUiModel

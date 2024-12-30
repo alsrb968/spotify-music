@@ -1,4 +1,4 @@
-package com.litbig.spotify.ui.home.track
+package com.litbig.spotify.ui.shared.track
 
 import android.net.Uri
 import androidx.compose.ui.graphics.Color

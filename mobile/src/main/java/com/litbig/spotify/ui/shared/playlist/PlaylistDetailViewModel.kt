@@ -1,4 +1,4 @@
-package com.litbig.spotify.ui.home.playlist
+package com.litbig.spotify.ui.shared.playlist
 
 import android.net.Uri
 import androidx.compose.ui.graphics.Color

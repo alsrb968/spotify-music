@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.litbig.spotify.ui.home.track
+package com.litbig.spotify.ui.shared.track
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

@@ -1,4 +1,4 @@
-package com.litbig.spotify.ui.home.artist
+package com.litbig.spotify.ui.shared.artist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

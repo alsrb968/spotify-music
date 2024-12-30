@@ -1,4 +1,4 @@
-package com.litbig.spotify.ui.home.playlist
+package com.litbig.spotify.ui.shared.playlist
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -31,7 +31,7 @@ import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.clickableScaled
 import com.litbig.spotify.core.design.extension.extractDominantColorFromUrl
 import com.litbig.spotify.ui.components.*
-import com.litbig.spotify.ui.home.artist.SimpleTopTrackListInfo
+import com.litbig.spotify.ui.shared.artist.SimpleTopTrackListInfo
 import com.litbig.spotify.ui.models.OwnerUiModel
 import com.litbig.spotify.ui.models.PlaylistUiModel
 import com.litbig.spotify.ui.models.TrackUiModel

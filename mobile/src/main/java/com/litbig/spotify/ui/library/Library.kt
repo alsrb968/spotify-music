@@ -1,7 +1,6 @@
-package com.litbig.spotify.ui.home
+package com.litbig.spotify.ui.library
 
 import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -12,36 +11,35 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.litbig.spotify.ui.home.HomeSection
 import com.litbig.spotify.ui.shared.album.AlbumDetailScreen
 import com.litbig.spotify.ui.shared.artist.ArtistDetailScreen
 import com.litbig.spotify.ui.home.feed.FeedScreen
 import com.litbig.spotify.ui.shared.playlist.PlaylistDetailScreen
 import com.litbig.spotify.ui.shared.track.TracksScreen
 import com.litbig.spotify.ui.lifecycleIsResumed
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
-sealed class HomeSection(val route: String) {
-    data object Feed : HomeSection(ROUTE_FEED)
-    data object Album : HomeSection("${ROUTE_ALBUM}/{${ARG_ALBUM_ID}}") {
+
+sealed class LibrarySection(val route: String) {
+    data object Library : LibrarySection(ROUTE_LIBRARY)
+    data object Album : LibrarySection("${ROUTE_ALBUM}/{${ARG_ALBUM_ID}}") {
         fun createRoute(albumId: String) = "${ROUTE_ALBUM}/$albumId"
     }
 
-    data object Artist : HomeSection("${ROUTE_ARTIST}/{${ARG_ARTIST_ID}}") {
+    data object Artist : LibrarySection("${ROUTE_ARTIST}/{${ARG_ARTIST_ID}}") {
         fun createRoute(artistId: String) = "${ROUTE_ARTIST}/$artistId"
     }
 
-    data object Playlist : HomeSection("${ROUTE_PLAYLIST}/{${ARG_PLAYLIST_ID}}") {
+    data object Playlist : LibrarySection("${ROUTE_PLAYLIST}/{${ARG_PLAYLIST_ID}}") {
         fun createRoute(playlistId: String) = "${ROUTE_PLAYLIST}/$playlistId"
     }
 
-    data object Tracks : HomeSection("${ROUTE_TRACKS}/{${ARG_PLAYLIST_ID}}") {
+    data object Tracks : LibrarySection("${ROUTE_TRACKS}/{${ARG_PLAYLIST_ID}}") {
         fun createRoute(playlistId: String) = "${ROUTE_TRACKS}/${playlistId}"
     }
 
     companion object {
-        const val ROUTE_FEED = "list"
+        const val ROUTE_LIBRARY = "library"
         const val ROUTE_ALBUM = "album"
         const val ROUTE_ARTIST = "artist"
         const val ROUTE_PLAYLIST = "playlist"
@@ -54,40 +52,38 @@ sealed class HomeSection(val route: String) {
 }
 
 @Composable
-fun rememberHomeSectionState(
+fun rememberLibrarySectionState(
     navController: NavHostController = rememberNavController(),
     context: Context = LocalContext.current,
 ) = remember(navController, context) {
-    HomeSectionState(navController, context)
+    LibrarySectionState(navController, context)
 }
 
-class HomeSectionState(
+class LibrarySectionState(
     val navController: NavHostController,
-    private val context: Context,
+    private val context: Context
 ) {
     fun navigateToAlbum(albumId: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate(HomeSection.Album.createRoute(Uri.encode(albumId)))
+            navController.navigate(LibrarySection.Album.createRoute(albumId))
         }
     }
 
     fun navigateToArtist(artistId: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate(HomeSection.Artist.createRoute(Uri.encode(artistId)))
+            navController.navigate(LibrarySection.Artist.createRoute(artistId))
         }
     }
 
     fun navigateToPlaylist(playlistId: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            navController.navigate(HomeSection.Playlist.createRoute(Uri.encode(playlistId)))
+            navController.navigate(LibrarySection.Playlist.createRoute(playlistId))
         }
     }
 
     fun navigateToTracks(playlistId: String, from: NavBackStackEntry) {
-        CoroutineScope(Dispatchers.Main).launch {
-            if (from.lifecycleIsResumed()) {
-                navController.navigate(HomeSection.Tracks.createRoute(Uri.encode(playlistId)))
-            }
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(LibrarySection.Tracks.createRoute(playlistId))
         }
     }
 
@@ -97,18 +93,18 @@ class HomeSectionState(
 }
 
 @Composable
-fun HomeContainer(
+fun LibraryContainer(
     modifier: Modifier = Modifier,
-    onShowSnackBar: (String) -> Unit,
+    onShowSnackBar: (String) -> Unit
 ) {
-    val appState = rememberHomeSectionState()
+    val appState = rememberLibrarySectionState()
 
     NavHost(
         modifier = modifier,
         navController = appState.navController,
-        startDestination = HomeSection.Feed.route
+        startDestination = LibrarySection.Library.route,
     ) {
-        addHomeGraph(
+        addLibraryGraph(
             navigateToAlbum = { albumId, from ->
                 appState.navigateToAlbum(albumId, from)
             },
@@ -127,7 +123,7 @@ fun HomeContainer(
     }
 }
 
-fun NavGraphBuilder.addHomeGraph(
+fun NavGraphBuilder.addLibraryGraph(
     modifier: Modifier = Modifier,
     navigateToAlbum: (String, NavBackStackEntry) -> Unit,
     navigateToArtist: (String, NavBackStackEntry) -> Unit,
@@ -136,20 +132,22 @@ fun NavGraphBuilder.addHomeGraph(
     navigateBack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
 ) {
-    composable(HomeSection.Feed.route) { from ->
-        FeedScreen(
+    composable(LibrarySection.Library.route) { from ->
+        LibraryScreen(
             modifier = modifier,
-            onAlbumSelected = { albumId ->
+            navigateToAlbum = { albumId ->
                 navigateToAlbum(albumId, from)
             },
-            onArtistSelected = { artistId ->
+            navigateToArtist = { artistId ->
                 navigateToArtist(artistId, from)
             },
-            onShowSnackBar = onShowSnackBar
+            navigateToPlaylist = { playlistId ->
+                navigateToPlaylist(playlistId, from)
+            }
         )
     }
 
-    composable(HomeSection.Album.route) { from ->
+    composable(LibrarySection.Album.route) { from ->
         AlbumDetailScreen(
             modifier = modifier,
             navigateToAlbum = { albumId ->
@@ -166,7 +164,7 @@ fun NavGraphBuilder.addHomeGraph(
         )
     }
 
-    composable(HomeSection.Artist.route) { from ->
+    composable(LibrarySection.Artist.route) { from ->
         ArtistDetailScreen(
             modifier = modifier,
             navigateToAlbum = { albumId ->
@@ -183,7 +181,7 @@ fun NavGraphBuilder.addHomeGraph(
         )
     }
 
-    composable(HomeSection.Playlist.route) { from ->
+    composable(LibrarySection.Playlist.route) { from ->
         PlaylistDetailScreen(
             modifier = modifier,
             navigateToPlaylist = { playlistId ->
@@ -197,7 +195,7 @@ fun NavGraphBuilder.addHomeGraph(
         )
     }
 
-    composable(HomeSection.Tracks.route) { from ->
+    composable(LibrarySection.Tracks.route) { from ->
         TracksScreen(
             modifier = modifier,
             navigateToArtist = { artistId ->

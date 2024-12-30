@@ -25,7 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.litbig.spotify.R
 import com.litbig.spotify.core.design.extension.gradientBackground
 import com.litbig.spotify.ui.home.HomeContainer
-import com.litbig.spotify.ui.library.LibraryScreen
+import com.litbig.spotify.ui.library.LibraryContainer
 import com.litbig.spotify.ui.player.PlayerBar
 import com.litbig.spotify.ui.search.SearchScreen
 import com.litbig.spotify.ui.theme.SpotifyTheme
@@ -72,7 +72,7 @@ fun SpotifyApp(
                     .consumeWindowInsets(padding)
                     .background(MaterialTheme.colorScheme.background),
                 navController = appState.navController,
-                startDestination = Screen.Library.route
+                startDestination = Screen.Home.route
             ) {
                 composable(Screen.Home.route) { backStackEntry ->
                     HomeContainer(
@@ -94,16 +94,13 @@ fun SpotifyApp(
                 }
 
                 composable(Screen.Library.route) { from ->
-                    LibraryScreen(
+                    LibraryContainer(
                         modifier = modifier,
-                        navigateToAlbum = { albumId ->
-                            appState.navigateToAlbum(albumId, from)
-                        },
-                        navigateToArtist = { artistId ->
-                            appState.navigateToArtist(artistId, from)
-                        },
-                        navigateToPlaylist = { playlistId ->
-                            appState.navigateToPlaylist(playlistId, from)
+                        onShowSnackBar = { message ->
+                            coroutineScope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar(message)
+                            }
                         }
                     )
                 }
